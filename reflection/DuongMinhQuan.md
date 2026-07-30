@@ -1,6 +1,6 @@
-# Reflection Cá Nhân — Đường Minh Quân (Data Architecture & Clustering Lead)
+# Reflection Cá Nhân — Dương Minh Quân (Data Architecture & Clustering Lead)
 
-- **Thông tin cá nhân:** Đường Minh Quân — Mã số học viên: `2A202601903`
+- **Thông tin cá nhân:** Dương Minh Quân — Mã số học viên: `2A202601903`
 - **Vai trò trong nhóm:** Data Architecture & Prompt Engineer, chịu trách nhiệm xây dựng thuật toán phân cụm liên tục (Continuous Clustering), thiết kế System Prompt và xử lý tách cụm out-of-scope.
 
 - **Phần công việc cụ thể:**
