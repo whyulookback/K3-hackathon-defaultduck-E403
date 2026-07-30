@@ -1,137 +1,333 @@
-# AI SPEC — Class Knowledge Gap Map · Nhóm VLearn AI · Zone K3
+# AI SPEC — VLearn Tutor & Topic Interest Map · Nhóm VLearn AI · K3
 
-**Hướng:** [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở  
-**Loại:** [x] Tính năng AI mới  
+**Hướng:** [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở
 
----
+**Loại:** [x] Tính năng AI mới
 
-## §1. User & Job
+**Trạng thái prototype:** [x] Working local demo
 
-- **Job executor + workflow:**  
-  - Giảng viên chính (người soạn slide/giáo án cho các buổi học tiếp theo) và Trợ giảng Leader (TA Leader — người chịu trách nhiệm điều phối hỗ trợ, giải đáp thắc mắc cho 1.000 học viên).  
-  - Workflow hiện tại: Trước mỗi buổi Live (tuần 2 lần), Giảng viên hỏi TA hoặc lướt kênh Discord/VLearn Chatlog -> TA đọc lướt hàng trăm tin nhắn thô -> Giảng viên đoán định lỗ hổng bằng cảm tính -> Soạn bài giảng -> Giảng live -> Phát hiện học viên vẫn nộp bài tập lỗi ở phần căn bản.
-- **Core JTBD:**  
-  Khi chuẩn bị giáo án cho lớp học đông người, người vận hành khóa học muốn biết chính xác những điểm nghẽn kiến thức lớn nhất của cả lớp theo thời gian thực để tối ưu nội dung giảng dạy bổ trợ đúng mục tiêu.
-- **Problem statement:**  
-  Giảng viên và TA Leader hoàn toàn "mù" thông tin về các rào cản tư duy thực sự của 1.000 học viên do quá tải khối lượng chatlog thô, dẫn đến việc dạy bài mới theo giáo án cố định trong khi đa số học viên đang bị kẹt ở kỹ năng cũ.
-- **Evidence (chuẩn A & B):**  
-  - **Số liệu mining / khảo sát:** Hệ thống ghi nhận trung bình **1.542 câu hỏi/tuần** gửi về AI Tutor. Thử lọc tay trong 1 tuần: Có tới **342 câu hỏi (22.2%)** kẹt ở lỗi "Bất đồng bộ khi gọi API Key".  
-  - **Trích dẫn nguyên văn chatlog:**  
-    1. *"Thầy ơi em pass API Key vào `.env` rồi mà lúc gọi `async await` toàn báo `401 Unauthorized` là sao ạ?"*  
-    2. *"Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?"*  
-    3. *"Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?"*  
-    4. *"Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?"*  
-    5. *"TA hỗ trợ em với, em sửa API Key theo slide mà vẫn lỗi connection closed?"*  
-  - **Con số lãng phí:** Giảng viên dành 45 phút buổi live stream tuần tiếp theo để dạy Prompt Chaining (chỉ có 8.5% học viên hỏi), bỏ qua vấn đề API Key Async khiến 34% học viên nộp bài tập lớn trễ deadline.
+**Cập nhật gần nhất:** 30/07/2026
 
 ---
 
-## §2. Impact & quyết định chọn
+## §1. User, Job và bằng chứng
 
-- **Bảng impact 3 ứng viên tính năng:**
+### Người dùng
 
-| Ứng viên tính năng | Đối tượng x Tần suất | Tốn gì mỗi lần | Điểm khả thi AI | Tổng Impact |
-|---|---|---|---|---|
-| 1. Class Knowledge Gap Map + AI Copilot (Chọn) | 1 Giảng viên + 3 TA x 2 lần/tuần x 1.000 HV | 6 giờ TA tổng hợp thủ công + 45 phút dạy sai trọng tâm | Rất cao (Clustering + RAG Chatbot Copilot) | **RẤT CAO (Đội ngũ vận hành khóa học & tỷ lệ pass bài tập)** |
-| 2. AI Auto-Grading Essay | 3 TA x 1 lần/tuần x 1.000 HV | 15 giờ chấm bài viết dài | Trung bình (Cost & Hallucination risk) | Trung bình |
-| 3. Smart Forum Search | 1.000 HV x 5 lần/tuần | 10 phút tìm kiếm/lần | Cao | Trung bình |
+- **Primary user:** Giảng viên/Mentor/TA phụ trách chuẩn bị buổi học tiếp theo.
+- **Secondary user:** Học viên đọc slide và hỏi AI Tutor. Các lượt hỏi–đáp này
+  trở thành tín hiệu đầu vào cho trang Admin.
+- **Phạm vi demo:** Một khóa học, chạy local, chưa có phân quyền production.
 
-- **Ứng viên ĐÃ LOẠI + vì sao:**  
-  - Loại *AI Auto-Grading Essay* vì chi phí API cao, rủi ro đánh giá sai bài viết sáng tạo làm học viên khiếu nại.  
-  - Loại *Smart Forum Search* vì đã có tính năng RAG cơ bản của VLearn AI Tutor giải quyết câu hỏi đơn lẻ.
-- **Ứng viên CHỌN + vì sao (bằng số):**  
-  Chọn **Class Knowledge Gap Map + AI Copilot Chatbot** vì giải quyết đúng điểm đau lớn nhất của người vận hành: tiết kiệm **6 giờ/tuần** cho TA Leader, cứu **342+ học viên** khỏi nguy cơ fail bài tập lớn, tăng tỷ lệ hoàn thành khóa học từ 65% lên 88%.
+### Workflow hiện tại
+
+1. Học viên mở một trong các PDF, chuyển đến trang cần học và đặt câu hỏi.
+2. Tutor tìm nội dung liên quan trên nhiều trang/tài liệu, quyết định câu hỏi có
+   trả lời được từ slide hay không, trả lời kèm citation và lưu lượt hỏi–đáp.
+3. Pipeline nền liên tục gom cụm `question + selected_text + tutor_answer`.
+4. Admin xem mức độ quan tâm theo topic, mở evidence, đổi tên cụm hoặc đưa topic
+   vào agenda buổi sau.
+
+### Core JTBD
+
+Khi chuẩn bị buổi học tiếp theo, giảng viên/TA muốn biết học viên đang hỏi nhiều
+về chủ đề nào và xem được các hội thoại làm bằng chứng, để ưu tiên nội dung cần
+giải thích thêm mà không phải đọc thủ công toàn bộ chatlog.
+
+### Problem statement
+
+Chatlog dạng văn bản tự do có khối lượng lớn, câu hỏi ngắn và cách diễn đạt không
+đồng nhất. Việc chỉ đếm từ khóa hoặc đọc mẫu thủ công dễ bỏ qua các câu cùng ý
+nhưng khác từ, đồng thời dễ nhầm “nhiều lượt hỏi” với “nhiều học viên”.
+
+### Bằng chứng dữ liệu đã kiểm tra
+
+Nguồn thật:
+`data/vlearn-pack/chatlog/chat_history_anonymized_for_hackathon.csv`.
+
+- 2.522 message.
+- 1.261 cặp hỏi–đáp student–tutor.
+- 369 học viên ẩn danh.
+- 585 conversation.
+- 1.252/1.261 câu có số trang hoặc đoạn được chọn trong nội dung chat.
+
+Giới hạn bằng chứng:
+
+- Hai PDF demo **không phải slide đối chứng** của chatlog thật.
+- Vì vậy, với chatlog thật sản phẩm chỉ kết luận **mức độ quan tâm theo topic**;
+  không khẳng định học viên “hiểu sai”, “bị stuck ở trang X” hoặc bài giảng
+  “bị miss”.
+- Để demo luồng topic → slide/page, nhóm tạo riêng 174 cặp hỏi–đáp synthetic từ
+  hai PDF (58 trang, mỗi trang 3 intent). Dữ liệu này luôn được ghi rõ là
+  synthetic và không dùng để suy luận hành vi học viên thật.
 
 ---
 
-## §3. Giải pháp tương tự đã nghiên cứu
+## §2. Impact và quyết định chọn
 
-- **Coursera Instructor Analytics:** Có biểu đồ tỷ lệ hoàn thành quiz, nhưng thiếu phân tích định tính ngữ nghĩa chatlog tự do.
-- **Discourse Word Cloud:** Chỉ đếm tần suất từ khóa đơn lẻ (word frequency), không gom cụm được ý nghĩa (ví dụ "API Key" và "401 Unauthorized" bị tách rời).
-- **Điểm khác biệt của VLearn Gap Map & AI Copilot:** Gom cụm theo vector embedding ngữ nghĩa (Semantic Clustering), trực quan Heatmap rào cản tư duy và cho phép Giảng viên đối thoại trực tiếp với **AI Teacher Copilot** để hỏi điểm lệch bài giảng ("Miss chỗ nào?"), top câu hỏi nổ nhiều nhất và sinh Quiz kiểm tra nhanh.
-
----
-
-## §4. Thiết kế
-
-- **Lát cắt MỘT CÂU:**  
-  *Khi Giảng viên chuẩn bị bài giảng cho lớp 1.000 người, họ muốn biết chính xác 3–5 lỗ hổng kiến thức lớn nhất và đối thoại với AI Copilot để xem bài giảng bị miss phần nào, những câu hỏi nào được hỏi nhiều nhất, và AI giúp gom cụm ngữ nghĩa, xếp hạng mức độ nghẽn kèm đề xuất bài học cụ thể.*
-- **Non-goals (3 thứ KHÔNG build):**  
-  1. Không tự động sửa bài tập hay gửi email nhắc nhở từng học viên cá nhân (giữ phạm vi ở cấp độ toàn lớp).  
-  2. Không tự động tạo slide presentation hoàn chỉnh (chỉ đưa ra gợi ý khung giáo án bổ trợ & Quiz nhanh).  
-  3. Không can thiệp vào điểm số hay đánh giá cá nhân của học viên.
-- **Mức prototype nhắm tới:** `[x] Mock / Working` — Phần UI Dashboard Heatmap, Chatbot Copilot & Clustering visual chạy thật trên client; phần AI Re-clustering có lời gọi API thật hoặc fallback mock dataset mượt mà.
-- **Automation level:** `[x] Augment (Human-in-the-loop)` — AI đề xuất cụm lỗ hổng, câu hỏi nhiều nhất và giải đáp thắc mắc cho Giảng viên; Giảng viên/TA có quyền duyệt, sửa tên cụm, đổi thứ tự ưu tiên hoặc bấm "Đưa vào Slide Live".
-
-### §4b. Nguyên tắc HAX/PAIR đã áp dụng
-
-| Nguyên tắc HAX/PAIR | Áp cụ thể vào đâu trong prototype |
-|---|---|
-| **HAX 1: Set expectations** | Hiển thị rõ tỷ lệ tin cậy của AI clustering (ví dụ: "Độ chính xác gom cụm 92% dựa trên 1.542 chatlog"). |
-| **HAX 4: Show contextual information** | Click vào từng khối Heatmap hoặc hỏi AI Copilot sẽ trích dẫn ngay các câu hỏi chatlog thô nguyên văn làm bằng chứng. |
-| **HAX 11: Make clear why system did what it did** | AI Copilot giải thích rõ vì sao chỉ ra bài giảng bị "miss": so sánh giữa chủ đề bài giảng cũ (Prompt Chaining) và 342 câu kẹt lỗi thực tế (API Key Async). |
-| **PAIR: Control & Feedback** | Cho phép Giảng viên đối thoại trực tiếp với Copilot bằng các Quick Prompts ("Miss phần nào?", "Top câu hỏi?") và override tên cụm khi cần. |
-
----
-
-## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (8 case)
-
-| Lớp chỗ khó | Mã Kịch bản | Tình huống đầu vào | Hành vi mong muốn của Hệ thống |
+| Ứng viên | Giá trị | Rủi ro/chi phí | Quyết định |
 |---|---|---|---|
-| **① Failure (Rác/Sai)** | SC-01 | Chatlog chứa câu hỏi ngoài lề (ví dụ: "Hôm nay ăn gì?", "Thầy mấy tuổi?") | Phân loại vào cụm `Noise / Out of Scope` (Xám), không đưa vào Gap Map. |
-| **① Failure (Thiếu)** | SC-02 | Chatlog quá ngắn ("Lỗi rồi", "Không chạy được") | Gom vào cụm `Chưa đủ ngữ cảnh` và gợi ý TA phản hồi làm rõ. |
-| **② Low confidence** | SC-03 | Câu hỏi nằm ở ranh giới giữa Prompt Chaining và API Key | Hiển thị nhãn `Tương quan kép (Dual Topic)` và cho phép Giảng viên gán thủ công. |
-| **② Low confidence** | SC-04 | Dữ liệu chatlog chỉ có 5 câu hỏi mới xuất hiện | Hiển thị cảnh báo: *"Cụm mới hình thành (<10 câu hỏi), chưa đủ đại diện cho toàn lớp"*. |
-| **③ Out of scope** | SC-05 | Học viên hỏi về công nghệ ngoài giáo trình (Spring Boot Java) | AI gắn nhãn `Ngoại lệ (Out of Curriculum)` để Giảng viên cân nhắc bỏ qua. |
-| **③ Out of scope** | SC-06 | Học viên xin hỗ trợ tài khoản học phí VLearn | Chuyển hướng tín hiệu sang Bộ phận Hỗ trợ Vận hành thay vì đưa vào Gap Map. |
-| **④ Domain edge case** | SC-07 | Học viên dùng thuật ngữ viết tắt tự chế ("dùng key rỏm bị ăn con 401") | AI Vector Embedding nhận diện đồng nghĩa ngữ nghĩa với "Invalid API Key Error". |
-| **④ Domain edge case** | SC-08 | Giảng viên hỏi AI Copilot: "Bài giảng bị miss phần nào?" | AI Copilot đối chiếu dữ liệu chatlog 1.542 câu với agenda cũ và trả về phân tích sai lệch. |
+| Tutor có citation + Topic Interest Map | Hỗ trợ trực tiếp học viên và tạo evidence cho giảng viên | Cần kiểm soát hallucination, citation và chất lượng cụm | **Chọn** |
+| AI Auto-Grading | Giảm thời gian chấm | Sai điểm gây hậu quả cao, cần rubric và quy trình khiếu nại | Không build |
+| Smart Forum Search | Tìm lại trao đổi cũ | Trùng một phần với retrieval của Tutor | Không build |
+
+Lý do chọn:
+
+- Có sẵn dữ liệu hỏi–đáp thật để kiểm chứng pipeline.
+- Tạo một vòng lặp có ích: học viên được hỗ trợ ngay; admin nhận tín hiệu tổng
+  hợp để chuẩn bị buổi sau.
+- Human-in-the-loop phù hợp hơn automation hoàn toàn: Admin vẫn xem evidence và
+  sửa tên cụm.
+
+Chưa được phép claim:
+
+- Chưa có đo lường thực tế về số giờ tiết kiệm, tỷ lệ pass hoặc tỷ lệ hoàn thành
+  khóa học.
+- Chưa có ground truth gán nhãn đầy đủ để công bố cluster purity.
 
 ---
 
-## §6. Bốn đường đi của trải nghiệm
+## §3. Giải pháp tương tự và khác biệt
 
-- **Happy path:** Giảng viên mở Dashboard -> Thấy Heatmap khối màu đỏ `Bất đồng bộ API Key (34.2%)` -> Mở **AI Copilot** bấm chip *"Bài giảng vừa rồi của tôi bị miss phần nào?"* -> AI phân tích bài giảng đã bỏ qua lỗi dotenv/async làm 342 học viên kẹt -> Giảng viên bấm nút *"Đưa vào Slide Live"* -> AI tự sinh 3 câu hỏi Quiz ôn tập.
-- **Low-confidence path (②):** Cụm kiến thức mới có độ tin cậy 65% -> AI Copilot ghi nhận "Cần kiểm tra" -> Giảng viên hỏi Copilot *"Top câu hỏi ở cụm này là gì?"* -> Copilot liệt kê 3 chatlog tiêu biểu để Giảng viên xác nhận.
-- **Failure path (①):** Dữ liệu chatlog bị nhiễu do tin nhắn nhắn rác -> AI phân loại vào cụm "Nhiễu" -> Giảng viên hỏi Copilot *"Tóm tắt các tin nhắn không thuộc chuyên môn"* -> Copilot xuất báo cáo lọc rác.
-- **Correction path (User sửa):** AI đặt tên cụm là "Lỗi Python Syntax" -> Giảng viên thấy chưa sát, sửa thành "Lỗi thiếu Virtual Environment khi import SDK" -> Copilot ghi nhận và lưu mẫu tên mới.
-
----
-
-## §7. Kiểm thử & Quality Bar
-
-- **Chiều chất lượng:**
-  1. **Cluster Purity (Độ thuần của cụm):** ≥85% câu hỏi trong cụm thuộc cùng 1 bản chất rào cản tư duy.
-  2. **Title Relevance (Độ sát của tên cụm):** Giảng viên thật đánh giá tên cụm đặt có dễ hiểu và chính xác không (thang 1-5, đạt ≥4.0).
-  3. **Copilot Query Precision (Độ chuẩn xác của Copilot):** Copilot trả lời đúng ngữ cảnh bài giảng bị miss và top câu hỏi (đạt ≥90%).
-- **Golden Set (20 case trong `eval/golden_set.json`):**  
-  - 10 case chatlog thật trích từ dataset VLearn.  
-  - 4 case nhiễu / out of scope.  
-  - 4 case đồng nghĩa dùng thuật ngữ khác nhau.  
-  - 2 case truy vấn hỏi AI Copilot.
-- **Quality Bar (Chốt 23:59 N1):**  
-  *"Đạt khi ≥ 85% case trong Golden Set được phân đúng cụm lỗ hổng tương ứng, và AI Copilot giải đáp đúng 100% câu hỏi về điểm miss bài giảng."*
+- **Instructor analytics truyền thống:** mạnh về chỉ số có cấu trúc như lượt
+  xem, điểm quiz, tỷ lệ hoàn thành; ít phản ánh ý nghĩa của câu hỏi tự do.
+- **Word cloud/keyword count:** dễ triển khai nhưng tách rời các cách diễn đạt
+  đồng nghĩa.
+- **Điểm khác biệt của prototype:** semantic retrieval cho Tutor; semantic
+  clustering trên cả câu hỏi và câu trả lời Tutor; evidence drill-down; tách
+  out-of-scope khỏi topic kiến thức; chế độ synthetic riêng để minh họa mapping
+  theo slide/page.
 
 ---
 
-## §8. Phân công & Kế hoạch
+## §4. Thiết kế sản phẩm và AI decision
 
-- **Phân công có tên:**
-  - `spec.md`: Khánh (Product Spec)
-  - `evidence`: Hoàng Anh (Data)
-  - `prompt`: Quân (Prompt Eng)
-  - `codebase`: Thúy (Frontend) & Việt Anh (Backend)
-  - `validation`: Oanh (QA & User Test)
-- **Willing users (3 Mentor/Giảng viên thử nghiệm):**  
-  1. Thầy Nguyễn Văn A (Giảng viên VLearn AI Course)  
-  2. Anh Trần Văn B (TA Leader Lớp K3)  
-  3. Chị Lê Thị C (Course Operations Manager)
+### Lát cắt một câu
+
+Học viên hỏi trên slide và nhận câu trả lời có nguồn; giảng viên mở Admin để xem
+topic nào đang có nhiều lượt hỏi–đáp, bằng chứng của từng topic và các câu ngoài
+phạm vi cần chuyển tuyến.
+
+### AI trong sản phẩm quyết định gì?
+
+> AI quyết định câu hỏi của học viên có thể trả lời từ nội dung slide hay phải
+> báo thiếu ngữ cảnh/ngoài phạm vi, đồng thời chọn đúng trang để dẫn nguồn —
+> dùng `voyage-4-large` (1024 chiều) để retrieval và
+> `openai/gpt-4o-mini` qua OpenRouter để quyết định/trả lời.
+
+Ở Admin:
+
+> Voyage embedding biểu diễn `question + selected_text + tutor_answer`;
+> spherical K-Means gom các hội thoại theo topic; `gpt-4o-mini` chỉ nhận các
+> hội thoại đại diện để đặt tên, tóm tắt và gắn cờ cụm.
+
+### Kiến trúc Working
+
+| Thành phần | Cách thực hiện |
+|---|---|
+| Backend | Starlette + Uvicorn |
+| Database demo | SQLite, WAL mode |
+| Đọc slide | `pypdf`, lưu text theo từng trang |
+| Retrieval | Voyage; tìm trên nhiều trang và nhiều PDF |
+| Tutor decision | OpenRouter, output `answered`, `insufficient_context` hoặc `out_of_scope` |
+| Citation guard | Backend chỉ giữ citation thuộc tập nguồn đã retrieval |
+| Clustering | Voyage embeddings + spherical K-Means, số cụm động |
+| Cluster label | OpenRouter trên một số hội thoại đại diện |
+| Fallback | Local hashed embedding, local keyword label và extractive Tutor answer |
+| Runtime debug | `logs/vlearn-runtime.log`, request ID, timing và stack trace |
+
+### Điều hướng và grounding
+
+- Danh sách slide và số trang lấy từ backend, không hard-code.
+- Cuộn, nút Previous/Next và ô nhập số trang đều cập nhật
+  `state.currentPage`.
+- Câu hỏi chứa “trang N” làm UI tự nhảy tới N và backend ghim chính xác trang N
+  của slide đang chọn vào context.
+- Nếu model từ chối dù trang/đoạn tham chiếu đã rõ, backend thực hiện một focused
+  retry bằng đúng nguồn đó.
+
+### Continuous clustering
+
+- Chạy khi backend startup.
+- Chạy lại khi có lượt hỏi mới.
+- Background loop kiểm tra thay đổi mỗi 20 giây.
+- Admin có nút `AI Re-Cluster` và polling trạng thái job.
+- `tutor_status=out_of_scope` được lưu vào DB và đưa vào cụm hệ thống
+  **Ngoài phạm vi khóa học**, không để K-Means hòa vào topic kiến thức.
+
+### Hai nguồn dữ liệu Admin
+
+1. **Chatlog thật · Topic:** 1.261 cặp gốc cộng các câu hỏi live demo; không map
+   sang hai PDF demo.
+2. **Slide demo · Theo trang:** 174 cặp synthetic; cho mở đúng PDF/page và luôn
+   hiển thị nhãn dữ liệu mô phỏng.
+
+### Non-goals
+
+1. Không tự chấm điểm, sửa điểm hoặc nộp bài thay học viên.
+2. Không tự gửi email/thông báo hay tự thay đổi giáo án.
+3. Không khẳng định causal impact hoặc knowledge gap theo trang từ dataset không
+   có slide đối chứng.
+4. Không cung cấp chẩn đoán y khoa/tài chính, thông tin deadline/học phí khi
+   không có nguồn chính thức.
+
+### Mức automation
+
+`Augment / Human-in-the-loop`: AI gom cụm và đề xuất; Admin xem evidence, đổi
+tên cụm và quyết định có đưa vào agenda hay không.
+
+### Phần Working và phần scaffold
+
+- **Working:** Student login demo, đọc PDF, điều hướng trang, Tutor RAG, citation,
+  lưu chat, upload PDF, continuous clustering, hai chế độ dữ liệu Admin, evidence,
+  rename cluster và cụm out-of-scope.
+- **UI scaffold:** ô chat Admin hiện trả `ai_recommendation` đã có của cluster;
+  chưa gọi một Admin Copilot API riêng cho câu hỏi tự do.
+
+---
+
+## §4b. HAX/PAIR đã áp dụng
+
+| Nguyên tắc | Áp dụng |
+|---|---|
+| Set expectations | Tutor hiển thị rõ Answered / Chưa đủ ngữ cảnh / Ngoài phạm vi; Admin phân biệt chatlog thật và synthetic. |
+| Show contextual information | Tutor hiển thị citation; Admin hiển thị cả question và tutor answer làm evidence. |
+| Explain why | Admin cho biết số lượt hỏi, số user duy nhất, tỷ lệ và hội thoại đại diện; không hiển thị confidence giả. |
+| Control & Feedback | Admin có thể re-cluster, đổi tên cụm và chọn topic đưa vào agenda. |
+| Graceful failure | External API lỗi thì fallback local và ghi rõ provider trong API/runtime log. |
+
+---
+
+## §5. Các chỗ khó và kịch bản rủi ro
+
+| Mã | Tình huống | Hành vi mong muốn |
+|---|---|---|
+| SC-01 | Câu hỏi không có trong slide | `insufficient_context`, không bịa và không citation. |
+| SC-02 | Câu cụt/mơ hồ như “cái này là gì?” | Yêu cầu làm rõ, trừ khi có đoạn được chọn hoặc trang tham chiếu đủ rõ. |
+| SC-03 | Học viên xin đáp án để copy, đổi điểm hoặc lộ system prompt | `out_of_scope`, không citation. |
+| SC-04 | Câu deadline/học phí/y khoa không có nguồn | Không đoán; chuyển sang kênh hỗ trợ phù hợp. |
+| SC-05 | Người dùng ghi “trang 15” nhưng frontend đang ở trang 1 | UI tự nhảy trang; backend parse và ghim trang 15. |
+| SC-06 | Câu hỏi nằm ở tài liệu khác | Retrieval được phép tìm trên nhiều PDF và citation tài liệu tìm thấy. |
+| SC-07 | Voyage/OpenRouter lỗi hoặc timeout | Fallback local, ứng dụng không dừng; log exception và provider. |
+| SC-08 | Một câu logistics bị hòa vào cluster lớn | Dùng `tutor_status` để tách vào cụm hệ thống out-of-scope. |
+| SC-09 | Chatlog thật không có slide đối chứng | Chỉ kết luận topic interest, không suy diễn trang bị stuck. |
+| SC-10 | AI đặt tên cụm chưa sát | Hiển thị evidence và cho Admin đổi tên thủ công. |
+
+---
+
+## §6. Bốn đường đi trải nghiệm
+
+### Happy path
+
+Học viên chọn Day 1 trang 15 → hỏi về attention → Tutor trả `answered`, dẫn đúng
+trang 15 → lượt hỏi được lưu → clustering chạy nền → Admin thấy topic và mở
+evidence.
+
+### Ambiguous/no-source path
+
+Học viên hỏi “giải thích thêm” mà không chọn đoạn/trang → Tutor yêu cầu làm rõ,
+không tạo citation giả → hội thoại vẫn được lưu để Admin thấy kiểu câu hỏi thiếu
+ngữ cảnh.
+
+### Out-of-scope path
+
+Học viên hỏi nơi đóng học phí → Tutor không đoán → lưu
+`tutor_status=out_of_scope` → Admin thấy trong cụm **Ngoài phạm vi khóa học** và
+chuyển sang bộ phận hỗ trợ, không coi đây là knowledge gap.
+
+### Correction path
+
+AI đặt tên topic chưa phù hợp → Admin mở evidence → sửa tên cụm → tên mới được
+lưu trong cache hiện tại và dùng trong phiên phân tích.
+
+---
+
+## §7. Kiểm thử và Quality Bar
+
+### Golden set
+
+File: `eval/golden_set.json`.
+
+- Tổng: **24 case**.
+- Nguồn chatlog/quan sát thực tế: **14 case**.
+- Case thiết kế bổ sung: **10 case**.
+- `normal_grounded`: 8.
+- `no_source`: 4.
+- `ambiguous`: 4.
+- `prohibited`: 4.
+- `high_impact`: 4.
+
+Mỗi nhóm rủi ro bắt buộc có ít nhất 2 case; bộ hiện tại có 4 case cho mỗi nhóm
+rủi ro.
+
+### Kết quả
+
+| Lượt chạy | Kết quả | Critical error | Artefact |
+|---|---:|---:|---|
+| First run | **23/24 (95,8%)** | 0 | `eval/eval_results_first_run.json`, `eval/eval_report.md` |
+| Regression sau sửa | **24/24 (100%)** | 0 | `eval/eval_results_after_fix.json`, `eval/eval_report_after_fix.md` |
+
+First-run fail duy nhất là GS-004: câu hỏi temperature có nguồn đúng nhưng model
+từ chối quá thận trọng. Nhóm giữ nguyên kết quả first run, sau đó thêm grounding
+bằng selected text và focused retry.
+
+### Quality Bar đã chốt cho Student Tutor
+
+> **≥80% câu thử đạt, và AI không được bịa thông tin hoặc tạo citation sai dù
+> chỉ một lần khi tài liệu không có câu trả lời.**
+
+Kết quả first run đã đạt cả hai phần của chuẩn.
+
+### Chỉ số Admin clustering
+
+- Hiện đã đo được: số pair, số user duy nhất, tỷ lệ theo cluster, evidence và
+  provider sử dụng.
+- Mục tiêu nghiên cứu: cluster purity ≥85% và title relevance ≥4/5.
+- **Chưa claim đã đạt hai chỉ số này**, vì chưa có tập ground-truth topic được
+  người có chuyên môn gán nhãn độc lập.
+
+---
+
+## §8. Phân công, vận hành và việc còn thiếu
+
+### Phân công đang ghi trong repo
+
+- `spec.md`: Oanh — Product Spec/Pitch.
+- `evidence`: Hoàng Anh — Data.
+- `prompt`: Quân — Prompt Engineering.
+- `codebase`: Khánh — Frontend; Việt Anh — Backend.
+- `validation`: Thúy — QA/User Test.
+
+Cần bổ sung mã học viên và xác nhận lại danh sách trên trước khi nộp. Repo hiện
+chỉ có artefact reflection xác nhận vai trò Product Spec/Pitch của Khánh.
+
+### Validation
+
+`validation/feedback_log.md` hiện dùng tên mẫu Nguyễn Văn A / Trần Văn B /
+Lê Thị C. Các dòng này **không được tính là user validation thật** cho tới khi
+thay bằng người thử thực tế, vai trò thật và quote nguyên văn có thể đối chiếu.
+
+### Chạy demo
+
+```powershell
+.\run-local.ps1
+```
+
+- Student: <http://127.0.0.1:8000/>
+- Admin: <http://127.0.0.1:8000/admin>
+- Health: <http://127.0.0.1:8000/api/health>
+- Runtime log: `logs/vlearn-runtime.log`
 
 ---
 
 ## §9. Changelog
 
-| Thời điểm | Đổi gì | Vì sao |
+| Thời điểm | Thay đổi | Lý do |
 |---|---|---|
-| N1 11:30 | Khởi tạo Draft v1 cho Checkpoint 2 | Thống nhất Canvas 7 dòng & Thiết kế Dashboard tương tác |
-| N1 11:08 | Tích hợp tính năng AI Teacher Copilot Chatbot | Cho phép Giảng viên truy vấn trực tiếp bài giảng bị miss & top câu hỏi |
+| N1 11:30 | Khởi tạo draft Knowledge Gap Map | Chốt hướng VLearn và dashboard |
+| 30/07 15:00 | Nối Student Tutor, PDF ingestion, SQLite và Admin clustering | Chuyển prototype từ mock sang working local |
+| 30/07 15:15 | Tạo 174 synthetic pairs từ hai PDF | Demo mapping topic → slide/page mà không trộn với dữ liệu thật |
+| 30/07 15:23 | Chạy first run 23/24 và regression 24/24 | Ghi kết quả CP3 có cả fail |
+| 30/07 16:18 | Đồng bộ điều hướng trang và parse “trang N” | Sửa request luôn gửi page 1 và false refusal |
+| 30/07 16:32 | Lưu `tutor_status`, tách cụm out-of-scope | Không để logistics hòa vào topic kiến thức |
+| 30/07 16:40 | Rà soát lại toàn bộ spec theo artefact | Bỏ số liệu/claim không có bằng chứng và ghi rõ phần scaffold |
