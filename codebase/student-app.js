@@ -1,97 +1,116 @@
 /**
- * VLearn Student Portal - Slide Viewer & AI Student Tutor Application Script
- * Enables Interactive Slide Navigation, Document Excerpt Copy & Explain workflow,
- * Student Question Answering, and Theme Switcher (Dark/Light mode).
+ * VLearn Student Portal - Official 3-Column Interactive Application (student.html)
+ * Controls Slide Page rendering, Left Syllabus Accordion, Right VLearn Tutor Sidebar Toggle,
+ * Text Selection Auto-Drafting, Context-Aware Question Answering, and Theme Switcher.
  */
 
-// Slide Deck Dataset
-const slidesData = [
+// Slide Deck Dataset for PDF Viewer (day01_302.pdf)
+const pdfSlides = [
   {
-    id: 1,
-    title: "Slide 1: Bất đồng bộ khi gọi API Key & Async await Header",
-    subtitle: "Khóa học AI Product Development (K3) — Bài 4: Integration",
-    body: "Khi tích hợp LLM API trong Web Backend, biến môi trường API Key cần được nạp trước khi khởi tạo client. Nếu thực thi hàm async trước khi nạp key, ứng dụng sẽ báo lỗi 401 Unauthorized do Header request trống.",
-    code: `// Slide Code Example 1:
-import dotenv from 'dotenv';
-dotenv.config(); // Bắt buộc gọi trước async call!
+    page: 1,
+    title: "COMP2010 — Generalist Product Builder & Course Overview",
+    instructor: "Mai Anh Nguyen (Blue)",
+    role: "Generalist Product Builder",
+    bullets: [
+      "2026: FPT Long Châu (PM · Healthcare Product)",
+      "2025: Thongtincuho.org (Co-founder)",
+      "2025: FPT Software AI Center (PM · AI Agent)",
+      "2021-2025: Xantus (PM · On-chain Analytics, AI Agent)",
+      "2016-2021: DYNO, Kalapa (PM · OCR, eKYC, Credit Scoring)"
+    ],
+    code: `// Day 1 Introduction:
+const course = "COMP2010 AI Product Development";
+const instructor = "Mai Anh Nguyen (Blue)";`
+  },
+  {
+    page: 2,
+    title: "Bài 4: Bất đồng bộ khi gọi API Key & Async await Header Injection",
+    instructor: "Thầy Nguyễn Văn A — VLearn AI Course",
+    role: "AI Lead Instructor",
+    bullets: [
+      "⚠️ Nỗi đau: Có đến 342 học viên bị kẹt lỗi 401 Unauthorized khi khởi tạo API Key trong hàm async.",
+      "📌 Nguyên nhân: Quên nạp dotenv.config() trước khi truyền biến môi trường vào Authorization Header.",
+      "💡 Giải pháp: Bắt buộc nạp cấu hình biến môi trường ở dòng đầu tiên của file entry point!"
+    ],
+    code: `import dotenv from 'dotenv';
+dotenv.config(); // Nạp API Key trước khi gọi async call!
 
-async function callGeminiAPI() {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) throw new Error("401 Unauthorized: Missing API Key");
+async function fetchAIResponse() {
+  const apiKey = process.env.VLEARN_API_KEY;
+  if (!apiKey) throw new Error("401 Unauthorized: Key bị undefined");
   return await fetch("https://api.vlearn.ai/v1/chat", {
     headers: { "Authorization": \`Bearer \${apiKey}\` }
   });
 }`
   },
   {
-    id: 2,
-    title: "Slide 2: Nạp biến môi trường từ File .env",
-    subtitle: "Khóa học AI Product Development (K3) — Bài 4: Environment Setup",
-    body: "File `.env` phải được lưu tại thư mục gốc (root) của dự án. Không commit file `.env` lên GitHub công khai để tránh bị leak lộ API Key ra ngoài.",
-    code: `# Slide Code Example 2 (.env):
+    page: 3,
+    title: "Bài 4 (Tiếp): Thiết lập File .env & Bảo mật API Key",
+    instructor: "Thầy Nguyễn Văn A — VLearn AI Course",
+    role: "AI Lead Instructor",
+    bullets: [
+      "1. Lưu file .env ở thư mục gốc (root directory).",
+      "2. Thêm file .env vào .gitignore để tránh bị lộ API Key công khai trên GitHub.",
+      "3. Reset key mới ngay lập tức nếu vô tình commit key cũ."
+    ],
+    code: `# File .env:
 PORT=3000
 VLEARN_API_KEY=sk-vlearn-live-998231-k3
 DATABASE_URL=postgresql://localhost:5432/vlearn`
   },
   {
-    id: 3,
-    title: "Slide 3: Vector DB Indexing & Batch Chunking Strategy",
-    subtitle: "Khóa học AI Product Development (K3) — Bài 5: RAG System",
-    body: "Khi ingest dataset văn bản lớn (>100.000 dòng), cần chia nhỏ tài liệu thành từng Chunk Size (ví dụ 512 tokens, overlap 50 tokens) để tránh bị đè bộ nhớ RAM (Memory Leak) trong ChromaDB hoặc FAISS.",
-    code: `// Slide Code Example 3:
-const textSplitter = new RecursiveCharacterTextSplitter({
+    page: 4,
+    title: "Bài 5: Vector DB Indexing & Batch Chunking Strategy",
+    instructor: "Việt Anh — Backend & AI Tech",
+    role: "AI Infrastructure Specialist",
+    bullets: [
+      "⚠️ Tránh tràn bộ nhớ RAM (Memory Leak) khi ingest 100k chunk tài liệu.",
+      "Chunk Size khuyến nghị: 512 tokens, Chunk Overlap: 50 tokens.",
+      "Sử dụng FAISS hoặc ChromaDB index cho truy vấn Semantic Similarity nhanh."
+    ],
+    code: `const textSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 512,
   chunkOverlap: 50
 });
-const docs = await textSplitter.createDocuments([rawChatlogText]);`
-  },
-  {
-    id: 4,
-    title: "Slide 4: Prompt Chaining & LangChain LCEL Syntax",
-    subtitle: "Khóa học AI Product Development (K3) — Bài 6: Prompt Engineering",
-    body: "Prompt Chaining giúp kết nối đầu ra của Step 1 làm đầu vào cho Step 2 thông qua LangChain Expression Language (LCEL). Sử dụng RunnablePassthrough() để giữ nguyên context giữa các bước.",
-    code: `// Slide Code Example 4 (LCEL):
-const chain = RunnableSequence.from([
-  { question: new RunnablePassthrough() },
-  promptTemplate,
-  model,
-  new StringOutputParser()
-]);`
+const docs = await textSplitter.createDocuments([chatlogsText]);`
   }
 ];
 
-// State Variables
-let currentSlideIdx = 0;
-let attachedContextText = "";
+// State
+let currentPageNum = 2; // Default starting page from screenshot
+let isTutorOpen = true;
 
 // DOM Elements
-const slideIndexBadge = document.getElementById("slide-index-badge");
-const slideTitle = document.getElementById("slide-title");
-const slideCanvas = document.getElementById("slide-canvas");
-const btnPrevSlide = document.getElementById("btn-prev-slide");
-const btnNextSlide = document.getElementById("btn-next-slide");
-const btnCopySlideDoc = document.getElementById("btn-copy-slide-doc");
-const docContextBox = document.getElementById("doc-context-box");
-const contextPreviewText = document.getElementById("context-preview-text");
-const btnClearContext = document.getElementById("btn-clear-context");
+const pdfCanvasContainer = document.getElementById("pdf-canvas-container");
+const slideMainContent = document.getElementById("slide-main-content");
+const navPageIndicator = document.getElementById("nav-page-indicator");
+const slidePageNumTop = document.getElementById("slide-page-num-top");
+const btnPdfPrev = document.getElementById("btn-pdf-prev");
+const btnPdfNext = document.getElementById("btn-pdf-next");
 
-const tutorChatMessages = document.getElementById("tutor-chat-messages");
-const studentChatInput = document.getElementById("student-chat-input");
-const btnStudentSend = document.getElementById("btn-student-send");
-const studentToast = document.getElementById("student-toast");
-const studentToastMsg = document.getElementById("student-toast-msg");
+const vlearnTutorSidebar = document.getElementById("vlearn-tutor-sidebar");
+const btnToggleTutor = document.getElementById("btn-toggle-tutor");
+const slideContextBadge = document.getElementById("slide-context-badge");
+const currentContextTxt = document.getElementById("current-context-txt");
+
+const tutorChatStream = document.getElementById("tutor-chat-stream");
+const tutorInputField = document.getElementById("tutor-input-field");
+const btnSendTutor = document.getElementById("btn-send-tutor");
+const btnResetChat = document.getElementById("btn-reset-chat");
 
 // Theme Elements
 const btnThemeToggle = document.getElementById("btn-theme-toggle");
 const themeIcon = document.getElementById("theme-icon");
 const themeText = document.getElementById("theme-text");
 
-// Initialize Application
-function initStudentApp() {
+// Initialize App
+function initApp() {
   initTheme();
-  renderSlide(currentSlideIdx);
-  setupSlideControls();
-  setupStudentChat();
+  renderSlidePage(currentPageNum);
+  setupNavigation();
+  setupTutorChat();
+  setupAccordion();
+  setupTextSelectionAutoDraft();
 }
 
 // Theme Switcher Logic
@@ -105,7 +124,6 @@ function initTheme() {
       const newTheme = currentTheme === "dark" ? "light" : "dark";
       applyTheme(newTheme);
       localStorage.setItem("vlearn-theme", newTheme);
-      showStudentToast(`Đã chuyển sang chế độ: ${newTheme === "light" ? "Sáng (Light Mode)" : "Tối (Dark Mode)"}`);
     });
   }
 }
@@ -113,183 +131,204 @@ function initTheme() {
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
   if (themeIcon && themeText) {
-    if (theme === "light") {
-      themeIcon.className = "ri-moon-line";
-      themeText.textContent = "Dark Mode";
-    } else {
+    if (theme === "dark") {
       themeIcon.className = "ri-sun-line";
       themeText.textContent = "Light Mode";
+    } else {
+      themeIcon.className = "ri-moon-line";
+      themeText.textContent = "Dark Mode";
     }
   }
 }
 
-// Render Slide Content
-function renderSlide(idx) {
-  const slide = slidesData[idx];
-  if (!slide) return;
+// Render PDF Slide Page
+function renderSlidePage(pageNum) {
+  const slide = pdfSlides.find(s => s.page === pageNum) || pdfSlides[0];
 
-  slideIndexBadge.textContent = `SLIDE ${slide.id} / ${slidesData.length}`;
-  slideTitle.textContent = slide.title;
+  slidePageNumTop.textContent = `Trang ${slide.page} / 83`;
+  navPageIndicator.innerHTML = `Trang <strong>${slide.page}</strong> / 83`;
+  slideContextBadge.textContent = `Trang slide: ${slide.page}`;
+  currentContextTxt.textContent = `slide trang ${slide.page} (${slide.title.substring(0, 35)}...)`;
 
-  slideCanvas.innerHTML = `
-    <div class="slide-content-header">
-      <p class="slide-subtitle">${slide.subtitle}</p>
-    </div>
-    <div class="slide-body-box">
-      <p style="margin-bottom: 12px;">${slide.body}</p>
-      <div class="code-snippet-box">${escapeHtml(slide.code)}</div>
-    </div>
-  `;
-
-  // Update nav button states
-  btnPrevSlide.disabled = (idx === 0);
-  btnNextSlide.disabled = (idx === slidesData.length - 1);
+  if (slide.page === 1) {
+    slideMainContent.innerHTML = `
+      <h2>${slide.title}</h2>
+      <div class="instructor-card-mock">
+        <div class="instructor-avatar-box">
+          <i class="ri-user-star-line"></i>
+        </div>
+        <div class="instructor-info-txt">
+          <h3>${slide.instructor}</h3>
+          <p class="instructor-role">${slide.role}</p>
+          <div class="instructor-bullets">
+            ${slide.bullets.map(b => `<p>• ${b}</p>`).join("")}
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    slideMainContent.innerHTML = `
+      <h2>${slide.title}</h2>
+      <div class="instructor-card-mock" style="flex-direction: column; align-items: flex-start;">
+        <div class="instructor-role" style="font-size: 13px; font-weight: 700; color: #2563eb;">${slide.instructor} — ${slide.role}</div>
+        <div class="instructor-bullets" style="font-size: 13px; line-height: 1.6; margin-bottom: 12px;">
+          ${slide.bullets.map(b => `<p>${b}</p>`).join("")}
+        </div>
+        <div style="width: 100%; background: #0f172a; color: #38bdf8; padding: 14px; border-radius: 8px; font-family: monospace; font-size: 12px; white-space: pre-wrap;">${escapeHtml(slide.code)}</div>
+      </div>
+    `;
+  }
 }
 
-// Slide Navigation Setup
-function setupSlideControls() {
-  btnPrevSlide.addEventListener("click", () => {
-    if (currentSlideIdx > 0) {
-      currentSlideIdx--;
-      renderSlide(currentSlideIdx);
+// Text Selection Auto-Drafting Feature
+function setupTextSelectionAutoDraft() {
+  document.addEventListener("selectionchange", () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const selectedText = selection.toString().trim();
+    if (selectedText && selectedText.length > 2) {
+      // Auto draft the question into the tutor input box!
+      tutorInputField.value = `Giải thích đoạn "${selectedText}"`;
+    }
+  });
+}
+
+// Setup Page & Drawer Navigation
+function setupNavigation() {
+  btnPdfPrev.addEventListener("click", () => {
+    if (currentPageNum > 1) {
+      currentPageNum--;
+      renderSlidePage(currentPageNum);
     }
   });
 
-  btnNextSlide.addEventListener("click", () => {
-    if (currentSlideIdx < slidesData.length - 1) {
-      currentSlideIdx++;
-      renderSlide(currentSlideIdx);
+  btnPdfNext.addEventListener("click", () => {
+    if (currentPageNum < pdfSlides.length) {
+      currentPageNum++;
+      renderSlidePage(currentPageNum);
     }
   });
 
-  // Copy Slide Document Action
-  btnCopySlideDoc.addEventListener("click", () => {
-    const slide = slidesData[currentSlideIdx];
-    attachedContextText = `[Trích từ Slide ${slide.id}: ${slide.title}]\n"${slide.body}"\nCode:\n${slide.code}`;
-
-    contextPreviewText.textContent = `📄 Attached: ${slide.title} (${slide.body.substring(0, 60)}...)`;
-    studentChatInput.value = `AI hãy giải thích giúp em đoạn tài liệu trong Slide ${slide.id} này với ạ?`;
-
-    showStudentToast(`📋 Đã trích dẫn tài liệu Slide ${slide.id} vào Chatbot AI!`);
-  });
-
-  btnClearContext.addEventListener("click", () => {
-    attachedContextText = "";
-    contextPreviewText.textContent = "Chưa dán tài liệu. Hãy chọn Slide và bấm \"Copy đoạn tài liệu\" để gửi cho AI Tutor.";
+  // Toggle Right Tutor Sidebar Drawer
+  btnToggleTutor.addEventListener("click", () => {
+    isTutorOpen = !isTutorOpen;
+    if (isTutorOpen) {
+      vlearnTutorSidebar.classList.remove("closed");
+      btnToggleTutor.querySelector(".arrow-icon").className = "ri-arrow-right-s-line arrow-icon";
+    } else {
+      vlearnTutorSidebar.classList.add("closed");
+      btnToggleTutor.querySelector(".arrow-icon").className = "ri-arrow-left-s-line arrow-icon";
+    }
   });
 }
 
-// Student Chatbot Setup
-function setupStudentChat() {
-  btnStudentSend.addEventListener("click", sendStudentMsg);
-  studentChatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendStudentMsg();
+// Setup VLearn Tutor Chat
+function setupTutorChat() {
+  btnSendTutor.addEventListener("click", sendTutorMessage);
+  tutorInputField.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendTutorMessage();
   });
 
-  // Student Quick Chips
-  const studentChips = document.querySelectorAll(".student-chip");
-  studentChips.forEach(chip => {
-    chip.addEventListener("click", () => {
-      const type = chip.getAttribute("data-q");
-      handleStudentChip(type);
-    });
+  btnResetChat.addEventListener("click", () => {
+    tutorChatStream.innerHTML = `
+      <div class="tutor-msg-item ai">
+        <div class="msg-box">
+          Xin chào! Mình là VLearn Tutor. Bạn có thể bôi đen một đoạn trên slide để hỏi hoặc gửi câu hỏi tự do nhé!
+        </div>
+      </div>
+    `;
+    showVlearnToast("Đã làm mới cuộc trò chuyện VLearn Tutor!");
   });
 }
 
-function sendStudentMsg() {
-  const text = studentChatInput.value.trim();
+function sendTutorMessage() {
+  const text = tutorInputField.value.trim();
   if (!text) return;
 
-  let fullPrompt = text;
-  if (attachedContextText) {
-    fullPrompt = `${text}\n\n📌 TÀI LIỆU TRÍCH DẪN:\n${attachedContextText}`;
-  }
-
-  appendTutorMsg("student-user", text);
-  studentChatInput.value = "";
+  appendTutorMsgItem("user", text);
+  tutorInputField.value = "";
 
   setTimeout(() => {
-    generateTutorAnswer(text);
+    generateTutorResponse(text);
   }, 600);
 }
 
-function handleStudentChip(type) {
-  const slide = slidesData[currentSlideIdx];
+function generateTutorResponse(userText) {
+  const slide = pdfSlides.find(s => s.page === currentPageNum) || pdfSlides[0];
+  let reply = "";
 
-  if (type === "explain") {
-    const q = `AI hãy giải thích khái niệm trong Slide ${slide.id} giúp em với ạ?`;
-    appendTutorMsg("student-user", q);
-    setTimeout(() => {
-      const ans = `📘 **Giải thích chi tiết Slide ${slide.id}:**
-Nội dung này hướng dẫn bạn cách **${slide.title}**.
-- **Điểm cốt lõi:** ${slide.body}
-- **Lưu ý quan trọng:** Đảm bảo nạp cấu hình trước khi gọi hàm thực thi async để tránh bị ngắt kết nối!`;
-      appendTutorMsg("ai-tutor", ans);
-    }, 600);
-  }
-  else if (type === "401") {
-    const q = "Sao em bị lỗi 401 Unauthorized khi gọi API Key ạ?";
-    appendTutorMsg("student-user", q);
-    setTimeout(() => {
-      const ans = `🔴 **Nguyên nhân lỗi 401 Unauthorized:**
-1. Bạn chưa gọi \`dotenv.config()\` trước khi lấy \`process.env.API_KEY\`.
-2. Hàm \`async\` chạy trước khi biến môi trường kịp load khiến header Authorization bị \`undefined\`.
-3. Reset API Key mới nhưng quên cập nhật file \`.env\`.`;
-      appendTutorMsg("ai-tutor", ans);
-    }, 600);
-  }
-  else if (type === "env") {
-    const q = "File .env bị undefined thì sửa thế nào ạ?";
-    appendTutorMsg("student-user", q);
-    setTimeout(() => {
-      const ans = `⚠️ **Cách sửa lỗi .env undefined:**
-1. Đảm bảo file tên chính xác là \`.env\` (nằm ở root directory, cùng cấp với package.json).
-2. Thêm dòng \`require('dotenv').config()\` hoặc \`import 'dotenv/config'\` ở ngay **DÒNG ĐẦU TIÊN** của file main.js/app.js.`;
-      appendTutorMsg("ai-tutor", ans);
-    }, 600);
-  }
-}
+  const lower = userText.toLowerCase();
+  if (lower.includes("giải thích đoạn")) {
+    const excerpt = userText.replace(/giải thích đoạn/i, "").replace(/"/g, "").trim();
+    reply = `💡 **VLearn Tutor giải thích đoạn trích dẫn:**
+*Target text:* "${excerpt}"
 
-function generateTutorAnswer(userQuestion) {
-  const slide = slidesData[currentSlideIdx];
-  let answer = "";
-
-  if (attachedContextText) {
-    answer = `💡 **Giải thích đoạn tài liệu trích dẫn:**\nCăn cứ vào tài liệu Slide ${slide.id}, đoạn kiến thức này giải thích về cơ chế **${slide.title}**.\n\nKhi bạn chạy code:\n- Cần kiểm tra kĩ biến môi trường và cú pháp async/await.\n- Đảm bảo header request không bị bỏ trống!`;
+Căn cứ vào Slide trang ${slide.page} (**${slide.title}**):
+1. **Bản chất kiến thức:** Đoạn này đề cập đến việc xử lý biến môi trường và đồng bộ hóa header request khi kết nối API.
+2. **Lỗi hay gặp:** Nếu không có \`await dotenv.config()\`, biến API Key bị \`undefined\` làm server trả về HTTP Status \`401 Unauthorized\`.
+3. **Cách khắc phục:** Luôn đưa hàm nạp key lên ngay dòng đầu tiên của file ứng dụng!`;
+  }
+  else if (lower.includes("401") || lower.includes("api key") || lower.includes("async")) {
+    reply = `🔴 **Giải đáp từ VLearn Tutor (Theo Slide ${slide.page}):**
+Lỗi \`401 Unauthorized\` thường do biến môi trường chưa kịp nạp khi hàm \`async\` gọi đến API Header.
+👉 *Cách sửa:* Thêm \`dotenv.config()\` lên dòng 1 trước hàm fetch!`;
+  } else if (lower.includes(".env") || lower.includes("undefined")) {
+    reply = `⚠️ **Giải đáp về .env:**
+File \`.env\` phải nằm ở thư mục gốc của dự án. Không commit file này lên Git công khai để bảo vệ secret key!`;
   } else {
-    answer = `🤖 **VLearn AI Tutor:** Tôi đã nhận câu hỏi của bạn về bài giảng. Bạn có thể chọn nút **"📋 Copy đoạn tài liệu trong slide"** để tôi giải thích chính xác đoạn văn bản đó nhé!`;
+    reply = `📘 **VLearn Tutor (Ngữ cảnh Slide trang ${currentPageNum}):**
+Căn cứ vào trang slide **"${slide.title}"**, bạn cần chú ý phần triển khai code thực hành. Bạn có thể bôi đen một câu cụ thể để mình giải thích thêm nhé!`;
   }
 
-  appendTutorMsg("ai-tutor", answer);
+  appendTutorMsgItem("ai", reply);
 }
 
-function appendTutorMsg(sender, text) {
-  const msgDiv = document.createElement("div");
-  msgDiv.className = `tutor-msg ${sender}-msg`;
+function appendTutorMsgItem(sender, text) {
+  const item = document.createElement("div");
+  item.className = `tutor-msg-item ${sender}`;
+  const formatted = text.replace(/\n/g, "<br>");
 
-  const icon = sender === "ai-tutor" ? "ri-robot-line" : "ri-user-3-line";
-  const formattedText = text.replace(/\n/g, "<br>");
+  item.innerHTML = `<div class="msg-box">${formatted}</div>`;
+  tutorChatStream.appendChild(item);
+  tutorChatStream.scrollTop = tutorChatStream.scrollHeight;
+}
 
-  msgDiv.innerHTML = `
-    <div class="msg-avatar"><i class="${icon}"></i></div>
-    <div class="msg-content">${formattedText}</div>
-  `;
+// Setup Left Accordion Selection
+function setupAccordion() {
+  const accHeaders = document.querySelectorAll(".accordion-header");
+  accHeaders.forEach(header => {
+    header.addEventListener("click", () => {
+      const item = header.parentElement;
+      item.classList.toggle("active");
+    });
+  });
 
-  tutorChatMessages.appendChild(msgDiv);
-  tutorChatMessages.scrollTop = tutorChatMessages.scrollHeight;
+  const docItems = document.querySelectorAll(".doc-item");
+  docItems.forEach(doc => {
+    doc.addEventListener("click", () => {
+      docItems.forEach(d => d.classList.remove("active"));
+      doc.classList.add("active");
+      showVlearnToast(`Đã chọn tài liệu: ${doc.querySelector(".doc-name").textContent}`);
+    });
+  });
 }
 
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function showStudentToast(msg) {
-  studentToastMsg.textContent = msg;
-  studentToast.classList.add("show");
+function showVlearnToast(msg) {
+  const toast = document.getElementById("vlearn-toast");
+  const msgSpan = document.getElementById("vlearn-toast-msg");
+  if (!toast || !msgSpan) return;
+
+  msgSpan.textContent = msg;
+  toast.classList.add("show");
   setTimeout(() => {
-    studentToast.classList.remove("show");
+    toast.classList.remove("show");
   }, 3000);
 }
 
-// Run Student App
-document.addEventListener("DOMContentLoaded", initStudentApp);
+// Run App
+document.addEventListener("DOMContentLoaded", initApp);
