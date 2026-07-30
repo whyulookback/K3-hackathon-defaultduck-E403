@@ -1833,11 +1833,287 @@ body {
   padding: 10px 0;
 }
 
+/* ==========================================================================
+   NEW AGENT TOOLS & STUDENT ISSUES CHART STYLES
+   ========================================================================== */
+
+/* Agent Tools Bar */
+.agent-tools-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  gap: 16px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+[data-theme="light"] .agent-tools-bar {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #cbd5e1;
+}
+
+.agent-tool-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.tool-icon { font-size: 16px; }
+.text-blue { color: #3b82f6; }
+.text-green { color: #10b981; }
+.text-purple { color: #8b5cf6; }
+
+.btn-scan-logs {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.btn-scan-logs:hover {
+  transform: scale(1.04);
+}
+
+/* View Switcher Tabs */
+.view-switcher {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bg-card-border);
+}
+
+[data-theme="light"] .view-switcher {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.view-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.view-tab-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* Hidden Utility */
+.hidden {
+  display: none !important;
+}
+
+/* Student Issues Breakdown Chart View (Donut Chart) */
+.chart-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.chart-header-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 1px solid var(--bg-card-border);
+  padding-bottom: 10px;
+}
+
+.chart-header-info i {
+  color: var(--color-primary);
+  margin-right: 6px;
+}
+
+.total-chatlog-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--bg-card-border);
+}
+
+.chart-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.donut-chart-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+}
+
+.donut-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.donut-center-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.donut-number {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.donut-subtext {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.chart-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--legend-color);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+[data-theme="light"] .chart-legend-item {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+.chart-legend-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.legend-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--legend-color);
+}
+
+.legend-topic-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.legend-values {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Slide OCR Grounding Card */
+.slide-ocr-card {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ocr-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.ocr-meta-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ocr-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--color-accent);
+}
+
+.ocr-tag.page {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--color-primary);
+}
+
+.ocr-concept {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.ocr-excerpt {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-family: monospace;
+  white-space: pre-line;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
 @media (max-width: 1024px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .main-dashboard { grid-template-columns: 1fr; }
   .chat-drawer { width: 90%; right: 5%; bottom: 90px; }
-  .donut-chart-layout { grid-template-columns: 1fr; }
+  .chart-layout { grid-template-columns: 1fr; }
 }
 
 /* Working demo additions */

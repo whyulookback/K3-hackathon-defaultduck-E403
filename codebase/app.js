@@ -327,7 +327,7 @@ function setupFiltersAndActions() {
       selectedClusterId = null;
       loadClusters();
     });
-  });
+  }
 
   document.querySelectorAll("[data-scope]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -476,6 +476,7 @@ function labelWindow(value) {
 }
 
 function showToast(message) {
+  if (!toast || !toastMessage) return;
   toastMessage.textContent = message;
   toast.classList.add("show");
   window.setTimeout(() => toast.classList.remove("show"), 3000);

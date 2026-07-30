@@ -35,6 +35,12 @@
           </div>
         </div>
 
+        <!-- API Key Config Button -->
+        <button class="theme-toggle-btn" id="btn-api-key" title="Cấu hình OpenRouter API Key cho AI Real Call">
+          <i class="ri-key-2-line"></i>
+          <span id="api-key-text">OpenRouter: Set</span>
+        </button>
+
         <!-- Theme Toggle Switch Button -->
         <button class="theme-toggle-btn" id="btn-theme-toggle" title="Chuyển chế độ Sáng / Tối">
           <i class="ri-sun-line" id="theme-icon"></i>
@@ -54,10 +60,29 @@
 
         <div class="ai-status">
           <span class="pulse-dot"></span>
-          <span>AI Clustering & Copilot: Active</span>
+          <span id="ai-status-text">Agent Tools: LogScanner + SlideOCR</span>
         </div>
       </div>
     </header>
+
+    <!-- Agent Tool Bar Notification -->
+    <div class="agent-tools-bar card-glass">
+      <div class="agent-tool-item">
+        <i class="ri-radar-line tool-icon text-blue"></i>
+        <span><strong>LogScannerTool:</strong> Scanning <code>chatlog/</code> directory (Auto-Ingest)</span>
+      </div>
+      <div class="agent-tool-item">
+        <i class="ri-calculator-line tool-icon text-green"></i>
+        <span><strong>MetricCalculatorTool:</strong> 1.542 chatlogs purified (92.4%)</span>
+      </div>
+      <div class="agent-tool-item">
+        <i class="ri-file-search-line tool-icon text-purple"></i>
+        <span><strong>SlideOCRSearchTool:</strong> RAG Context Grounding active</span>
+      </div>
+      <button class="btn-scan-logs" id="btn-auto-scan">
+        <i class="ri-refresh-line"></i> Quét Log Mới (Auto-Scan)
+      </button>
+    </div>
 
     <!-- KPI Metric Cards -->
     <section class="kpi-grid">
@@ -117,7 +142,6 @@
               <button class="mode-btn active" id="btn-mode-grid" title="Chế độ Lưới Topic Map"><i class="ri-grid-line"></i> Topic Map</button>
               <button class="mode-btn" id="btn-mode-chart" title="Chế độ Biểu đồ Chủ đề"><i class="ri-bar-chart-fill"></i> Biểu đồ Chủ đề</button>
             </div>
-
             <div class="time-filter">
               <button class="filter-btn active" data-time="7d">7 Ngày qua</button>
               <button class="filter-btn" data-time="24h">24 Giờ qua</button>
@@ -133,14 +157,27 @@
           <!-- Populated by JavaScript -->
         </div>
 
-        <!-- Question Topic Distribution Chart View (Hidden by default) -->
-        <div class="topic-chart-view hidden" id="topic-chart-view">
+        <!-- Student Issues Breakdown Chart View (Donut Chart) -->
+        <div class="chart-view-container hidden" id="chart-view-container">
           <div class="chart-header-info">
             <span class="chart-tag"><i class="ri-bar-chart-grouped-line"></i> Biểu đồ Tần suất Câu hỏi Theo Chủ đề</span>
             <span class="chart-total" id="chart-total">Đang tải dữ liệu...</span>
           </div>
-          <div class="chart-bars-list" id="chart-bars-list">
-            <!-- Populated by JavaScript -->
+
+          <div class="chart-layout">
+            <div class="donut-chart-wrapper">
+              <svg class="donut-svg" viewBox="0 0 200 200" id="donut-svg">
+                <!-- SVG Donut Paths populated by JS -->
+              </svg>
+              <div class="donut-center-label">
+                <span class="donut-number">1,542</span>
+                <span class="donut-subtext">Chatlog Tín hiệu</span>
+              </div>
+            </div>
+
+            <div class="chart-legend-list" id="chart-legend-list">
+              <!-- Populated by JS -->
+            </div>
           </div>
         </div>
 
@@ -160,6 +197,22 @@
           <span class="severity-badge" id="cluster-severity">ĐANG TẢI</span>
           <h2 class="cluster-title" id="cluster-title">Chọn một cụm để xem phân tích</h2>
           <p class="cluster-stats" id="cluster-stats">0 lượt hỏi · 0 học viên duy nhất</p>
+        </div>
+
+        <!-- Slide OCR Grounding Detail Box -->
+        <div class="slide-ocr-card" id="slide-ocr-box">
+          <div class="ocr-header">
+            <i class="ri-slideshow-3-fill"></i>
+            <span id="ocr-slide-title">Khớp Slide Tài Liệu Môn Học (Slide OCR RAG)</span>
+          </div>
+          <div class="ocr-body">
+            <div class="ocr-meta-row">
+              <span class="ocr-tag" id="ocr-lecture-tag">Chưa chọn cụm</span>
+              <span class="ocr-tag page" id="ocr-page-tag">Trang --</span>
+            </div>
+            <p class="ocr-concept" id="ocr-concept-txt">Chọn cụm trên bản đồ để xem trang slide OCR tương ứng.</p>
+            <div class="ocr-excerpt" id="ocr-text-snippet">---</div>
+          </div>
         </div>
 
         <!-- AI Lesson Recommendation Box -->
@@ -211,7 +264,7 @@
         </div>
         <div>
           <h4>AI Teacher Copilot</h4>
-          <span class="chat-status-txt">Trợ lý Phân tích Dữ liệu Lớp học & Giáo án</span>
+          <span class="chat-status-txt">Trợ lý Phân tích Dữ liệu Lớp học & Giáo án (RAG Slide Grounding)</span>
         </div>
       </div>
       <button class="chat-close-btn" id="btn-close-chat"><i class="ri-close-line"></i></button>
@@ -222,6 +275,7 @@
       <span class="prompts-label">Gợi ý truy vấn nhanh:</span>
       <div class="quick-prompts-scroll">
         <button class="prompt-chip" data-prompt="miss">🎯 Bài giảng của tôi bị miss phần nào?</button>
+        <button class="prompt-chip" data-prompt="slide-details">📄 Chi tiết Slide OCR khớp với rào cản?</button>
         <button class="prompt-chip" data-prompt="top-questions">💬 Câu hỏi nào được hỏi nhiều nhất ở cụm này?</button>
         <button class="prompt-chip" data-prompt="quiz">📝 Gợi ý 3 câu hỏi Quiz ôn tập cho buổi Live</button>
         <button class="prompt-chip" data-prompt="summary">📊 Tóm tắt chủ đề được quan tâm nhất</button>
@@ -241,7 +295,7 @@
 
     <!-- Chat Input Area -->
     <div class="chat-input-area">
-      <input type="text" id="chat-input" placeholder="Hỏi AI về bài giảng, câu hỏi của học viên hay lỗ hổng..." />
+      <input type="text" id="chat-input" placeholder="Hỏi AI về bài giảng, slide trang bao nhiêu, nội dung yếu..." />
       <button class="btn-send-chat" id="btn-send-chat"><i class="ri-send-plane-fill"></i></button>
     </div>
   </div>
@@ -251,6 +305,7 @@
     <i class="ri-checkbox-circle-fill"></i> <span id="toast-message">Đã cập nhật bài giảng vào Slide!</span>
   </div>
 
-  <script src="app.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
