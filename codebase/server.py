@@ -3,13 +3,36 @@ import socketserver
 import os
 import json
 import sys
+import time
+import uuid
+import logging
+from pathlib import Path
 from functools import partial
 
-PORT = 8000
 WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CODEBASE_DIR = os.path.join(WORKSPACE_DIR, "codebase")
 
-# Load .env variables into environment
+if WORKSPACE_DIR not in sys.path:
+    sys.path.insert(0, WORKSPACE_DIR)
+
+import db
+import tutor
+import clustering
+
+PORT = 8000
+LOGS_DIR = os.path.join(WORKSPACE_DIR, "logs")
+os.makedirs(LOGS_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOGS_DIR, "vlearn-runtime.log")
+
+# Setup runtime logger
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] [ReqID: %(request_id)s] %(message)s"
+)
+logger = logging.getLogger("vlearn-runtime")
+
+
 def load_dotenv():
     env_file = os.path.join(WORKSPACE_DIR, ".env")
     if os.path.exists(env_file):
@@ -22,15 +45,37 @@ def load_dotenv():
 
 load_dotenv()
 
-class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
+
+class VLearnStarletteServerHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        kwargs["directory"] = CODEBASE_DIR
+        super().__init__(*args, **kwargs)
+
+    def log_runtime(self, msg: str, req_id: str = None, level: str = "info"):
+        req_id = req_id or str(uuid.uuid4())[:8]
+        extra = {"request_id": req_id}
+        if level == "error":
+            logger.error(msg, extra=extra)
+        else:
+            logger.info(msg, extra=extra)
+
     def do_GET(self):
+        start_time = time.time()
+        req_id = str(uuid.uuid4())[:8]
         url_path = self.path.split('?')[0]
+
+        self.log_runtime(f"GET {url_path}", req_id=req_id)
+
         if url_path == '/api/health':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "service": "VLearn Tutor & Topic Interest Map Server"}, ensure_ascii=False).encode('utf-8'))
+            self.wfile.write(json.dumps({
+                "status": "ok",
+                "service": "VLearn Tutor & Topic Interest Map Server",
+                "timing_ms": round((time.time() - start_time) * 1000, 2)
+            }, ensure_ascii=False).encode('utf-8'))
             return
 
         if url_path in ['/admin', '/admin/']:
@@ -43,95 +88,106 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             cfg_data = {
                 "has_key": bool(os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")),
+                "has_voyage_key": bool(os.getenv("VOYAGE_API_KEY")),
                 "model": os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
                 "base_url": os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
             }
             self.wfile.write(json.dumps(cfg_data, ensure_ascii=False).encode('utf-8'))
             return
 
+        if url_path == '/api/clusters':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            conn = db.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM clusters ORDER BY is_out_of_scope ASC, percentage DESC")
+            rows = cursor.fetchall()
+            conn.close()
+            clusters = []
+            for r in rows:
+                c_dict = dict(r)
+                c_dict["evidence"] = json.loads(c_dict.get("evidence_json", "[]"))
+                clusters.append(c_dict)
+            self.wfile.write(json.dumps({"status": "success", "clusters": clusters}, ensure_ascii=False).encode('utf-8'))
+            return
+
         return super().do_GET()
 
     def do_POST(self):
+        start_time = time.time()
+        req_id = str(uuid.uuid4())[:8]
         url_path = self.path.split('?')[0]
-        if url_path in ['/api/recluster', '/api/scan']:
+
+        self.log_runtime(f"POST {url_path}", req_id=req_id)
+
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else "{}"
+        req_json = json.loads(body) if body else {}
+
+        if url_path in ['/api/tutor', '/api/agent', '/api/chat']:
             try:
-                if CODEBASE_DIR not in sys.path:
-                    sys.path.insert(0, CODEBASE_DIR)
-                import process_chatlog
-                process_chatlog.process_vlearn_chatlogs()
+                user_id = req_json.get("user_id", "anon_user")
+                day_code = req_json.get("day_code", "Day1")
+                page = int(req_json.get("page", 1))
+                selected_text = req_json.get("selected_text", "")
+                question = req_json.get("prompt") or req_json.get("query") or req_json.get("question") or ""
+
+                res = tutor.ask_tutor(user_id, day_code, page, selected_text, question)
+                res["timing_ms"] = round((time.time() - start_time) * 1000, 2)
 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                res_data = {
-                    "status": "success",
-                    "message": "Real AI Re-Clustering & Log Scanning completed! LogScannerTool updated dataset."
-                }
-                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
+                self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
             except Exception as e:
-                print("Error during real re-cluster:", e)
+                self.log_runtime(f"Error in /api/tutor: {e}", req_id=req_id, level="error")
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                res_data = {"status": "error", "message": str(e)}
-                self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
 
-        elif url_path in ['/api/agent', '/api/chat']:
+        elif url_path in ['/api/recluster', '/api/scan']:
             try:
-                content_length = int(self.headers.get('Content-Length', 0))
-                body = self.rfile.read(content_length).decode('utf-8')
-                req_json = json.loads(body) if body else {}
-
-                user_prompt = req_json.get("prompt") or req_json.get("query") or ""
-                
-                api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
-
-                if api_key:
-                    if WORKSPACE_DIR not in sys.path:
-                        sys.path.insert(0, WORKSPACE_DIR)
-                    from providers import make_provider
-                    from tools import to_openai_tools
-                    from chat import run_model_tool_loop
-
-                    provider_name = "openrouter" if os.getenv("OPENROUTER_API_KEY") else "openai"
-                    provider = make_provider(provider_name)
-                    tools = to_openai_tools()
-
-                    sys_msg = {
-                        "role": "system",
-                        "content": (
-                            "Bạn là AI Teacher Copilot Agent sử dụng các Agent Tools để phân tích dữ liệu 1.261 chatlogs "
-                            "và slide bài giảng VLearn. Bạn có thể sử dụng các công cụ slide_ocr_search_tool, metric_calculator_tool, "
-                            "log_scanner_tool để tra cứu thông tin và trả lời trực tiếp cho người dùng."
-                        )
-                    }
-                    user_msg = {"role": "user", "content": user_prompt}
-                    loop_result = run_model_tool_loop(
-                        provider=provider,
-                        messages=[sys_msg, user_msg],
-                        tools=tools,
-                        model=os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
-                        max_tool_rounds=3
-                    )
-                    ai_text = loop_result.get("assistant_text", "Đã xử lý xong truy vấn.")
-                    res_payload = {"status": "success", "response": ai_text, "details": loop_result}
-                else:
-                    if WORKSPACE_DIR not in sys.path:
-                        sys.path.insert(0, WORKSPACE_DIR)
-                    import agent
-                    copilot_agent = agent.VLearnCopilotAgent(WORKSPACE_DIR)
-                    res_payload = copilot_agent.run(user_prompt)
+                res = clustering.perform_clustering()
+                res["timing_ms"] = round((time.time() - start_time) * 1000, 2)
 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                self.wfile.write(json.dumps(res_payload, ensure_ascii=False).encode('utf-8'))
-
+                self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
             except Exception as e:
-                print("Error executing Agent Pipeline:", e)
+                self.log_runtime(f"Error in /api/recluster: {e}", req_id=req_id, level="error")
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+
+        elif url_path == '/api/clusters/rename':
+            try:
+                cluster_id = req_json.get("cluster_id")
+                new_label = req_json.get("new_label")
+                if cluster_id and new_label:
+                    conn = db.get_db_connection()
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE clusters SET label = ? WHERE id = ?", (new_label, cluster_id))
+                    conn.commit()
+                    conn.close()
+                    res = {"status": "success", "message": f"Renamed cluster {cluster_id} to '{new_label}'"}
+                else:
+                    res = {"status": "error", "message": "Missing cluster_id or new_label"}
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(res, ensure_ascii=False).encode('utf-8'))
+            except Exception as e:
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
@@ -147,10 +203,16 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
 
+
 if __name__ == "__main__":
+    db.init_db()
+    clustering.start_background_clustering(20)
+
     os.chdir(CODEBASE_DIR)
     socketserver.TCPServer.allow_reuse_address = True
-    handler = partial(RealAIGapMapHandler, directory=CODEBASE_DIR)
+    handler = VLearnStarletteServerHandler
     with socketserver.TCPServer(("", PORT), handler) as httpd:
-        print(f"Serving REAL AI GapMap Server with Live Re-Clustering Backend at http://localhost:{PORT}")
+        print(f"Serving VLearn Tutor & Topic Interest Map Server at http://127.0.0.1:{PORT}")
+        print(f"Admin Dashboard available at http://127.0.0.1:{PORT}/admin")
+        print(f"Health Check available at http://127.0.0.1:{PORT}/api/health")
         httpd.serve_forever()
