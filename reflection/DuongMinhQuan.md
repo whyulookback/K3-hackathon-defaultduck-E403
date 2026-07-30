@@ -1,16 +1,17 @@
-# Reflection Cá Nhân — Đường Minh Quân (Agent & Data Architecture Lead)
+# Reflection Cá Nhân — Đường Minh Quân (Data Architecture & Clustering Lead)
 
 - **Thông tin cá nhân:** Đường Minh Quân — Mã số học viên: `2A202601903`
-- **Vai trò trong nhóm:** thiết kế hệ thống Agent Tools, xử lý dữ liệu chatlog thực tế, viết thuật toán phân cụm
-theo mã slide và trang
+- **Vai trò trong nhóm:** Data Architecture & Prompt Engineer, chịu trách nhiệm xây dựng thuật toán phân cụm liên tục (Continuous Clustering), thiết kế System Prompt và xử lý tách cụm out-of-scope.
 
 - **Phần công việc cụ thể:**
-  - **Thiết kế Agent với các Tools tự động:** Phát triển kiến trúc AI Agent bao gồm `LogScannerTool` (tự động quét & nạp chatlog mới), `MetricCalculatorTool` (tính toán độ nghiêm trọng & tỉ lệ kẹt kiến thức), và `SlideOCRSearchTool` (RAG Context Grounding khớp nội dung OCR slide).
-  - **Phân cụm dữ liệu theo Mã Slide & Trang:** Xử lý 1.261 chatlog thực tế (`chat_history_anonymized_for_hackathon.csv`), loại bỏ nhiễu và phân cụm chính xác theo **Mã Slide (`day_code`) + Khoảng trang (`citations/Trang X`)** dựa trên cấu trúc bài giảng thay vì gom cụm ngữ nghĩa rời rạc.
+  - **Thuật toán Phân cụm Liên tục (Continuous Clustering Engine):** Phát triển tiến trình chạy nền 20s kết hợp Voyage embedding với Spherical K-Means để gom cụm ngữ nghĩa `question + selected_text + tutor_answer` tự động khi có dữ liệu chatlog mới.
+  - **Tách cụm Out-of-scope (Lọc nhiễu):** Thiết kế logic lọc `tutor_status == out_of_scope`, phân tách các câu hỏi về học phí, deadline, link slide vào cụm "Ngoài phạm vi khóa học" riêng biệt, giúp dữ liệu phân tích chuyên môn của giảng viên luôn sạch.
+  - **Prompt Engineering & AI Labeling:** Thiết kế System Prompts cho `gpt-4o-mini` để tự động đặt tên cụm (5-7 từ), tóm tắt tín hiệu chính, tính độ nghiêm trọng (Severity: CRITICAL, HIGH, MEDIUM, LOW) và đề xuất lộ trình giảng dạy bổ trợ (AI Recommendation).
+  - **Human-in-the-loop & Cache Management:** Xây dựng API và cơ chế cache lưu đè tên cụm khi Giảng viên/TA đổi tên thủ công (`rename_cluster`) hoặc đưa cụm vào agenda buổi sau.
 
 - **AI hỗ trợ thế nào:**
-  - Sử dụng AI Coding Assistant để hỗ trợ tối ưu các biểu thức Regex trích xuất chính xác chỉ số trang (`Trang X-Y`) từ 1.261 dòng chatlog tự do.
-  - Hỗ trợ viết Prompt System cho AI Copilot đóng vai trò Trợ lý Giảng viên.
-- **Bài học từ case fail hoặc thách thức:**
-  - **Thách thức 1 (Tái định hình Logic Gom Cụm):** Ban đầu hệ thống định phân cụm thuần ngữ nghĩa theo từ khóa, nhưng kết quả cho thấy Giảng viên không biết rõ học viên đang kẹt ở trang slide nào của buổi học. Nhóm đã điều chỉnh thuật toán sang gom cụm theo **Mã Slide (`day_code`) + Khoảng trang**, giúp Giảng viên ngay lập tức nhận biết lỗ hổng kiến thức thuộc trang slide nào để chuẩn bị giáo án cho buổi Live Session tiếp theo.
+  - Dùng AI Coding Assistant để hỗ trợ viết và tinh chỉnh các biểu thức Regex bóc tách trang slide từ 1.261 dòng chatlog tự do.
+  - Dùng AI kiểm thử và tối ưu độ dài Prompt để giảm thiểu tối đa rủi ro OpenRouter trả về JSON ngắt chuỗi.
 
+- **Bài học từ case fail hoặc thách thức:**
+  - **Thách thức về gom cụm dữ liệu:** Ban đầu nếu gom cụm thuần ngữ nghĩa câu hỏi, các câu hỏi hậu cần (deadline, link) sẽ bị hòa lẫn vào cụm kiến thức làm giảng viên bị rối. Việc tách riêng luồng `out_of_scope` dựa trên trạng thái trả lời của Tutor giúp bản đồ tri thức cực kỳ sạch sẽ và mang lại giá trị thực tế cao.
