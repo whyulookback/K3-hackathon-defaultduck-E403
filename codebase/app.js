@@ -1,6 +1,6 @@
 /**
  * VLearn Class Knowledge Gap Map - Interactive Prototype Application (CP2)
- * Handles Heatmap rendering, Cluster Inspector, Evidence Chatlog Stream,
+ * Handles Heatmap rendering, Topic Donut Chart, Cluster Inspector, Evidence Chatlog Stream,
  * Time filtering, AI Re-clustering Simulation, AI Teacher Copilot Chatbot, and Theme Switcher (Dark/Light mode).
  */
 
@@ -13,7 +13,7 @@ const clustersData = [
     percentage: 34.2,
     severity: "CRITICAL",
     color: "#ef4444",
-    glow: "rgba(239, 68, 68, 0.25)",
+    glow: "rgba(239, 68, 68, 0.35)",
     aiRecommendation: "⚠️ **CẢNH BÁO LẬP BÀI GIẢNG:** Dành 30 phút đầu buổi Live tới demo Live Fix lỗi dotenv & async API Key handling trước khi chuyển sang Prompt Chaining. Có 342/1,000 học viên đang kẹt rào cản này!",
     chatlogs: [
       { user: "Học viên #842", time: "10 phút trước", text: "Thầy ơi em pass API Key vào `.env` rồi mà lúc gọi <span class='highlight-key'>async await</span> toàn báo <span class='highlight-key'>401 Unauthorized</span> là sao ạ?" },
@@ -30,7 +30,7 @@ const clustersData = [
     percentage: 25.4,
     severity: "HIGH",
     color: "#f97316",
-    glow: "rgba(249, 115, 22, 0.25)",
+    glow: "rgba(249, 115, 22, 0.3)",
     aiRecommendation: "💡 **Đề xuất Giáo án:** Hướng dẫn kỹ thuật Batching Chunk Size (512 tokens) & giải phóng Memory khi Ingest dataset > 10.000 dòng trên ChromaDB/FAISS.",
     chatlogs: [
       { user: "Học viên #312", time: "30 phút trước", text: "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn ạ?" },
@@ -45,7 +45,7 @@ const clustersData = [
     percentage: 12.0,
     severity: "MEDIUM",
     color: "#eab308",
-    glow: "rgba(234, 179, 8, 0.2)",
+    glow: "rgba(234, 179, 8, 0.25)",
     aiRecommendation: "📘 **Nội dung bổ trợ:** Nhắc lại cú pháp RunnablePassthrough() trong LangChain Expression Language (LCEL) ở 10 phút cuối buổi.",
     chatlogs: [
       { user: "Học viên #099", time: "15 phút trước", text: "Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?" },
@@ -84,9 +84,15 @@ const clustersData = [
 
 // State
 let selectedClusterId = "cluster-1";
+let currentViewMode = "grid"; // 'grid' or 'chart'
 
 // DOM Elements
 const heatmapGrid = document.getElementById("heatmap-grid");
+const topicChartView = document.getElementById("topic-chart-view");
+const chartBarsList = document.getElementById("chart-bars-list");
+const btnModeGrid = document.getElementById("btn-mode-grid");
+const btnModeChart = document.getElementById("btn-mode-chart");
+
 const inspectorPanel = document.getElementById("inspector-panel");
 const clusterSeverity = document.getElementById("cluster-severity");
 const clusterTitle = document.getElementById("cluster-title");
@@ -117,8 +123,10 @@ const themeText = document.getElementById("theme-text");
 function initDashboard() {
   initTheme();
   renderHeatmap();
+  renderTopicDonutChart();
   selectCluster(selectedClusterId);
   setupEventListeners();
+  setupViewModeSwitcher();
   setupChatbot();
 }
 
@@ -127,24 +135,47 @@ function initTheme() {
   const savedTheme = localStorage.getItem("vlearn-theme") || "dark";
   applyTheme(savedTheme);
 
-  btnThemeToggle.addEventListener("click", () => {
-    const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    applyTheme(newTheme);
-    localStorage.setItem("vlearn-theme", newTheme);
-    showToast(`Đã chuyển sang chế độ: ${newTheme === "light" ? "Sáng (Light Mode)" : "Tối (Dark Mode)"}`);
-  });
+  if (btnThemeToggle) {
+    btnThemeToggle.addEventListener("click", () => {
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      applyTheme(newTheme);
+      localStorage.setItem("vlearn-theme", newTheme);
+      showToast(`Đã chuyển sang chế độ: ${newTheme === "light" ? "Sáng (Light Mode)" : "Tối (Dark Mode)"}`);
+    });
+  }
 }
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  if (theme === "light") {
-    themeIcon.className = "ri-moon-line";
-    themeText.textContent = "Dark Mode";
-  } else {
-    themeIcon.className = "ri-sun-line";
-    themeText.textContent = "Light Mode";
+  if (themeIcon && themeText) {
+    if (theme === "light") {
+      themeIcon.className = "ri-moon-line";
+      themeText.textContent = "Dark Mode";
+    } else {
+      themeIcon.className = "ri-sun-line";
+      themeText.textContent = "Light Mode";
+    }
   }
+}
+
+// View Mode Switcher (Grid vs Donut Chart)
+function setupViewModeSwitcher() {
+  btnModeGrid.addEventListener("click", () => {
+    currentViewMode = "grid";
+    btnModeGrid.classList.add("active");
+    btnModeChart.classList.remove("active");
+    heatmapGrid.classList.remove("hidden");
+    topicChartView.classList.add("hidden");
+  });
+
+  btnModeChart.addEventListener("click", () => {
+    currentViewMode = "chart";
+    btnModeChart.classList.add("active");
+    btnModeGrid.classList.remove("active");
+    topicChartView.classList.remove("hidden");
+    heatmapGrid.classList.add("hidden");
+  });
 }
 
 // Render Heatmap Grid
@@ -180,6 +211,58 @@ function renderHeatmap() {
   });
 }
 
+// Render Circular / Donut Chart (Biểu Đồ Tròn Phân Bổ Chủ Đề)
+function renderTopicDonutChart() {
+  chartBarsList.innerHTML = "";
+
+  // Build Conic Gradient string for Donut Chart
+  let cumulativePct = 0;
+  const gradientStops = clustersData.map(c => {
+    const start = cumulativePct;
+    cumulativePct += c.percentage;
+    return `${c.color} ${start}% ${cumulativePct}%`;
+  }).join(", ");
+
+  const donutContainer = document.createElement("div");
+  donutContainer.className = "donut-chart-layout";
+
+  donutContainer.innerHTML = `
+    <!-- Donut Circle Visual -->
+    <div class="donut-visual-box">
+      <div class="donut-circle" style="background: conic-gradient(${gradientStops});">
+        <div class="donut-hole">
+          <span class="donut-center-val">1,542</span>
+          <span class="donut-center-lbl">Chatlog Tín Hiệu</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donut Legend Side List -->
+    <div class="donut-legend-list">
+      ${clustersData.map(cluster => `
+        <div class="donut-legend-item ${cluster.id === selectedClusterId ? 'active-legend' : ''}" data-id="${cluster.id}">
+          <div class="legend-dot" style="background-color: ${cluster.color}; shadow: 0 0 8px ${cluster.glow};"></div>
+          <div class="legend-info">
+            <span class="legend-title">${cluster.name}</span>
+            <span class="legend-sub">${cluster.studentCount} câu hỏi · <strong>${cluster.percentage}%</strong></span>
+          </div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  chartBarsList.appendChild(donutContainer);
+
+  // Bind click events on Legend items
+  const legendItems = donutContainer.querySelectorAll(".donut-legend-item");
+  legendItems.forEach(item => {
+    item.addEventListener("click", () => {
+      const id = item.getAttribute("data-id");
+      selectCluster(id);
+    });
+  });
+}
+
 // Select & Inspect Cluster
 function selectCluster(clusterId) {
   selectedClusterId = clusterId;
@@ -193,6 +276,16 @@ function selectCluster(clusterId) {
       block.classList.add("active-block");
     } else {
       block.classList.remove("active-block");
+    }
+  });
+
+  // Highlight active item in Donut Legend
+  const legendItems = document.querySelectorAll(".donut-legend-item");
+  legendItems.forEach(item => {
+    if (item.getAttribute("data-id") === clusterId) {
+      item.classList.add("active-legend");
+    } else {
+      item.classList.remove("active-legend");
     }
   });
 
@@ -260,6 +353,7 @@ function setupEventListeners() {
     if (newTitle && newTitle.trim() !== "") {
       cluster.name = newTitle.trim();
       renderHeatmap();
+      renderTopicDonutChart();
       selectCluster(cluster.id);
       showToast("✏️ Đã cập nhật tên cụm kiến thức mới!");
     }
@@ -301,7 +395,6 @@ function sendUserMessage() {
   appendMessage("user", text);
   chatInput.value = "";
 
-  // Process AI Response based on context
   setTimeout(() => {
     generateAIResponse(text);
   }, 600);
