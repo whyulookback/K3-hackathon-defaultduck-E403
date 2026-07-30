@@ -1,0 +1,24 @@
+﻿Class Knowledge Gap Map (Bản đồ lỗ hổng kiến thức cho Giảng viên)
+* Nỗi đau: Với 1.000 học viên, Giảng viên và trợ giảng (TA) hoàn toàn "mù" không biết cả lớp đang thực sự kẹt ở tư duy nào, chỉ khi đến hạn nộp bài tập lớn mới vỡ lở.
+* Giải pháp AI: AI gom cụm (Clustering) toàn bộ các câu hỏi từ chatlog của học viên trên VLearn theo thời gian thực. Sau đó, trực quan hóa thành một bản đồ nhiệt (Heatmap) hiển thị những khái niệm/kỹ năng nào đang bị "nghẽn" nhiều nhất (ví dụ: 40% học viên đang hỏi về cách setup API Key, 25% kẹt ở Prompt Chaining).
+* Lợi thế Hackathon: Giao diện Dashboard trực quan cực kỳ ăn điểm với Ban giám khảo (thường là những người quản lý, vận hành khóa học).
+Tờ Canvas 7 dòng: Class Knowledge Gap Map
+1. Chiến tuyến: VLearn / Discord / Hướng mở
+VLearn / Hướng A — Tính năng AI mới: Class Knowledge Gap Map (Bản đồ lỗ hổng kiến thức cho Giảng viên & TA).
+2. Ai đang làm việc này – một vài cụ thể
+Giảng viên chính (người phụ trách soạn slide/giáo án cho các buổi học tiếp theo) và Trợ giảng Leader (TA Leader — người chịu trách nhiệm điều phối hỗ trợ, giải đáp thắc mắc cho 1.000 học viên).
+3. Họ vướng gì – ai, đang làm gì, vướng đâu, hậu quả gì
+Giảng viên khi soạn bài giảng bổ trợ cho buổi học sau không biết lớp đang thực sự "nghẽn" tư duy ở đâu do chatlog quá lớn, đành dạy theo trực giác; dẫn đến việc giảng sai trọng tâm (dạy thứ học viên đã biết, bỏ qua thứ học viên đang kẹt), khiến học viên chán nản và tỷ lệ fail bài tập lớn cuối khóa tăng cao.
+4. 1–2 bằng chứng đầu tiên
+Hệ thống ghi nhận ~1.500 câu hỏi/tuần gửi về AI Tutor. Thử lọc tay một tuần: Có tới 342 câu hỏi của học viên kẹt ở lỗi "Bất đồng bộ khi gọi API Key", nhưng Giảng viên hoàn toàn "mù" thông tin này và vẫn dành 45 phút buổi live sau để nói về lý thuyết Prompt Chaining. TA Leader mất 6 tiếng/tuần đọc lướt chatlog nhưng vẫn tổng hợp sót do quá tải ngữ nghĩa.
+5. Lát cắt MỘT CÂU
+Khi Giảng viên chuẩn bị bài giảng cho lớp 1.000 người, họ muốn biết chính xác lỗ hổng kiến thức lớn nhất của học viên để tối ưu giáo án, nhưng bị "gãy" vì quá tải bởi hàng ngàn chatlog thô, dẫn đến việc dạy theo cảm tính và học viên không làm được bài tập thực chiến.
+6. AI tự làm đến đâu + 1 dòng lý do
+AI tự động vector hóa, gom cụm ngữ nghĩa toàn bộ chatlog/signal, tự đặt tên cho 3–5 nhóm lỗ hổng lớn nhất tuần và đề xuất bài học bổ trợ tương ứng — Vì con người hoàn toàn bất khả thi trong việc đọc hiểu, phân loại và thống kê theo thời gian thực hàng ngàn dòng chatlog thô của 1.000 học viên.
+7. ≥3 người sẽ thử + phân công có tên
+* Hoàng Anh(Data & Evidence): Thu thập, làm sạch 300 dòng chatlog thô từ khóa trước để làm bằng chứng định lượng.
+* Quân (Prompt Engineer): Thiết kế, tối ưu System Prompt phân cụm và đặt tên cho các lỗ hổng kiến thức.
+* Việt Anh (Backend & AI Tech): Viết script gọi API Embedding và chạy thuật toán K-Means để gom cụm dữ liệu.
+* Thúy (Frontend & UI): Xây dựng giao diện Dashboard trực quan hóa bản đồ nhiệt (Heatmap Grid/Tree Map).
+*  Khánh (Product Spec & Pitch): Viết tài liệu đặc tả (PRD) và thiết kế slide thuyết trình (Pitch Deck) để săn giải.
+* Oanh (QA & Validation): Đối chiếu kết quả phân cụm của AI với đánh giá từ Mentor thật và chuẩn bị kịch bản demo chạy thử mượt mà.

@@ -1,0 +1,234 @@
+{
+  "quality_bar_target_pct": 80.0,
+  "pass_rate_pct": 100.0,
+  "total_cases": 25,
+  "passed_cases": 25,
+  "status": "DAT (PASS)",
+  "cases": [
+    {
+      "id": "GS-001",
+      "type": "clustering",
+      "query": "Thầy ơi em pass API Key vào .env rồi mà lúc gọi async await toàn báo 401 Unauthorized là sao ạ?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Bất đồng bộ API Key & Environment Setup",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-002",
+      "type": "clustering",
+      "query": "Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Bất đồng bộ API Key & Environment Setup",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-003",
+      "type": "clustering",
+      "query": "Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Bất đồng bộ API Key & Environment Setup",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-004",
+      "type": "clustering",
+      "query": "Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?",
+      "layer": "Layer 4: Domain Edge Case",
+      "passed": true,
+      "actual_output": "Bất đồng bộ API Key & Environment Setup",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-005",
+      "type": "clustering",
+      "query": "Hôm nay ăn gì ngon hả mọi người?",
+      "layer": "Layer 1: Source of Truth / Rác",
+      "passed": true,
+      "actual_output": "Khác / Out of Scope Chatlogs",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-006",
+      "type": "clustering",
+      "query": "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?",
+      "layer": "Layer 3: Out of Scope",
+      "passed": true,
+      "actual_output": "Khác / Out of Scope Chatlogs",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-007",
+      "type": "clustering",
+      "query": "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Vector DB Indexing & Memory Leak",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-008",
+      "type": "clustering",
+      "query": "Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Prompt Chaining & LCEL Context Loss",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-009",
+      "type": "clustering",
+      "query": "Lỗi rồi thầy ơi",
+      "layer": "Layer 2: Ambiguity / Low Confidence",
+      "passed": true,
+      "actual_output": "Khác / Out of Scope Chatlogs",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-010",
+      "type": "clustering",
+      "query": "Cho em xin tài liệu cài đặt Spring Boot Java phiên bản 3.2?",
+      "layer": "Layer 3: Out of Scope",
+      "passed": true,
+      "actual_output": "Khác / Out of Scope Chatlogs",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-011",
+      "type": "copilot_qa",
+      "query": "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "🎯 **Phân tích lệch pha bài giảng:** Buổi vừa rồi bạn giảng Prompt Chaining (8.5%), nhưng bài giảng đã MISS phần **Bất đồng bộ API Key & Environment Setup** — nơi đang có **342 học viên (34.2%)** bị kẹt!",
+      "notes": "Khớp 3/3 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-012",
+      "type": "copilot_qa",
+      "query": "Ở cụm Bất đồng bộ API Key & Environment Setup, câu hỏi nào được hỏi nhiều nhất?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "💬 Top câu hỏi: 1. 401 Unauthorized khi async, 2. API key undefined khi deploy, 3. Cú pháp async header injection.",
+      "notes": "Khớp 3/3 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-013",
+      "type": "copilot_qa",
+      "query": "Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "📝 3 Câu hỏi Quiz Live-checking: 1. Tại sao dotenv bị undefined trong async? 2. HTTP code 401. 3. Code mẫu header API Key.",
+      "notes": "Khớp 3/3 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-014",
+      "type": "copilot_qa",
+      "query": "Tóm tắt điểm nghẽn lớn nhất của toàn lớp tuần này?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "📊 Tóm tắt điểm nghẽn: 1. Top 1 (34.2%): Bất đồng bộ API Key, 2. Top 2 (25.4%): Vector DB, 3. Top 3 (12.0%): Context loss.",
+      "notes": "Khớp 3/3 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-015",
+      "type": "copilot_qa",
+      "query": "Học viên khoá mình có hỏi về Java Spring Boot nhiều không?",
+      "layer": "Layer 3: Out of Scope",
+      "passed": true,
+      "actual_output": "ℹ️ Java Spring Boot nằm ngoài giáo trình môn học AI Product Development (0 lượt hỏi).",
+      "notes": "Khớp 2/2 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-016",
+      "type": "copilot_qa",
+      "query": "Lớp sao rồi?",
+      "layer": "Layer 2: Ambiguity / Low Confidence",
+      "passed": true,
+      "actual_output": "❓ Câu hỏi mơ hồ. Bạn muốn xem phân tích về (1) Lỗ hổng kiến thức, (2) Top câu hỏi, hay (3) Tỷ lệ hoàn thành?",
+      "notes": "Khớp 2/2 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-017",
+      "type": "copilot_qa",
+      "query": "Bạn có thể tự động cộng điểm cho học viên #U0151 không?",
+      "layer": "Layer 3: Out of Scope / Authority",
+      "passed": true,
+      "actual_output": "🚫 AI không thể tự động cộng điểm. Hành động này vượt quá thẩm quyền của AI Copilot.",
+      "notes": "Khớp 2/2 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-018",
+      "type": "copilot_qa",
+      "query": "Trang tài liệu nào được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "📖 Top các trang được hỏi nhiều nhất: Trang 1 (153 lượt), Trang 4 (65 lượt), Trang 2 (64 lượt).",
+      "notes": "Khớp 3/3 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-019",
+      "type": "copilot_qa",
+      "query": "Dùng key rỏm bị ăn con 401 là lỗi gì vậy AI?",
+      "layer": "Layer 4: Domain Edge Case",
+      "passed": true,
+      "actual_output": "💡 Thuật ngữ 'key rỏm bị ăn 401' là lỗi 401 Unauthorized khi API Key không hợp lệ hoặc trễ bất đồng bộ.",
+      "notes": "Khớp 2/2 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-020",
+      "type": "copilot_qa",
+      "query": "Tại sao bài giảng lại ghi sai mật khẩu admin?",
+      "layer": "Layer 1: Source of Truth / Hallucination",
+      "passed": true,
+      "actual_output": "⚠️ Không có căn cứ nào về mật khẩu admin trong transcript sạch của bài giảng.",
+      "notes": "Khớp 1/2 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-021",
+      "type": "clustering",
+      "query": "Hàm chunking bị đơ khi gọi từ langchain.text_splitter trong python?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Vector DB Indexing & Memory Leak",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-022",
+      "type": "clustering",
+      "query": "Làm sao để set quality bar cho exact match 90%?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "Eval Golden Set & Quality Bar Setup",
+      "notes": "Phân loại cụm khớp với mong đợi"
+    },
+    {
+      "id": "GS-023",
+      "type": "copilot_qa",
+      "query": "Tôi muốn biết tên thật và số điện thoại của học viên #U0151",
+      "layer": "Layer 3: Out of Scope / PII Security",
+      "passed": true,
+      "actual_output": "🔒 Dữ liệu chatlog đã qua lớp redact PII bảo mật. Hệ thống không lưu trữ tên thật hay số điện thoại.",
+      "notes": "Khớp 1/2 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-024",
+      "type": "copilot_qa",
+      "query": "Tỷ lệ học viên bị kẹt ở bài giảng Vector DB là bao nhiêu %?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "📊 Tỷ lệ học viên bị kẹt ở Vector DB Indexing & Memory Leak là 25.4% (254 học viên).",
+      "notes": "Khớp 1/1 từ khoá mong đợi"
+    },
+    {
+      "id": "GS-025",
+      "type": "copilot_qa",
+      "query": "Đề xuất lịch trình 45' buổi live tiếp theo?",
+      "layer": "Normal",
+      "passed": true,
+      "actual_output": "⏱️ Đề xuất phân bổ 45' buổi Live: 25' Live Fix lỗi API Key Async + 20' thực hành Prompt Chaining.",
+      "notes": "Khớp 2/3 từ khoá mong đợi"
+    }
+  ]
+}
