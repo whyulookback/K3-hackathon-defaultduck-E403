@@ -288,10 +288,24 @@ function cacheDOM() {
 function setupApiKeyConfig() {
   updateApiKeyUI();
 
+  // Auto-fetch API status from Python server .env
+  fetch("/api/config")
+    .then(res => res.json())
+    .then(cfg => {
+      if (cfg && cfg.has_key) {
+        if (!openrouterApiKey) {
+          openrouterApiKey = "ENV_KEY_ACTIVE";
+        }
+        if (cfg.model) openrouterModel = cfg.model;
+        updateApiKeyUI();
+      }
+    })
+    .catch(err => console.log("Config fetch note:", err));
+
   if (btnApiKey) {
     btnApiKey.addEventListener("click", () => {
       const current = localStorage.getItem("vlearn_openrouter_key") || (typeof CONFIG !== 'undefined' ? CONFIG.OPENROUTER_API_KEY : "");
-      const key = prompt("🔑 Nhập OpenRouter API Key (sk-or-v1-...) của bạn để chạy AI Real Call khi Demo:\n(Nếu để trống sẽ dùng Data Intelligence Engine sẵn có)", current);
+      const key = prompt("🔑 Nhập OpenRouter API Key (sk-or-v1-...) của bạn để chạy AI Real Call khi Demo:\n(Nếu để trống sẽ dùng API Key từ file .env hoặc Fallback Engine)", current);
       if (key !== null) {
         openrouterApiKey = key.trim();
         localStorage.setItem("vlearn_openrouter_key", openrouterApiKey);
@@ -667,24 +681,10 @@ async function generateAIResponseReal(userText) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  // Real OpenRouter API Call if Key Present
+  // Real OpenRouter API Call if Key Present (either via UI or via server .env proxy)
   if (openrouterApiKey) {
     try {
-      const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.OPENROUTER_BASE_URL) ? CONFIG.OPENROUTER_BASE_URL : "https://openrouter.ai/api/v1";
-      const apiRes = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${openrouterApiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.href,
-          "X-Title": "VLearn AI GapMap"
-        },
-        body: JSON.stringify({
-          model: openrouterModel,
-          messages: [
-            {
-              role: "system",
-              content: `Bạn là AI Teacher Copilot phân tích dữ liệu lớp học theo Mã Slide (day_code) và Trang Slide.
+      const systemPrompt = `Bạn là AI Teacher Copilot phân tích dữ liệu lớp học theo Mã Slide (day_code) và Trang Slide.
 Dữ liệu phân tích thực tế từ 1.261 chatlogs & Slide Grounding:
 - Cụm đang chọn: ${currentCluster.name} (${currentCluster.studentCount} học viên, ${currentCluster.percentage}% tổng thắc mắc).
 - Mã Slide (day_code): ${currentCluster.day_code || 'N/A'}.
@@ -698,22 +698,49 @@ Dữ liệu phân tích thực tế từ 1.261 chatlogs & Slide Grounding:
 Nhiệm vụ của bạn:
 1. Trả lời trực tiếp câu hỏi của Giảng viên một cách ngắn gọn, sắc bén, định dạng markdown đẹp có emoji.
 2. Trích dẫn đúng Tên Slide (mã day_code), Khoảng trang bao nhiêu và Nội dung kiến thức bị nghẽn.
-3. Đưa ra đề xuất khắc phục giáo án cụ thể.`
-            },
-            {
-              role: "user",
-              content: userText
-            }
-          ]
-        })
-      });
-      const data = await apiRes.json();
-      if (chatMessages && chatMessages.contains(typingDiv)) {
-        chatMessages.removeChild(typingDiv);
-      }
-      if (data && data.choices && data.choices[0] && data.choices[0].message) {
-        appendMessage("ai", data.choices[0].message.content);
-        return;
+3. Đưa ra đề xuất khắc phục giáo án cụ thể.
+4. Nếu câu hỏi vượt thẩm quyền (như cộng điểm), hãy từ chối lịch sự. Nếu câu hỏi ngoài giáo trình (như Java Spring Boot), hãy xác nhận không nằm trong bài giảng môn học.`;
+
+      if (openrouterApiKey === "ENV_KEY_ACTIVE") {
+        const proxyRes = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: userText, system: systemPrompt })
+        });
+        const pdata = await proxyRes.json();
+        if (chatMessages && chatMessages.contains(typingDiv)) {
+          chatMessages.removeChild(typingDiv);
+        }
+        if (pdata && pdata.response) {
+          appendMessage("ai", pdata.response);
+          return;
+        }
+      } else {
+        const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.OPENROUTER_BASE_URL) ? CONFIG.OPENROUTER_BASE_URL : "https://openrouter.ai/api/v1";
+        const apiRes = await fetch(`${baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${openrouterApiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": window.location.href,
+            "X-Title": "VLearn AI GapMap"
+          },
+          body: JSON.stringify({
+            model: openrouterModel,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userText }
+            ]
+          })
+        });
+        const data = await apiRes.json();
+        if (chatMessages && chatMessages.contains(typingDiv)) {
+          chatMessages.removeChild(typingDiv);
+        }
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+          appendMessage("ai", data.choices[0].message.content);
+          return;
+        }
       }
     } catch (e) {
       console.log("OpenRouter API call fallback to Data Intelligence Engine.", e);

@@ -65,6 +65,62 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 res_data = {"status": "error", "message": str(e)}
                 self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
+
+        elif self.path == '/api/chat':
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(content_length).decode('utf-8')
+                req_json = json.loads(body) if body else {}
+
+                user_prompt = req_json.get("prompt", "")
+                system_context = req_json.get("system", "Bạn là AI Teacher Copilot phân tích dữ liệu lớp học VLearn.")
+
+                api_key = os.getenv("OPENROUTER_API_KEY", "")
+                model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+
+                if not api_key:
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"error": "No OPENROUTER_API_KEY found in .env"}).encode('utf-8'))
+                    return
+
+                import urllib.request
+                openrouter_req = urllib.request.Request(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "http://localhost:8000",
+                        "X-Title": "VLearn AI GapMap"
+                    },
+                    data=json.dumps({
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_context},
+                            {"role": "user", "content": user_prompt}
+                        ]
+                    }).encode('utf-8')
+                )
+
+                with urllib.request.urlopen(openrouter_req, timeout=15) as resp:
+                    resp_data = json.loads(resp.read().decode('utf-8'))
+                    ai_message = resp_data["choices"][0]["message"]["content"]
+
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"response": ai_message}, ensure_ascii=False).encode('utf-8'))
+
+            except Exception as e:
+                print("Error proxying chat to OpenRouter:", e)
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
         else:
             self.send_error(404, "Endpoint not found")
 
