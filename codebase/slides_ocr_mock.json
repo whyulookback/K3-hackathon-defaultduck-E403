@@ -1,0 +1,152 @@
+{
+  "description": "Mock OCR dataset extracted from vlearn lecture slides mapped by day_code (original slide name) and slide page ranges",
+  "lectures": {
+    "day02-c301": {
+      "lecture_title": "day02-c301: Triển khai Async Call & Quản lý API Key trên Server",
+      "sections": {
+        "1-5": {
+          "section_name": "Mục 1: Biến môi trường .env & Bất đồng bộ API Key",
+          "pages": "Trang 1 - 5",
+          "title": "Xử lý Biến Môi trường .env & Bất đồng bộ trong Node.js/Python",
+          "summary": "Hướng dẫn nạp dotenv.config() đúng thời điểm trước khi thực hiện async fetch API. Khắc phục lỗi 401 Unauthorized khi header bị undefined.",
+          "key_concept": "Bất đồng bộ API Key & dotenv handling (Rào cản kẹt 34.2% học viên)",
+          "ocr_text": "SLIDE 2: ASYNC API KEY LOADING & .ENV SETUP\nLỗi phổ biến: Gọi hàm async fetch API trước khi biến môi trường được load hoàn tất.\nCú pháp chuẩn:\nimport dotenv from 'dotenv';\ndotenv.config(); // Nạp biến môi trường TRƯỚC KHI import client\nconst apiKey = process.env.OPENROUTER_API_KEY;\nif (!apiKey) throw new Error('API Key missing!');",
+          "remediation": "Dành 30 phút đầu buổi Live tới demo Live-coding fix lỗi undefined API Key trong hàm async."
+        },
+        "6-15": {
+          "section_name": "Mục 2: Xử lý Error Code 401 & Rate Limit 429",
+          "pages": "Trang 6 - 15",
+          "title": "Bắt lỗi HTTP 401 vs 429 & Retry Exponential Backoff",
+          "summary": "Định nghĩa mã lỗi HTTP khi API Key hết hạn hoặc trễ bất đồng bộ. Thiết lập Exponential Backoff retry mechanism.",
+          "key_concept": "HTTP Status Code 401 & Exponential Backoff Retry",
+          "ocr_text": "SLIDE 11: HTTP ERROR HANDLING\n- 401 Unauthorized: API Key bị sai, thiếu Header Authorization hoặc nạp trễ bất đồng bộ.\n- 429 Too Many Requests: Rate limit per minute (RPM).",
+          "remediation": "Cung cấp mã mẫu try-catch retry với Exponential Backoff."
+        },
+        "16+": {
+          "section_name": "Mục 3: Triển khai Server-side API Proxy",
+          "pages": "Trang 16+",
+          "title": "Bảo vệ API Key qua Server-side Proxy Route",
+          "summary": "Bảo vệ API Key bằng cách tạo backend route proxy trung gian thay vì gọi trực tiếp từ client-side browser.",
+          "key_concept": "Server-side API Proxy Architecture",
+          "ocr_text": "SLIDE 16: BACKEND PROXY ARCHITECTURE\nBrowser Client ---> Express/FastAPI Backend Proxy (chứa .env Key) ---> LLM Provider API.",
+          "remediation": "Hướng dẫn học viên tạo Express/FastAPI proxy server."
+        }
+      }
+    },
+    "Lecture_material_ms2044ey_k6uor3": {
+      "lecture_title": "Lecture_material_ms2044ey_k6uor3: Vector DB Indexing & Memory Leak khi Chunking",
+      "sections": {
+        "1-5": {
+          "section_name": "Mục 1: Kỹ thuật Chunking & Text Splitting",
+          "pages": "Trang 1 - 5",
+          "title": "Text Chunking Strategy (chunk_size=512, overlap=50)",
+          "summary": "So sánh RecursiveCharacterTextSplitter vs TokenTextSplitter. Thiết lập chunk_size=512 và chunk_overlap=50.",
+          "key_concept": "Chunking Strategy & Overlap Optimization",
+          "ocr_text": "SLIDE 4: CHUNKING STRATEGIES\nRecursiveCharacterTextSplitter: Tách văn bản dựa trên các ký tự phân cách (\\n\\n, \\n, space).\nchunk_size = 512 tokens, chunk_overlap = 50 tokens.",
+          "remediation": "Hướng dẫn visualiser hiển thị vùng overlap giữa các chunk."
+        },
+        "6-15": {
+          "section_name": "Mục 2: Vector DB Indexing & Embedding Similarity Search",
+          "pages": "Trang 6 - 15",
+          "title": "Indexing Vector Store trên ChromaDB / FAISS",
+          "summary": "Tạo HNSW index và Cosine Similarity Distance cho vector search tốc độ cao.",
+          "key_concept": "Vector Indexing & Cosine Distance",
+          "ocr_text": "SLIDE 9: VECTOR DB INDEXING\nKhởi tạo vectorstore = Chroma.from_documents(documents, embeddings, persist_directory='./db').",
+          "remediation": "Minh hoạ câu lệnh query similarity_search_with_score."
+        },
+        "16+": {
+          "section_name": "Mục 3: Tối ưu Memory Leak & Batching Chunk Ingestion",
+          "pages": "Trang 16+",
+          "title": "Giải phóng RAM & Batching Ingestion khi Chunk > 10.000 dòng",
+          "summary": "Giải pháp batching vector insertion khi ingest dataset > 10.000 dòng trên ChromaDB/FAISS. Tránh tràn RAM server.",
+          "key_concept": "Vector DB Memory Leak & Batch Ingestion (Rào cản kẹt 25.4% học viên)",
+          "ocr_text": "SLIDE 18: FAISS & CHROMADB MEMORY OPTIMIZATION\nLỗi Out of Memory (OOM): Ingest cùng lúc hàng chục nghìn vector vào RAM khiến process bị crash.\nGiải pháp Batching: batch_size = 100\nfor i in range(0, len(chunks), batch_size):\n    vector_store.add_texts(chunks[i:i+batch_size])\n    gc.collect()",
+          "remediation": "Dành 15 phút hướng dẫn kỹ thuật db.add_texts(batch_size=100) và gc.collect()."
+        }
+      }
+    },
+    "Lecture_material_ms203vsq_ob7vqp": {
+      "lecture_title": "Lecture_material_ms203vsq_ob7vqp: Prompt Chaining & LangChain Expression Language (LCEL)",
+      "sections": {
+        "1-10": {
+          "section_name": "Mục 1: Cú pháp LCEL & RunnablePassthrough() Context Loss",
+          "pages": "Trang 1 - 10",
+          "title": "Truyền Context qua các node bằng RunnablePassthrough()",
+          "summary": "Truyền dữ liệu giữa các node trong chain bằng RunnableMap và RunnablePassthrough mà không làm trôi context.",
+          "key_concept": "LCEL Context Preservation (Rào cản kẹt 12.0% học viên)",
+          "ocr_text": "SLIDE 3: LANGCHAIN EXPRESSION LANGUAGE (LCEL)\nchain = {\"context\": retriever | format_docs, \"question\": RunnablePassthrough()} | prompt | model | StrOutputParser()",
+          "remediation": "Cần ví dụ minh hoạ RunnableMap truyền 2 biến song song."
+        },
+        "11+": {
+          "section_name": "Mục 2: Prompt Chaining Multi-node & Guardrail Rules",
+          "pages": "Trang 11+",
+          "title": "Chuỗi Prompt Chaining nhiều bước & Kiểm soát Output",
+          "summary": "Kết nối output từ Step 1 (Summarize) làm input cho Step 2 (Question Answering) kèm Guardrail rules.",
+          "key_concept": "Multi-step Sequential Chain",
+          "ocr_text": "SLIDE 12: MULTI-STEP PROMPT CHAINING\nStep 1: ExtractorChain -> Step 2: ReasonerChain -> Step 3: FormatterChain.",
+          "remediation": "Cung cấp mẫu code SequentialChain nâng cao."
+        }
+      }
+    },
+    "Lecture_material_ms2lb2ke_c1je8j": {
+      "lecture_title": "Lecture_material_ms2lb2ke_c1je8j: Cấu hình Environment Variable & Authentication Middleware",
+      "sections": {
+        "1-15": {
+          "section_name": "Mục 1: Quản lý Biến Môi trường & Security Middleware",
+          "pages": "Trang 1 - 15",
+          "title": "Quản lý .env & Authentication Route Protection",
+          "summary": "Viết Middleware kiểm tra JWT / Bearer Token trước khi cho phép client truy cập API endpoint.",
+          "key_concept": "Auth Middleware & Route Protection",
+          "ocr_text": "SLIDE 8: MIDDLEWARE AUTHENTICATION\nCheck req.headers.authorization. Trả về 401 nếu thiếu token.",
+          "remediation": "Hướng dẫn tạo Auth Middleware trong Express/FastAPI."
+        }
+      }
+    },
+    "Lecture_material_ms4ahenz_7cpqa2": {
+      "lecture_title": "Lecture_material_ms4ahenz_7cpqa2: LLM Application Architecture & Guardrails Setup",
+      "sections": {
+        "1-30": {
+          "section_name": "Mục 1: System Prompt Design & Anti-Jailbreak Guardrails",
+          "pages": "Trang 1 - 30",
+          "title": "Thiết lập System Prompt An toàn & Chống Jailbreak",
+          "summary": "Ngăn ngừa Jailbreak, System Override và định hình cá tính cho AI Assistant.",
+          "key_concept": "System Prompt Guardrails & Boundaries",
+          "ocr_text": "SLIDE 15: SYSTEM PROMPT GUARDRAILS\n1. Role definition: AI Assistant môn AI Product.\n2. Boundaries: Từ chối câu hỏi ngoài phạm vi.",
+          "remediation": "Cung cấp mẫu Guardrail System Prompt tiêu chuẩn."
+        }
+      }
+    },
+    "New learning material": {
+      "lecture_title": "New learning material: Kiến trúc Mô hình Ngôn ngữ (LLM), Context Window & MoE Architecture",
+      "sections": {
+        "1-5": {
+          "section_name": "Mục 1: Tổng quan Mô hình LLM, Pre-training, SFT & RLHF/DPO",
+          "pages": "Trang 1 - 5",
+          "title": "Quy trình huấn luyện LLM: Pre-training → SFT → RLHF/DPO",
+          "summary": "3 giai đoạn huấn luyện LLM: Tiền huấn luyện trên hàng nghìn tỷ token, SFT theo ví dụ mẫu, và RLHF/DPO tinh chỉnh theo phản hồi con người.",
+          "key_concept": "Quy trình huấn luyện LLM (Pre-training, SFT, RLHF)",
+          "ocr_text": "SLIDE 2: LLM TRAINING PIPELINE\n1. Pre-training: Đọc hàng nghìn tỷ token học ngôn ngữ.\n2. SFT (Supervised Fine-Tuning): Học trả lời theo ví dụ mẫu.\n3. RLHF / DPO: Tinh chỉnh theo phản hồi con người.",
+          "remediation": "Cung cấp sơ đồ tổng quan 3 bước huấn luyện mô hình ngôn ngữ lớn."
+        },
+        "6-25": {
+          "section_name": "Mục 2: Phân loại dòng LLM (GPT, Claude, Kimi) & Kiến trúc Transformer",
+          "pages": "Trang 6 - 25",
+          "title": "Các dòng LLM phổ biến & Nguyên lý Transformer",
+          "summary": "So sánh các dòng LLM chính (GPT, Claude, Kimi) và nguyên lý bộ não nền Transformer.",
+          "key_concept": "Các dòng LLM & Bộ não Transformer",
+          "ocr_text": "SLIDE 12: DÒNG MÔ HÌNH NGÔN NGỮ LỚN\nGPT-4, Claude 3.5, Kimi K3 - Mỗi mô hình có tập dữ liệu và bộ não nền Transformer riêng.",
+          "remediation": "So sánh điểm mạnh và weak-spot của từng dòng mô hình."
+        },
+        "26+": {
+          "section_name": "Mục 3: Context Window (Bàn làm việc), Autoregressive & MoE 2.800B Params",
+          "pages": "Trang 26+",
+          "title": "Giới hạn Context Window (Bàn làm việc 128K/1M token), Sinh từ Autoregressive & MoE",
+          "summary": "Cơ chế đoán từ nối câu của Transformer, ẩn dụ Bàn làm việc về giới hạn Context (128K/1M token), hiện tượng Lost-in-the-middle bỏ sót thông tin ở giữa prompt dài, và MoE 2.800B params.",
+          "key_concept": "Context Window (Bàn làm việc), Lost in the Middle & MoE Architecture",
+          "ocr_text": "SLIDE 31: CONTEXT WINDOW & TRANSFORMER GENERATION\n- Sinh văn bản = đoán → nối vào câu → đoán tiếp.\n- Context Window (Bàn làm việc): 128K token ≈ 300 trang sách, 1M token ≈ 4-5 cuốn sách.\n- Bàn đầy quá thì thông tin ở giữa bàn dễ bị bỏ sót (Lost in the middle).\n- SLIDE 37: MoE Architecture - 2.800 tỷ tham số (Bệnh viện đa khoa kích hoạt chuyên gia).",
+          "remediation": "Hướng dẫn kỹ thuật cấu trúc Prompt (đặt thông tin quan trọng ở đầu/cuối prompt) tránh lỗi Lost in the Middle."
+        }
+      }
+    }
+  }
+}
