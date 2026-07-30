@@ -1,7 +1,7 @@
 /**
  * VLearn Class Knowledge Gap Map - Interactive Prototype Application (CP2)
  * Handles Heatmap rendering, Cluster Inspector, Evidence Chatlog Stream,
- * Time filtering, AI Re-clustering Simulation, and AI Teacher Copilot Chatbot.
+ * Time filtering, AI Re-clustering Simulation, AI Teacher Copilot Chatbot, and Theme Switcher (Dark/Light mode).
  */
 
 // Mock Clusters Data (Matching Spec & Data Evidence)
@@ -35,7 +35,7 @@ const clustersData = [
     chatlogs: [
       { user: "Học viên #312", time: "30 phút trước", text: "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn ạ?" },
       { user: "Học viên #671", time: "1 giờ trước", text: "Code python chunking văn bản lớn chạy được 50% là bị memory leak out of RAM ạ?" },
-      { user: "Học viên #445", time: "2 giờ me", text: "Em lưu embedding vector vào FAISS index mà search similarity trả về kết quả rất chậm?" }
+      { user: "Học viên #445", time: "2 giờ trước", text: "Em lưu embedding vector vào FAISS index mà search similarity trả về kết quả rất chậm?" }
     ]
   },
   {
@@ -108,12 +108,43 @@ const chatMessages = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
 const btnSendChat = document.getElementById("btn-send-chat");
 
+// Theme Toggle Elements
+const btnThemeToggle = document.getElementById("btn-theme-toggle");
+const themeIcon = document.getElementById("theme-icon");
+const themeText = document.getElementById("theme-text");
+
 // Initialize Dashboard
 function initDashboard() {
+  initTheme();
   renderHeatmap();
   selectCluster(selectedClusterId);
   setupEventListeners();
   setupChatbot();
+}
+
+// Theme Switcher Logic (Dark / Light Mode)
+function initTheme() {
+  const savedTheme = localStorage.getItem("vlearn-theme") || "dark";
+  applyTheme(savedTheme);
+
+  btnThemeToggle.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    applyTheme(newTheme);
+    localStorage.setItem("vlearn-theme", newTheme);
+    showToast(`Đã chuyển sang chế độ: ${newTheme === "light" ? "Sáng (Light Mode)" : "Tối (Dark Mode)"}`);
+  });
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  if (theme === "light") {
+    themeIcon.className = "ri-moon-line";
+    themeText.textContent = "Dark Mode";
+  } else {
+    themeIcon.className = "ri-sun-line";
+    themeText.textContent = "Light Mode";
+  }
 }
 
 // Render Heatmap Grid
@@ -280,7 +311,7 @@ function handleQuickPrompt(type) {
   const currentCluster = clustersData.find(c => c.id === selectedClusterId);
 
   if (type === "miss") {
-    const question = "Bài giảng vừa rồi của tôi đã bị miss mất phần kiến thức nào?";
+    const question = "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?";
     appendMessage("user", question);
     setTimeout(() => {
       const response = `🎯 **Phân tích lệch pha bài giảng:**

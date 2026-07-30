@@ -1,7 +1,7 @@
 /**
  * VLearn Student Portal - Slide Viewer & AI Student Tutor Application Script
  * Enables Interactive Slide Navigation, Document Excerpt Copy & Explain workflow,
- * and Student Question Answering.
+ * Student Question Answering, and Theme Switcher (Dark/Light mode).
  */
 
 // Slide Deck Dataset
@@ -81,11 +81,46 @@ const btnStudentSend = document.getElementById("btn-student-send");
 const studentToast = document.getElementById("student-toast");
 const studentToastMsg = document.getElementById("student-toast-msg");
 
+// Theme Elements
+const btnThemeToggle = document.getElementById("btn-theme-toggle");
+const themeIcon = document.getElementById("theme-icon");
+const themeText = document.getElementById("theme-text");
+
 // Initialize Application
 function initStudentApp() {
+  initTheme();
   renderSlide(currentSlideIdx);
   setupSlideControls();
   setupStudentChat();
+}
+
+// Theme Switcher Logic
+function initTheme() {
+  const savedTheme = localStorage.getItem("vlearn-theme") || "dark";
+  applyTheme(savedTheme);
+
+  if (btnThemeToggle) {
+    btnThemeToggle.addEventListener("click", () => {
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      applyTheme(newTheme);
+      localStorage.setItem("vlearn-theme", newTheme);
+      showStudentToast(`Đã chuyển sang chế độ: ${newTheme === "light" ? "Sáng (Light Mode)" : "Tối (Dark Mode)"}`);
+    });
+  }
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  if (themeIcon && themeText) {
+    if (theme === "light") {
+      themeIcon.className = "ri-moon-line";
+      themeText.textContent = "Dark Mode";
+    } else {
+      themeIcon.className = "ri-sun-line";
+      themeText.textContent = "Light Mode";
+    }
+  }
 }
 
 // Render Slide Content
