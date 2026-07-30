@@ -71,6 +71,7 @@ const themeText = document.getElementById("theme-text");
 const loginOverlay = document.getElementById("demo-login-overlay");
 const loginForm = document.getElementById("demo-login-form");
 const userBadge = document.getElementById("student-user-badge");
+const studentLogoutBtn = document.getElementById("student-logout-btn");
 let wheelNavigationLocked = false;
 
 function initTheme() {
@@ -91,15 +92,26 @@ function applyTheme(theme) {
   themeText.textContent = theme === "dark" ? "Light Mode" : "Dark Mode";
 }
 
-function loadSavedUser() {
+async function restoreStudentSession() {
   try {
-    state.user = JSON.parse(localStorage.getItem("vlearn-demo-user") || "null");
-  } catch {
-    state.user = null;
-  }
-  if (state.user) {
+    const response = await fetch("/api/auth/me");
+    if (!response.ok) throw new Error("No active session");
+    const result = await response.json();
+    if (result.user?.role !== "student") {
+      window.location.replace("/admin");
+      return false;
+    }
+    state.user = result.user;
+    localStorage.setItem("vlearn-demo-user", JSON.stringify(result.user));
     loginOverlay?.classList.add("hidden");
     updateUserBadge();
+    return true;
+  } catch {
+    state.user = null;
+    localStorage.removeItem("vlearn-demo-user");
+    localStorage.removeItem("vlearn-demo-token");
+    loginOverlay?.classList.remove("hidden");
+    return false;
   }
 }
 
@@ -120,23 +132,39 @@ async function handleLogin(event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, role: "student" }),
     });
-    if (!response.ok) throw new Error("Không đăng nhập được");
     const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Không đăng nhập được");
+    if (result.user?.role !== "student") {
+      throw new Error("Tài khoản không có quyền học viên");
+    }
     state.user = result.user;
     localStorage.setItem("vlearn-demo-user", JSON.stringify(result.user));
-    localStorage.setItem("vlearn-demo-token", result.token);
+    localStorage.removeItem("vlearn-demo-token");
     loginOverlay.classList.add("hidden");
     updateUserBadge();
+    await loadSlides();
     showVlearnToast(`Xin chào ${result.user.name}!`);
   } catch (error) {
     showVlearnToast(`${error.message}. Hãy chạy server.py trước.`);
   }
 }
 
+async function logoutStudent() {
+  await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+  state.user = null;
+  localStorage.removeItem("vlearn-demo-user");
+  localStorage.removeItem("vlearn-demo-token");
+  window.location.replace("/");
+}
+
 async function loadSlides() {
   slideMainContent.innerHTML = '<div class="slide-loading"><i class="ri-loader-4-line ri-spin"></i><span>Đang đọc học liệu PDF...</span></div>';
   try {
     const response = await fetch("/api/slides");
+    if (response.status === 401 || response.status === 403) {
+      await logoutStudent();
+      return;
+    }
     if (!response.ok) throw new Error("Không tải được danh sách slide");
     const result = await response.json();
     state.slides = result.slides || [];
@@ -213,11 +241,45 @@ async function renderSlidePage() {
   btnPdfPrev.disabled = page <= 1;
   btnPdfNext.disabled = page >= slide.page_count;
 
-  const frame = document.createElement("iframe");
-  frame.className = "pdf-slide-frame";
-  frame.title = `${slide.title}, trang ${page}`;
-  frame.src = `${slide.file_url}#page=${page}&toolbar=0&navpanes=0&view=FitH`;
-  slideMainContent.replaceChildren(frame);
+  const stage = document.createElement("div");
+  stage.className = "slide-image-stage is-loading";
+  stage.setAttribute("aria-busy", "true");
+
+  const loading = document.createElement("div");
+  loading.className = "slide-image-loading";
+  loading.innerHTML =
+    '<i class="ri-loader-4-line ri-spin"></i><span>Đang cắt trang PDF...</span>';
+
+  const image = document.createElement("img");
+  image.className = "slide-page-image";
+  image.alt = `${slide.title}, trang ${page}`;
+  image.draggable = false;
+  image.addEventListener("load", () => {
+    stage.classList.remove("is-loading");
+    stage.setAttribute("aria-busy", "false");
+    loading.remove();
+  });
+  image.addEventListener("error", () => {
+    stage.classList.remove("is-loading");
+    stage.classList.add("has-error");
+    stage.setAttribute("aria-busy", "false");
+    stage.replaceChildren();
+    const error = document.createElement("div");
+    error.className = "slide-image-error";
+    error.innerHTML =
+      '<i class="ri-file-damage-line"></i><strong>Không render được trang slide</strong>';
+    const fallback = document.createElement("a");
+    fallback.href = `${slide.file_url}#page=${page}`;
+    fallback.target = "_blank";
+    fallback.rel = "noopener";
+    fallback.textContent = "Mở PDF gốc";
+    error.appendChild(fallback);
+    stage.appendChild(error);
+  });
+  image.src =
+    `/api/slides/${encodeURIComponent(slide.id)}/pages/${page}/image`;
+  stage.append(loading, image);
+  slideMainContent.replaceChildren(stage);
 }
 
 async function goToPage(pageNumber) {
@@ -327,6 +389,10 @@ async function sendTutorMessage() {
         question,
       }),
     });
+    if (response.status === 401 || response.status === 403) {
+      await logoutStudent();
+      return;
+    }
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Tutor chưa trả lời được");
     loading.remove();
@@ -400,11 +466,12 @@ function escapeHtml(value) {
 
 async function initApp() {
   initTheme();
-  loadSavedUser();
   loginForm?.addEventListener("submit", handleLogin);
+  studentLogoutBtn?.addEventListener("click", logoutStudent);
   setupNavigation();
   setupTutorChat();
-  await loadSlides();
+  const authenticated = await restoreStudentSession();
+  if (authenticated) await loadSlides();
 }
 
 document.addEventListener("DOMContentLoaded", initApp);

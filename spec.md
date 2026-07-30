@@ -161,6 +161,7 @@ phạm vi cần chuyển tuyến.
 | Cluster label | OpenRouter trên một số hội thoại đại diện |
 | Fallback | Local hashed embedding, local keyword label và extractive Tutor answer |
 | Runtime debug | `logs/vlearn-runtime.log`, request ID, timing và stack trace |
+| Phân quyền demo | Session cookie HttpOnly; Student-only Tutor API và Admin-only management API |
 
 ### Điều hướng và grounding
 
@@ -196,19 +197,19 @@ phạm vi cần chuyển tuyến.
    có slide đối chứng.
 4. Không cung cấp chẩn đoán y khoa/tài chính, thông tin deadline/học phí khi
    không có nguồn chính thức.
+5. Không cung cấp chatbot hỏi–đáp tự do ở màn Admin; Admin làm việc trực tiếp
+   với kết quả clustering, evidence và khuyến nghị có căn cứ.
 
 ### Mức automation
 
 `Augment / Human-in-the-loop`: AI gom cụm và đề xuất; Admin xem evidence, đổi
 tên cụm và quyết định có đưa vào agenda hay không.
 
-### Phần Working và phần scaffold
+### Phần Working
 
 - **Working:** Student login demo, đọc PDF, điều hướng trang, Tutor RAG, citation,
   lưu chat, upload PDF, continuous clustering, hai chế độ dữ liệu Admin, evidence,
   rename cluster và cụm out-of-scope.
-- **UI scaffold:** ô chat Admin hiện trả `ai_recommendation` đã có của cluster;
-  chưa gọi một Admin Copilot API riêng cho câu hỏi tự do.
 
 ---
 
