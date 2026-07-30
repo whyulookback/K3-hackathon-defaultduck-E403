@@ -50,6 +50,32 @@ Nguồn thật:
 - 369 học viên ẩn danh.
 - 585 conversation.
 - 1.252/1.261 câu có số trang hoặc đoạn được chọn trong nội dung chat.
+- 582/1.261 tutor message (46,2%) có trường `citations` rỗng hoặc `[]`.
+
+Phép đếm citation: lọc `role == "tutor"` rồi tính các dòng có `citations` sau
+khi `strip()` thuộc `{"", "[]", "{}", "null", "None"}`. Đây là khoảng trống
+về khả năng truy vết, không đồng nghĩa toàn bộ 582 câu trả lời đều sai. Năm
+`turn_id` đối chứng: `T0014`, `T0036`, `T0065`, `T0128`, `T1261`.
+
+### Bằng chứng khảo sát ngoài nhóm
+
+Nguồn: `labcoach.csv` và `student.csv`. Nhóm xác nhận người trả lời đều ngoài
+nhóm.
+
+- 11 Labcoach và 11 học viên trả lời; loại một phản hồi học viên ghi khóa học
+  `123`, còn 21 phản hồi hợp lệ.
+- 11/11 Labcoach gặp khó khăn trong việc xác định học viên vướng ở đâu ít nhất
+  thỉnh thoảng.
+- 9/10 học viên K3 hợp lệ còn nội dung chưa hiểu sau buổi học ít nhất thỉnh
+  thoảng.
+- Kết hợp hai phía: **20/21 (95,2%)** xác nhận vấn đề.
+- **10/11 Labcoach (90,9%)** trả lời sẽ dùng công cụ tự động phân tích chatlog.
+- 9/11 Labcoach muốn xem những chủ đề học viên hỏi nhiều nhất; 9/11 muốn báo cáo
+  dạng biểu đồ và 7/11 muốn dashboard.
+
+Cách đếm và toàn bộ lưu ý chất lượng dữ liệu nằm tại
+`evidence/cp4_evidence_report.md`; script tái lập:
+`evidence/analyze_cp4_evidence.py`.
 
 Giới hạn bằng chứng:
 
@@ -292,14 +318,17 @@ Kết quả first run đã đạt cả hai phần của chuẩn.
 
 ### Phân công đang ghi trong repo
 
+- **Nhóm trưởng:** Ngô Đình Khánh — `2A202601625` (đối chiếu branch và lịch sử
+  commit).
 - `spec.md`: Oanh — Product Spec/Pitch.
 - `evidence`: Hoàng Anh — Data.
 - `prompt`: Quân — Prompt Engineering.
 - `codebase`: Khánh — Frontend; Việt Anh — Backend.
 - `validation`: Thúy — QA/User Test.
 
-Cần bổ sung mã học viên và xác nhận lại danh sách trên trước khi nộp. Repo hiện
-chỉ có artefact reflection xác nhận vai trò Product Spec/Pitch của Khánh.
+Cần bổ sung mã học viên và xác nhận lại danh sách trên trước khi nộp.
+`reflection/khanh.md` ghi Khánh là Product Spec/Pitch trong khi phân công hiện
+tại ghi Oanh; nhóm cần chốt lại điểm không nhất quán này trước commit cuối.
 
 ### Validation
 
@@ -331,3 +360,4 @@ thay bằng người thử thực tế, vai trò thật và quote nguyên văn c
 | 30/07 16:18 | Đồng bộ điều hướng trang và parse “trang N” | Sửa request luôn gửi page 1 và false refusal |
 | 30/07 16:32 | Lưu `tutor_status`, tách cụm out-of-scope | Không để logistics hòa vào topic kiến thức |
 | 30/07 16:40 | Rà soát lại toàn bộ spec theo artefact | Bỏ số liệu/claim không có bằng chứng và ghi rõ phần scaffold |
+| 30/07 17:00 | Bổ sung survey và phân tích citation | Chốt bằng chứng A+B có phép đếm tái lập cho CP4 |

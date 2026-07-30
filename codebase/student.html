@@ -24,8 +24,8 @@
       <div class="vlearn-doc-info">
         <i class="ri-book-open-line doc-icon"></i>
         <div class="doc-meta-title">
-          <span class="doc-filename">day01_302.pdf</span>
-          <span class="doc-subcode">COMP2010 · Lecture_material_ms2039d0_hnxpxy</span>
+          <span class="doc-filename" id="current-doc-filename">Đang tải học liệu...</span>
+          <span class="doc-subcode" id="current-doc-subcode">AI Product Development · Demo local</span>
         </div>
       </div>
     </div>
@@ -41,12 +41,12 @@
       <button class="vlearn-lang-btn">VI</button>
 
       <!-- User Badge -->
-      <div class="vlearn-user-badge">
-        <i class="ri-user-3-line"></i> Sinh viên ẩn danh
+      <div class="vlearn-user-badge" id="student-user-badge">
+        <i class="ri-user-3-line"></i> Học viên demo
       </div>
 
       <!-- Switch View Link -->
-      <a href="index.html" class="vlearn-switch-gapmap-btn">
+      <a href="/admin" class="vlearn-switch-gapmap-btn">
         <i class="ri-dashboard-line"></i> 👉 View Giảng viên (GapMap)
       </a>
     </div>
@@ -205,12 +205,12 @@
         <!-- Rendered Slide Canvas -->
         <div class="slide-page-paper">
           <div class="slide-page-header">
-            <span class="slide-page-tag" id="slide-page-num-top">Trang 2 / 83</span>
-            <span class="slide-doc-tag">day01_302.pdf</span>
+            <span class="slide-page-tag" id="slide-page-num-top">Đang tải...</span>
+            <span class="slide-doc-tag" id="slide-doc-tag">PDF</span>
           </div>
 
           <!-- Slide Content Display -->
-          <div class="slide-main-content" id="slide-main-content">
+          <div class="slide-main-content" id="slide-main-content" tabindex="0" aria-label="Trình đọc slide; cuộn để đổi trang">
             <!-- Dynamic Slide Content populated by JS -->
           </div>
         </div>
@@ -219,7 +219,11 @@
       <!-- Bottom Slide Navigation Footer -->
       <div class="pdf-bottom-navbar">
         <button class="nav-arrow-btn" id="btn-pdf-prev"><i class="ri-arrow-left-s-line"></i></button>
-        <span class="nav-page-indicator" id="nav-page-indicator">Trang <strong>2</strong> / 83</span>
+        <label class="nav-page-indicator" id="nav-page-indicator">
+          Trang
+          <input id="page-jump-input" class="page-jump-input" type="number" min="1" value="1" aria-label="Đi tới trang">
+          / <span id="page-total">1</span>
+        </label>
         <button class="nav-arrow-btn" id="btn-pdf-next"><i class="ri-arrow-right-s-line"></i></button>
       </div>
 
@@ -290,6 +294,18 @@
   <!-- Toast Notification -->
   <div class="toast-notification" id="vlearn-toast">
     <i class="ri-checkbox-circle-fill"></i> <span id="vlearn-toast-msg">Đã copy tài liệu vào Chatbot VLearn Tutor!</span>
+  </div>
+
+  <div class="demo-login-overlay" id="demo-login-overlay">
+    <form class="demo-login-card" id="demo-login-form">
+      <div class="login-logo"><i class="ri-graduation-cap-line"></i></div>
+      <h2>Đăng nhập VLearn Demo</h2>
+      <p>Nhập tên hiển thị để bắt đầu học và đặt câu hỏi theo slide.</p>
+      <label for="demo-student-name">Tên học viên</label>
+      <input id="demo-student-name" type="text" value="Học viên K3" maxlength="80" required>
+      <button type="submit"><i class="ri-login-circle-line"></i> Vào lớp học</button>
+      <span>Local demo · Không sử dụng tài khoản thật</span>
+    </form>
   </div>
 
   <script src="student-app.js"></script>
