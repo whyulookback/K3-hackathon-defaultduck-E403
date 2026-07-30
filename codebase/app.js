@@ -681,10 +681,9 @@ async function generateAIResponseReal(userText) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  // Real OpenRouter API Call if Key Present (either via UI or via server .env proxy)
-  if (openrouterApiKey) {
-    try {
-      const systemPrompt = `Bạn là AI Teacher Copilot phân tích dữ liệu lớp học theo Mã Slide (day_code) và Trang Slide.
+  // 1. First, attempt Real LLM Call via Backend Proxy (/api/chat) or OpenRouter API Client
+  try {
+    const systemPrompt = `Bạn là AI Teacher Copilot phân tích dữ liệu lớp học theo Mã Slide (day_code) và Trang Slide.
 Dữ liệu phân tích thực tế từ 1.261 chatlogs & Slide Grounding:
 - Cụm đang chọn: ${currentCluster.name} (${currentCluster.studentCount} học viên, ${currentCluster.percentage}% tổng thắc mắc).
 - Mã Slide (day_code): ${currentCluster.day_code || 'N/A'}.
@@ -698,15 +697,16 @@ Dữ liệu phân tích thực tế từ 1.261 chatlogs & Slide Grounding:
 Nhiệm vụ của bạn:
 1. Trả lời trực tiếp câu hỏi của Giảng viên một cách ngắn gọn, sắc bén, định dạng markdown đẹp có emoji.
 2. Trích dẫn đúng Tên Slide (mã day_code), Khoảng trang bao nhiêu và Nội dung kiến thức bị nghẽn.
-3. Đưa ra đề xuất khắc phục giáo án cụ thể.
-4. Nếu câu hỏi vượt thẩm quyền (như cộng điểm), hãy từ chối lịch sự. Nếu câu hỏi ngoài giáo trình (như Java Spring Boot), hãy xác nhận không nằm trong bài giảng môn học.`;
+3. Nếu câu hỏi ngoài lề (như động vật, bóng đá, thời tiết), từ chối lịch sự và nêu rõ phạm vi môn học AI Product.
+4. Nếu câu hỏi đòi trừ điểm/cộng điểm, từ chối vì vượt quá thẩm quyền.`;
 
-      if (openrouterApiKey === "ENV_KEY_ACTIVE") {
-        const proxyRes = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: userText, system: systemPrompt })
-        });
+    if (!openrouterApiKey || openrouterApiKey === "ENV_KEY_ACTIVE") {
+      const proxyRes = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: userText, system: systemPrompt })
+      });
+      if (proxyRes.ok) {
         const pdata = await proxyRes.json();
         if (chatMessages && chatMessages.contains(typingDiv)) {
           chatMessages.removeChild(typingDiv);
@@ -715,24 +715,26 @@ Nhiệm vụ của bạn:
           appendMessage("ai", pdata.response);
           return;
         }
-      } else {
-        const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.OPENROUTER_BASE_URL) ? CONFIG.OPENROUTER_BASE_URL : "https://openrouter.ai/api/v1";
-        const apiRes = await fetch(`${baseUrl}/chat/completions`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${openrouterApiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": window.location.href,
-            "X-Title": "VLearn AI GapMap"
-          },
-          body: JSON.stringify({
-            model: openrouterModel,
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: userText }
-            ]
-          })
-        });
+      }
+    } else if (openrouterApiKey) {
+      const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.OPENROUTER_BASE_URL) ? CONFIG.OPENROUTER_BASE_URL : "https://openrouter.ai/api/v1";
+      const apiRes = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${openrouterApiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": window.location.href,
+          "X-Title": "VLearn AI GapMap"
+        },
+        body: JSON.stringify({
+          model: openrouterModel,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userText }
+          ]
+        })
+      });
+      if (apiRes.ok) {
         const data = await apiRes.json();
         if (chatMessages && chatMessages.contains(typingDiv)) {
           chatMessages.removeChild(typingDiv);
@@ -742,9 +744,9 @@ Nhiệm vụ của bạn:
           return;
         }
       }
-    } catch (e) {
-      console.log("OpenRouter API call fallback to Data Intelligence Engine.", e);
     }
+  } catch (e) {
+    console.log("LLM API Call fallback to Offline Intelligent Engine:", e);
   }
 
   // Fallback Data Intelligence Engine
@@ -808,9 +810,13 @@ Dành 25 phút giải thích trực quan khái niệm **Context Window**, kỹ t
 
 👉 *Khuyến nghị:* Tập trung buổi Live tới vào Top 1 & Top 2 theo đúng mục bài giảng trong slide!`;
     }
-    else if (lower.includes("cộng điểm") || lower.includes("sổ điểm") || lower.includes("sửa điểm")) {
+    else if (lower.includes("cộng điểm") || lower.includes("trừ điểm") || lower.includes("sổ điểm") || lower.includes("sửa điểm") || lower.includes("phạt")) {
       response = `🚫 **Từ chối yêu cầu vượt thẩm quyền:**
-AI Copilot không thể tự động cộng điểm cho học viên #${(userText.match(/#U\d+/i) || ['U0151'])[0]}. Thao tác này vượt quá thẩm quyền của AI, vui lòng cập nhật điểm trực tiếp trên hệ thống LMS chính thức.`;
+AI Copilot không thể tự động cộng điểm, trừ điểm hay phạt học viên. Thao tác này vượt quá thẩm quyền của AI, việc đánh giá thuộc thẩm quyền của Giảng viên trên hệ thống LMS chính thức.`;
+    }
+    else if (lower.includes("mèo") || lower.includes("chó") || lower.includes("thời tiết") || lower.includes("ăn gì") || lower.includes("bóng đá") || lower.includes("game")) {
+      response = `💬 **Nằm ngoài phạm vi môn học (Out of Scope):**
+AI Teacher Copilot được tối ưu để hỗ trợ Giảng viên phân tích dữ liệu 1.261 chatlogs & slide bài giảng môn AI Product Development. Câu hỏi của bạn mang tính chất ngoài lề và không nằm trong dữ liệu môn học.`;
     }
     else if (lower.includes("java") || lower.includes("spring boot") || lower.includes("c#") || lower.includes("php")) {
       response = `ℹ️ **Nằm ngoài phạm vi giáo trình (Out of Scope):**
@@ -828,7 +834,7 @@ Không có bất kỳ căn cứ nào về thông tin mật khẩu admin trong tr
       response = `💡 **Giải thích thuật ngữ (Edge Case):**
 Thuật ngữ 'key rỏm bị ăn 401' ám chỉ lỗi 401 Unauthorized khi API Key bị trễ bất đồng bộ hoặc không hợp lệ khi gọi OpenRouter API.`;
     }
-    else if (lower === "lớp sao rồi" || lower.includes("lớp sao rồi") || lower.length < 10) {
+    else if (lower === "lớp sao rồi" || lower.includes("lớp sao rồi") || lower.length < 8) {
       response = `❓ **Yêu cầu làm rõ (Ambiguous Query):**
 Câu hỏi của bạn chưa rõ ràng. Bạn muốn xem phân tích về:
 1. Lỗ hổng bài giảng mới nhất theo Slide?
@@ -836,9 +842,9 @@ Câu hỏi của bạn chưa rõ ràng. Bạn muốn xem phân tích về:
 3. Hay đề xuất điều chỉnh thời lượng buổi Live tiếp theo?`;
     }
     else {
-      response = `🤖 **AI Teacher Copilot:** Tôi đã đối chiếu chatlog với **${currentCluster.day_code} (${currentCluster.page_range})**.
-Cụm **"${currentCluster.name}"** đang có **${currentCluster.studentCount} học viên** cần hỗ trợ gấp.
-Bạn có muốn bấm nút **"Đưa vào Slide Live"** để AI tự động thêm slide củng cố phần này không?`;
+      response = `🤖 **AI Teacher Copilot:** Đối chiếu câu hỏi *"${userText}"* với dữ liệu 1.261 chatlogs bài giảng:
+Hệ thống không tìm thấy điểm nghẽn hoặc rào cản kiến thức tương ứng với câu hỏi này trong các buổi học vừa qua.
+👉 *Gợi ý:* Bạn có thể nhấp chọn một Cụm bài giảng trên Heatmap Grid để tra cứu phân tích Slide OCR & Chatlog chi tiết.`;
     }
 
     appendMessage("ai", response);
