@@ -1,0 +1,50 @@
+[
+  {
+    "id": "GS-001",
+    "chat_text": "Thầy ơi em pass API Key vào .env rồi mà lúc gọi async await toàn báo 401 Unauthorized là sao ạ?",
+    "expected_cluster": "Bất đồng bộ API Key & Environment",
+    "difficulty_layer": "Normal"
+  },
+  {
+    "id": "GS-002",
+    "chat_text": "Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?",
+    "expected_cluster": "Bất đồng bộ API Key & Environment",
+    "difficulty_layer": "Normal"
+  },
+  {
+    "id": "GS-003",
+    "chat_text": "Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?",
+    "expected_cluster": "Bất đồng bộ API Key & Environment",
+    "difficulty_layer": "Normal"
+  },
+  {
+    "id": "GS-004",
+    "chat_text": "Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?",
+    "expected_cluster": "Bất đồng bộ API Key & Environment",
+    "difficulty_layer": "Edge Case"
+  },
+  {
+    "id": "GS-005",
+    "chat_text": "Hôm nay ăn gì ngon hả mọi người?",
+    "expected_cluster": "Noise / Out of Scope",
+    "difficulty_layer": "Failure Case"
+  },
+  {
+    "id": "GS-006",
+    "chat_text": "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?",
+    "expected_cluster": "Out of Curriculum",
+    "difficulty_layer": "Out of Scope"
+  },
+  {
+    "id": "GS-007",
+    "chat_text": "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn?",
+    "expected_cluster": "Vector DB Indexing & Chunking",
+    "difficulty_layer": "Normal"
+  },
+  {
+    "id": "GS-008",
+    "chat_text": "Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?",
+    "expected_cluster": "Prompt Chaining & LCEL",
+    "difficulty_layer": "Normal"
+  }
+]
