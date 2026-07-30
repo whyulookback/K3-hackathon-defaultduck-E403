@@ -8,6 +8,7 @@ import logging
 import math
 import os
 import re
+import secrets
 import sqlite3
 import threading
 import time
@@ -23,11 +24,12 @@ from urllib.parse import quote
 
 import httpx
 import numpy as np
+import pymupdf
 from pypdf import PdfReader
 from starlette.applications import Starlette
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.responses import FileResponse, JSONResponse
+from starlette.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
@@ -118,12 +120,56 @@ DISABLE_EXTERNAL_AI = os.getenv("DISABLE_EXTERNAL_AI", "").lower() in {
     "yes",
 }
 CLUSTER_COUNT = max(4, min(12, int(os.getenv("CLUSTER_COUNT", "9"))))
+ADMIN_ACCESS_CODE_CONFIGURED = bool(os.getenv("ADMIN_ACCESS_CODE"))
+ADMIN_ACCESS_CODE = os.getenv("ADMIN_ACCESS_CODE", "admin-demo")
+SESSION_COOKIE_NAME = "vlearn_session"
+SESSION_TTL_SECONDS = 12 * 60 * 60
 
 _cluster_lock = threading.Lock()
 _cluster_cache: dict[str, dict[str, Any]] = {}
 _cluster_jobs: dict[str, dict[str, Any]] = {}
 _stop_event = threading.Event()
 _voyage_available: bool | None = None
+_session_lock = threading.Lock()
+_sessions: dict[str, dict[str, Any]] = {}
+
+
+def create_session(user: dict[str, str]) -> str:
+    token = secrets.token_urlsafe(32)
+    with _session_lock:
+        _sessions[token] = {
+            "user": user,
+            "expires_at": time.time() + SESSION_TTL_SECONDS,
+        }
+    return token
+
+
+def get_request_session(request: Request) -> dict[str, Any] | None:
+    token = request.cookies.get(SESSION_COOKIE_NAME, "")
+    authorization = request.headers.get("authorization", "")
+    if not token and authorization.lower().startswith("bearer "):
+        token = authorization[7:].strip()
+    if not token:
+        return None
+    with _session_lock:
+        session = _sessions.get(token)
+        if not session:
+            return None
+        if float(session["expires_at"]) <= time.time():
+            _sessions.pop(token, None)
+            return None
+        return dict(session)
+
+
+def remove_request_session(request: Request) -> None:
+    token = request.cookies.get(SESSION_COOKIE_NAME, "")
+    if token:
+        with _session_lock:
+            _sessions.pop(token, None)
+
+
+def auth_error(status_code: int, message: str) -> JSONResponse:
+    return JSONResponse({"error": message}, status_code=status_code)
 
 
 def db_connect() -> sqlite3.Connection:
@@ -1511,13 +1557,60 @@ async def login(request: Request) -> JSONResponse:
     body = await request.json()
     name = str(body.get("name") or "Học viên Demo").strip()[:80]
     role = "admin" if body.get("role") == "admin" else "student"
+    if role == "admin":
+        access_code = str(body.get("access_code") or "")
+        if not secrets.compare_digest(access_code, ADMIN_ACCESS_CODE):
+            logger.warning(
+                "event=auth_login_failed request_id=%s role=admin reason=invalid_code",
+                getattr(request.state, "request_id", "-"),
+            )
+            return auth_error(401, "Access code Admin không đúng")
     user_id = f"DEMO-{hashlib.sha1(f'{role}:{name}'.encode()).hexdigest()[:8].upper()}"
-    return JSONResponse(
+    user = {"id": user_id, "name": name, "role": role}
+    remove_request_session(request)
+    token = create_session(user)
+    response = JSONResponse(
         {
-            "token": hashlib.sha256(f"{user_id}:{time.time()}".encode()).hexdigest(),
-            "user": {"id": user_id, "name": name, "role": role},
+            "user": user,
         }
     )
+    response.set_cookie(
+        SESSION_COOKIE_NAME,
+        token,
+        max_age=SESSION_TTL_SECONDS,
+        httponly=True,
+        samesite="strict",
+        secure=False,
+        path="/",
+    )
+    logger.info(
+        "event=auth_login_success request_id=%s user_id=%s role=%s",
+        getattr(request.state, "request_id", "-"),
+        user_id,
+        role,
+    )
+    return response
+
+
+async def current_user(request: Request) -> JSONResponse:
+    session = get_request_session(request)
+    if not session:
+        return auth_error(401, "Chưa đăng nhập hoặc phiên đã hết hạn")
+    return JSONResponse({"user": session["user"]})
+
+
+async def logout(request: Request) -> JSONResponse:
+    session = get_request_session(request)
+    remove_request_session(request)
+    response = JSONResponse({"status": "logged_out"})
+    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
+    logger.info(
+        "event=auth_logout request_id=%s user_id=%s role=%s",
+        getattr(request.state, "request_id", "-"),
+        session["user"]["id"] if session else "-",
+        session["user"]["role"] if session else "-",
+    )
+    return response
 
 
 async def list_slides(_: Request) -> JSONResponse:
@@ -1554,6 +1647,62 @@ async def get_slide_page(request: Request) -> JSONResponse:
     result = dict(row)
     result["file_url"] = f"/api/slides/{quote(slide_id)}/file"
     return JSONResponse(result)
+
+
+async def get_slide_page_image(request: Request) -> Response:
+    slide_id = request.path_params["slide_id"]
+    page_number = int(request.path_params["page_number"])
+    with db_connect() as conn:
+        row = conn.execute(
+            """
+            SELECT title, filename, file_path, page_count
+            FROM slides WHERE id=?
+            """,
+            (slide_id,),
+        ).fetchone()
+    if not row or page_number < 1 or page_number > int(row["page_count"]):
+        return JSONResponse({"error": "Không tìm thấy trang slide"}, status_code=404)
+
+    file_path = Path(row["file_path"])
+    if not file_path.exists():
+        return JSONResponse({"error": "File PDF không còn tồn tại"}, status_code=404)
+
+    def render_page() -> bytes:
+        with pymupdf.open(str(file_path)) as document:
+            page = document.load_page(page_number - 1)
+            target_width = 1800
+            zoom = max(1.0, min(2.5, target_width / max(1.0, page.rect.width)))
+            pixmap = page.get_pixmap(
+                matrix=pymupdf.Matrix(zoom, zoom),
+                colorspace=pymupdf.csRGB,
+                alpha=False,
+            )
+            return pixmap.tobytes("png")
+
+    try:
+        image_bytes = await asyncio.to_thread(render_page)
+    except Exception as exc:
+        logger.exception(
+            "event=slide_page_render_failed slide_id=%s page=%d error=%r",
+            slide_id,
+            page_number,
+            exc,
+        )
+        return JSONResponse(
+            {"error": "Không render được trang PDF"},
+            status_code=500,
+        )
+
+    return Response(
+        image_bytes,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "private, max-age=3600",
+            "Content-Disposition": (
+                f'inline; filename="{quote(file_path.stem)}-page-{page_number}.png"'
+            ),
+        },
+    )
 
 
 async def get_slide_file(request: Request) -> FileResponse | JSONResponse:
@@ -1764,11 +1913,14 @@ async def upload_slide(request: Request) -> JSONResponse:
     return JSONResponse(result, status_code=201)
 
 
-async def student_page(_: Request) -> FileResponse:
+async def student_page(request: Request) -> FileResponse | RedirectResponse:
+    session = get_request_session(request)
+    if session and session["user"]["role"] == "admin":
+        return RedirectResponse("/admin", status_code=303)
     return FileResponse(CODEBASE_DIR / "student.html")
 
 
-async def admin_page(_: Request) -> FileResponse:
+async def admin_page(request: Request) -> FileResponse | RedirectResponse:
     return FileResponse(CODEBASE_DIR / "index.html")
 
 
@@ -1787,6 +1939,11 @@ async def startup() -> None:
         DISABLE_EXTERNAL_AI,
         DB_PATH,
     )
+    if not ADMIN_ACCESS_CODE_CONFIGURED:
+        logger.warning(
+            "event=auth_demo_code_active message=%r",
+            "ADMIN_ACCESS_CODE chưa được đặt; đang dùng access code local demo.",
+        )
     init_db()
     register_existing_slides()
     imported = import_dataset_if_needed()
@@ -1825,8 +1982,48 @@ async def runtime_logging_middleware(request: Request, call_next):
     request.state.request_id = request_id
     started_at = time.perf_counter()
     client_host = request.client.host if request.client else "-"
+    session = get_request_session(request)
+    request.state.user = session["user"] if session else None
+    path = request.url.path
+
+    required_roles: set[str] | None = None
+    if path.startswith("/api/admin"):
+        required_roles = {"admin"}
+    elif path.startswith("/api/chat"):
+        required_roles = {"student"}
+    elif path.startswith("/api/slides"):
+        required_roles = {"student", "admin"}
+
+    authorization_response = None
+    if required_roles and not session:
+        authorization_response = auth_error(
+            401, "Bạn cần đăng nhập để sử dụng chức năng này"
+        )
+    elif required_roles and session["user"]["role"] not in required_roles:
+        authorization_response = auth_error(
+            403, "Tài khoản không có quyền truy cập chức năng này"
+        )
+    elif path == "/student.html" and session and session["user"]["role"] == "admin":
+        authorization_response = RedirectResponse("/admin", status_code=303)
+    elif path == "/index.html" and session and session["user"]["role"] == "student":
+        authorization_response = RedirectResponse("/", status_code=303)
+
+    if authorization_response is not None:
+        logger.warning(
+            "event=auth_access_denied request_id=%s path=%s required_roles=%s "
+            "actual_role=%s status=%d",
+            request_id,
+            path,
+            ",".join(sorted(required_roles)) if required_roles else "page-role",
+            session["user"]["role"] if session else "anonymous",
+            authorization_response.status_code,
+        )
     try:
-        response = await call_next(request)
+        response = (
+            authorization_response
+            if authorization_response is not None
+            else await call_next(request)
+        )
     except Exception as exc:
         logger.exception(
             "event=http_request_failed request_id=%s method=%s path=%s "
@@ -1859,8 +2056,14 @@ routes = [
     Route("/admin", admin_page),
     Route("/api/health", health),
     Route("/api/auth/login", login, methods=["POST"]),
+    Route("/api/auth/me", current_user),
+    Route("/api/auth/logout", logout, methods=["POST"]),
     Route("/api/slides", list_slides),
     Route("/api/slides/{slide_id:str}/pages/{page_number:int}", get_slide_page),
+    Route(
+        "/api/slides/{slide_id:str}/pages/{page_number:int}/image",
+        get_slide_page_image,
+    ),
     Route("/api/slides/{slide_id:str}/file", get_slide_file),
     Route("/api/chat/questions", ask_tutor, methods=["POST"]),
     Route("/api/client-logs", client_log, methods=["POST"]),

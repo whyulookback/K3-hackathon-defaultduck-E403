@@ -30,8 +30,28 @@ CLARIFICATION_TERMS = {
 }
 
 
-def fetch_slide_map(base_url: str) -> dict[str, dict[str, Any]]:
-    response = httpx.get(f"{base_url}/api/slides", timeout=30)
+def authenticate_student(base_url: str) -> dict[str, str]:
+    response = httpx.post(
+        f"{base_url}/api/auth/login",
+        json={"name": "CP3 evaluation runner", "role": "student"},
+        timeout=30,
+    )
+    response.raise_for_status()
+    session_cookie = response.cookies.get("vlearn_session")
+    if not session_cookie:
+        raise RuntimeError("Student login succeeded without a session cookie")
+    return {"Cookie": f"vlearn_session={session_cookie}"}
+
+
+def fetch_slide_map(
+    base_url: str,
+    auth_headers: dict[str, str],
+) -> dict[str, dict[str, Any]]:
+    response = httpx.get(
+        f"{base_url}/api/slides",
+        headers=auth_headers,
+        timeout=30,
+    )
     response.raise_for_status()
     return {item["filename"]: item for item in response.json()["slides"]}
 
@@ -40,6 +60,7 @@ def evaluate_case(
     case: dict[str, Any],
     slide_map: dict[str, dict[str, Any]],
     base_url: str,
+    auth_headers: dict[str, str],
 ) -> dict[str, Any]:
     slide = slide_map[case["slide_filename"]]
     payload = {
@@ -56,6 +77,7 @@ def evaluate_case(
         response = httpx.post(
             f"{base_url}/api/chat/questions",
             json=payload,
+            headers=auth_headers,
             timeout=120,
         )
         latency_ms = round((time.perf_counter() - started) * 1000)
@@ -232,7 +254,8 @@ def main() -> None:
     args = parser.parse_args()
 
     cases = json.loads(GOLDEN_SET_PATH.read_text(encoding="utf-8"))
-    slide_map = fetch_slide_map(args.base_url)
+    auth_headers = authenticate_student(args.base_url)
+    slide_map = fetch_slide_map(args.base_url, auth_headers)
     missing = {
         case["slide_filename"] for case in cases
     }.difference(slide_map)
@@ -242,7 +265,13 @@ def main() -> None:
     completed: list[dict[str, Any]] = []
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
         futures = {
-            executor.submit(evaluate_case, case, slide_map, args.base_url): case["id"]
+            executor.submit(
+                evaluate_case,
+                case,
+                slide_map,
+                args.base_url,
+                auth_headers,
+            ): case["id"]
             for case in cases
         }
         for future in as_completed(futures):
