@@ -27,7 +27,20 @@ VOYAGE_API_KEY=...
 VOYAGE_MODEL=voyage-4-large
 VOYAGE_OUTPUT_DIMENSION=1024
 VOYAGE_BASE_URL=https://api.voyageai.com/v1
+
+ADMIN_ACCESS_CODE=ma-truy-cap-admin-cua-nhom
 ```
+
+Nếu chưa đặt `ADMIN_ACCESS_CODE`, local demo dùng tạm `admin-demo`. Student đăng
+nhập bằng tên hiển thị; Admin phải nhập access code. Session được lưu trong
+cookie HttpOnly và hết hạn sau 12 giờ.
+
+Phân quyền:
+
+- Student chỉ gọi được Tutor API.
+- Admin chỉ gọi được Admin clustering/upload API.
+- Slide read API dùng chung cho hai role để Admin vẫn mở được evidence PDF.
+- Truy cập nhầm `/` hoặc `/admin` sẽ được chuyển về đúng khu vực của role.
 
 Nếu API tạm lỗi, backend chuyển sang local hashed embeddings và extractive
 answer để demo không bị dừng. Chạy hoàn toàn local/fallback:

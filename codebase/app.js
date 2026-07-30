@@ -60,17 +60,81 @@ const btnAddSlide = document.getElementById("btn-add-slide");
 const btnEditTitle = document.getElementById("btn-edit-title");
 const toast = document.getElementById("toast");
 const toastMessage = document.getElementById("toast-message");
-const btnOpenChat = document.getElementById("btn-open-chat");
-const btnCloseChat = document.getElementById("btn-close-chat");
-const chatDrawer = document.getElementById("chat-drawer");
-const chatMessages = document.getElementById("chat-messages");
-const chatInput = document.getElementById("chat-input");
-const btnSendChat = document.getElementById("btn-send-chat");
 const btnThemeToggle = document.getElementById("btn-theme-toggle");
 const themeIcon = document.getElementById("theme-icon");
 const themeText = document.getElementById("theme-text");
 const uploadInput = document.getElementById("slide-upload-input");
 const btnUploadSlide = document.getElementById("btn-upload-slide");
+const adminLoginOverlay = document.getElementById("admin-login-overlay");
+const adminLoginForm = document.getElementById("admin-login-form");
+const adminLoginError = document.getElementById("admin-login-error");
+const adminLogoutBtn = document.getElementById("admin-logout-btn");
+
+async function restoreAdminSession() {
+  try {
+    const response = await fetch("/api/auth/me");
+    if (!response.ok) throw new Error("No active session");
+    const result = await response.json();
+    if (result.user?.role !== "admin") {
+      if (adminLoginError) {
+        adminLoginError.textContent =
+          "Bạn đang đăng nhập bằng vai trò Học viên. Nhập access code để chuyển sang Admin.";
+        adminLoginError.classList.remove("hidden");
+        adminLoginError.classList.add("role-switch-notice");
+      }
+      adminLoginOverlay?.classList.remove("hidden");
+      return false;
+    }
+    adminLoginOverlay?.classList.add("hidden");
+    return true;
+  } catch {
+    adminLoginOverlay?.classList.remove("hidden");
+    return false;
+  }
+}
+
+async function handleAdminLogin(event) {
+  event.preventDefault();
+  adminLoginError?.classList.add("hidden");
+  adminLoginError?.classList.remove("role-switch-notice");
+  const name = document.getElementById("admin-display-name").value.trim();
+  const accessCode = document.getElementById("admin-access-code").value;
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        role: "admin",
+        access_code: accessCode,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Không đăng nhập được");
+    if (result.user?.role !== "admin") {
+      throw new Error("Tài khoản không có quyền Admin");
+    }
+    window.location.reload();
+  } catch (error) {
+    if (adminLoginError) {
+      adminLoginError.textContent = error.message;
+      adminLoginError.classList.remove("hidden");
+    }
+  }
+}
+
+async function logoutAdmin() {
+  await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+  window.location.replace("/admin");
+}
+
+async function ensureAdminAccess(response) {
+  if (response.status === 401 || response.status === 403) {
+    await logoutAdmin();
+    return false;
+  }
+  return true;
+}
 
 function initTheme() {
   const saved = localStorage.getItem("vlearn-theme") || "dark";
@@ -96,6 +160,7 @@ async function loadClusters(showLoader = true) {
     const response = await fetch(
       `/api/admin/clusters?window=${currentWindow}&scope=${currentScope}`
     );
+    if (!(await ensureAdminAccess(response))) return;
     const result = await response.json();
     if (response.status === 202 || result.status === "processing") {
       schedulePoll();
@@ -343,11 +408,12 @@ function setupFiltersAndActions() {
     btnRecluster.disabled = true;
     btnRecluster.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Đang chạy...';
     try {
-      await fetch("/api/admin/clusters/recompute", {
+      const response = await fetch("/api/admin/clusters/recompute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ window: currentWindow, scope: currentScope }),
       });
+      if (!(await ensureAdminAccess(response))) return;
       renderProcessingState();
       showToast("Đã yêu cầu chạy lại clustering trên dữ liệu mới nhất.");
       window.setTimeout(() => loadClusters(false), 2200);
@@ -374,6 +440,7 @@ function setupFiltersAndActions() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: nextName.trim(), window: currentWindow, scope: currentScope }),
     });
+    if (!(await ensureAdminAccess(response))) return;
     if (!response.ok) return showToast("Không lưu được tên cụm.");
     cluster.name = nextName.trim();
     renderHeatmap();
@@ -397,6 +464,7 @@ function setupUpload() {
         `/api/admin/slides?filename=${encodeURIComponent(file.name)}&title=${encodeURIComponent(file.name.replace(/\.pdf$/i, ""))}`,
         { method: "POST", headers: { "Content-Type": "application/pdf" }, body: file }
       );
+      if (!(await ensureAdminAccess(response))) return;
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Upload thất bại");
       showToast(`Đã upload ${result.title} (${result.page_count} trang).`);
@@ -408,58 +476,6 @@ function setupUpload() {
       btnUploadSlide.querySelector("span").textContent = "Upload slide";
     }
   });
-}
-
-function setupChatbot() {
-  btnOpenChat.addEventListener("click", () => chatDrawer.classList.toggle("active"));
-  btnCloseChat.addEventListener("click", () => chatDrawer.classList.remove("active"));
-  document.querySelectorAll(".prompt-chip").forEach((chip) => {
-    chip.addEventListener("click", () => {
-      const cluster = clustersData.find((item) => item.id === selectedClusterId);
-      if (!cluster) return;
-      const type = chip.dataset.prompt;
-      const answers = {
-        miss: `Không có slide đối chứng nên hệ thống chưa kết luận bài giảng “miss”. Tín hiệu chắc chắn hiện có: chủ đề “${cluster.name}” chiếm ${cluster.percentage}% hội thoại và liên quan ${cluster.unique_users} học viên duy nhất.`,
-        "top-questions": `Các hội thoại đại diện của “${cluster.name}” đang hiển thị ở Inspector. Cụm có ${cluster.question_count} lượt hỏi–đáp. ${cluster.summary}`,
-        quiz: `Đề xuất: dùng các câu hỏi đại diện trong cụm “${cluster.name}” để soạn 3 câu kiểm tra đầu buổi; giảng viên cần duyệt lại vì hiện chưa có slide chuẩn để đối chứng.`,
-        summary: clustersData.slice(0, 3).map((item, index) => `${index + 1}. ${item.name}: ${item.percentage}%`).join("\n"),
-      };
-      appendAdminMessage("user", chip.textContent.trim());
-      appendAdminMessage("ai", answers[type] || cluster.summary);
-    });
-  });
-  btnSendChat.addEventListener("click", sendAdminMessage);
-  chatInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") sendAdminMessage();
-  });
-}
-
-function sendAdminMessage() {
-  const text = chatInput.value.trim();
-  if (!text) return;
-  const cluster = clustersData.find((item) => item.id === selectedClusterId);
-  appendAdminMessage("user", text);
-  chatInput.value = "";
-  appendAdminMessage(
-    "ai",
-    cluster
-      ? `Dựa trên cụm đang chọn: ${cluster.ai_recommendation}`
-      : "Hãy chọn một cụm chủ đề để xem phân tích có căn cứ."
-  );
-}
-
-function appendAdminMessage(sender, text) {
-  const item = document.createElement("div");
-  item.className = `chat-msg ${sender}-msg`;
-  const avatar = document.createElement("div");
-  avatar.className = "msg-avatar";
-  avatar.innerHTML = `<i class="${sender === "ai" ? "ri-robot-line" : "ri-user-line"}"></i>`;
-  const content = document.createElement("div");
-  content.className = "msg-content";
-  content.textContent = text;
-  item.append(avatar, content);
-  chatMessages.appendChild(item);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 function formatDate(value) {
@@ -491,13 +507,16 @@ function escapeHtml(value) {
 
 async function initDashboard() {
   initTheme();
+  adminLoginForm?.addEventListener("submit", handleAdminLogin);
+  adminLogoutBtn?.addEventListener("click", logoutAdmin);
+  const authenticated = await restoreAdminSession();
+  if (!authenticated) return;
   document.querySelectorAll("[data-scope]").forEach((button) => {
     button.classList.toggle("active", button.dataset.scope === currentScope);
   });
   setupViewSwitcher();
   setupFiltersAndActions();
   setupUpload();
-  setupChatbot();
   await loadClusters();
 }
 
