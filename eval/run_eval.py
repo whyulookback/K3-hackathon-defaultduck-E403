@@ -84,7 +84,7 @@ def run_evaluation():
             query = case.get("query", "")
             expected_keywords = case.get("expected_response_contains", [])
 
-            res = tutor.ask_tutor(user_id="teacher_eval", day_code="Day1", page=1, selected_text="", question=query)
+            res = tutor.ask_tutor(user_id="__eval__", day_code="Day1", page=1, selected_text="", question=query)
             actual_output = res.get("response", "")
 
             status_pass = len(actual_output) > 10

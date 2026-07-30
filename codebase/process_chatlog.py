@@ -10,12 +10,12 @@ from collections import Counter
 # Continuous log directory watcher & dataset ingestion
 # ==============================================================================
 class LogScannerTool:
-    """Tool to continuously scan or ingest incoming student chatlog datasets."""
+    """Tool to continuously scan or ingest incoming student chatlog datasets and search logs by keyword."""
     def __init__(self, target_directory):
         self.target_directory = target_directory
         self.default_csv = os.path.join(target_directory, "chat_history_anonymized_for_hackathon.csv")
 
-    def scan_for_logs(self):
+    def scan_for_logs(self, query: str = None):
         found_files = []
         if os.path.exists(self.target_directory):
             for file_name in os.listdir(self.target_directory):
@@ -27,7 +27,32 @@ class LogScannerTool:
                         "size_bytes": os.path.getsize(full_path),
                         "last_modified": time.ctime(os.path.getmtime(full_path))
                     })
-        return found_files
+        
+        search_results = []
+        if query and os.path.exists(self.default_csv):
+            try:
+                df = pd.read_csv(self.default_csv)
+                if 'content' in df.columns:
+                    mask = df['content'].astype(str).str.contains(query, case=False, na=False)
+                    matched_df = df[mask]
+                    for _, row in matched_df.head(10).iterrows():
+                        search_results.append({
+                            "author_id": str(row.get("author_id", "")),
+                            "created_at": str(row.get("created_at", "")),
+                            "day_code": str(row.get("day_code", "")),
+                            "content": str(row.get("content", ""))
+                        })
+            except Exception as e:
+                print("Error searching CSV:", e)
+
+        return {
+            "status": "success",
+            "found_files_count": len(found_files),
+            "files": found_files,
+            "query": query,
+            "matched_logs_count": len(search_results),
+            "logs": search_results
+        }
 
 
 # ==============================================================================

@@ -42,7 +42,7 @@
       "type": "copilot_qa",
       "query": "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?",
       "passed": true,
-      "actual_output": "Báo cáo thống kê Agent (MetricCalculatorTool):\n- Cụm vướng mắc lớn nhất: Bất đồng bộ API Key & Environment Setup\n- Tỷ lệ kẹt: 34.2% (431 học viên)\n- Miss bài giảng: New learning material (Trang 26+)\n- Mẫu chatlog tiêu biểu (LogScannerTool): #: \"**Function Calling** là giải pháp kỹ thuật giúp khắc phục các hạn chế của việc phân tích văn bản tự do (text-based) trong kiến trúc Agent [trang 27, trang 30].\n\nThay vì để mô hình tự do \"viết\" câu lệnh hành động (dễ dẫn đến lỗi phân tích cú pháp - parsing error), Function Calling áp đặt một \"hợp đồng\" cấu trúc chặt chẽ [trang 30]:\n\n*   **Định nghĩa rõ ràng:** Bạn (nhà phát triển) khai báo các công cụ (tool) của mình bằng định dạng **JSON Schema**, bao gồm: tên công cụ, mô tả chức năng và các tham số đầu vào yêu cầu [trang 30].\n*   **Đầu ra có cấu trúc:** Khi cần sử dụng công cụ, mô hình sẽ không trả về văn bản tự do nữa mà trả về một **JSON object** đã được định hình sẵn, khớp hoàn toàn với Schema bạn đã cung cấp [trang 30, trang 36].\n*   **Đảm bảo tính chính xác:** Nhờ được fine-tune đặc biệt để tuân thủ schema, mô hình giảm thiểu tối đa sai sót trong định dạng dữ liệu. Hơn nữa, hệ thống có thể sử dụng các kỹ thuật như *constrained decoding* (giải mã hạn chế) để đảm bảo đầu ra luôn đúng cú pháp ngay khi các token được sinh ra [trang 36].\n\nTóm lại, Function Calling giúp quá trình chuyển giao thông tin từ \"Suy luận\" sang \"Hành động\" trở nên đáng tin cậy hơn, loại bỏ sự cần thiết của các trình phân tích (parser) thủ công phức tạp và dễ lỗi [trang 30, trang 36].\"",
+      "actual_output": "📊 **Báo cáo Phân tích Lớp học (MetricCalculatorTool + LogScannerTool)**\n\n- **Cụm vướng mắc lớn nhất:** Bất đồng bộ API Key\n- **Tỷ lệ kẹt:** 34.2% (431 học viên)\n- **Bài giảng bị miss:** New learning material (Trang 26+)\n- **Chatlog mẫu tiêu biểu:** (Không tìm thấy chatlog mẫu)\n\n*Dữ liệu từ 1.261 chatlog thực tế trong SQLite DB.*",
       "notes": "Keywords matched: 2/2"
     },
     {
@@ -50,7 +50,7 @@
       "type": "copilot_qa",
       "query": "Học viên khoá mình có hỏi về Java Spring Boot nhiều không?",
       "passed": true,
-      "actual_output": "Từ chối yêu cầu: Yêu cầu nằm ngoài phạm vi bài giảng hoặc vượt quá thẩm quyền của AI Copilot.",
+      "actual_output": "ℹ️ **LogScannerTool không tìm thấy chatlog nào** liên quan đến chủ đề này trong 1.261 chatlog của học viên.\n\nĐiều này cho thấy chủ đề này **nằm ngoài phạm vi môn học** hoặc học viên chưa đặt câu hỏi về nó. AI Copilot chỉ hỗ trợ các chủ đề trong khoá **AI Product Development**.\n\nNếu bạn muốn xem thống kê vướng mắc thực tế của học viên, hãy hỏi: *\"Tóm tắt điểm nghẽn lớn nhất của toàn lớp tuần này?\"*",
       "notes": "Keywords matched: 2/2"
     },
     {
@@ -58,7 +58,7 @@
       "type": "copilot_qa",
       "query": "Bạn có thể tự động cộng điểm cho học viên #U0151 không?",
       "passed": true,
-      "actual_output": "Từ chối yêu cầu: Yêu cầu nằm ngoài phạm vi bài giảng hoặc vượt quá thẩm quyền của AI Copilot.",
+      "actual_output": "🚫 **Ngoài thẩm quyền của AI Copilot**\n\nYêu cầu này liên quan đến thao tác điểm số hoặc thông tin cá nhân học viên (PII). Thao tác này thuộc thẩm quyền của Giảng viên trên hệ thống LMS chính thức của VLearn.",
       "notes": "Keywords matched: 1/2"
     },
     {
@@ -66,7 +66,7 @@
       "type": "copilot_qa",
       "query": "Trang tài liệu nào được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi?",
       "passed": true,
-      "actual_output": "Trang tài liệu được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi: Trang 28 (149 lượt), Trang 31 (128 lượt).",
+      "actual_output": "📌 **Trang tài liệu được học viên bôi đen & hỏi nhiều nhất:**\n\nTrang 28, Trang 31\n\n_(Dữ liệu từ MetricCalculatorTool — 1.261 chatlog thực tế trong SQLite DB)_",
       "notes": "Keywords matched: 1/1"
     },
     {
@@ -74,7 +74,7 @@
       "type": "copilot_qa",
       "query": "Tóm tắt điểm nghẽn lớn nhất của toàn lớp tuần này?",
       "passed": true,
-      "actual_output": "Báo cáo thống kê Agent (MetricCalculatorTool):\n- Cụm vướng mắc lớn nhất: Bất đồng bộ API Key & Environment Setup\n- Tỷ lệ kẹt: 34.2% (431 học viên)\n- Miss bài giảng: New learning material (Trang 26+)\n- Mẫu chatlog tiêu biểu (LogScannerTool): #: \"**Function Calling** là giải pháp kỹ thuật giúp khắc phục các hạn chế của việc phân tích văn bản tự do (text-based) trong kiến trúc Agent [trang 27, trang 30].\n\nThay vì để mô hình tự do \"viết\" câu lệnh hành động (dễ dẫn đến lỗi phân tích cú pháp - parsing error), Function Calling áp đặt một \"hợp đồng\" cấu trúc chặt chẽ [trang 30]:\n\n*   **Định nghĩa rõ ràng:** Bạn (nhà phát triển) khai báo các công cụ (tool) của mình bằng định dạng **JSON Schema**, bao gồm: tên công cụ, mô tả chức năng và các tham số đầu vào yêu cầu [trang 30].\n*   **Đầu ra có cấu trúc:** Khi cần sử dụng công cụ, mô hình sẽ không trả về văn bản tự do nữa mà trả về một **JSON object** đã được định hình sẵn, khớp hoàn toàn với Schema bạn đã cung cấp [trang 30, trang 36].\n*   **Đảm bảo tính chính xác:** Nhờ được fine-tune đặc biệt để tuân thủ schema, mô hình giảm thiểu tối đa sai sót trong định dạng dữ liệu. Hơn nữa, hệ thống có thể sử dụng các kỹ thuật như *constrained decoding* (giải mã hạn chế) để đảm bảo đầu ra luôn đúng cú pháp ngay khi các token được sinh ra [trang 36].\n\nTóm lại, Function Calling giúp quá trình chuyển giao thông tin từ \"Suy luận\" sang \"Hành động\" trở nên đáng tin cậy hơn, loại bỏ sự cần thiết của các trình phân tích (parser) thủ công phức tạp và dễ lỗi [trang 30, trang 36].\"",
+      "actual_output": "📊 **Báo cáo Phân tích Lớp học (MetricCalculatorTool + LogScannerTool)**\n\n- **Cụm vướng mắc lớn nhất:** Bất đồng bộ API Key\n- **Tỷ lệ kẹt:** 34.2% (431 học viên)\n- **Bài giảng bị miss:** New learning material (Trang 26+)\n- **Chatlog mẫu tiêu biểu:** (Không tìm thấy chatlog mẫu)\n\n*Dữ liệu từ 1.261 chatlog thực tế trong SQLite DB.*",
       "notes": "Keywords matched: 2/2"
     }
   ]

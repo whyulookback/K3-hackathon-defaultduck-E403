@@ -60,6 +60,9 @@ def run_spherical_kmeans(vectors: np.ndarray, num_clusters: int = 4, max_iter: i
 def perform_clustering() -> Dict[str, Any]:
     """Executes full topic clustering pipeline over conversations in SQLite."""
     convs = db.get_all_conversations()
+    # Exclude eval/test conversations so they don't pollute chatlog evidence
+    EVAL_USER_PREFIXES = ("teacher_eval", "__eval__", "eval_", "anon_user")
+    convs = [c for c in convs if not str(c.get("user_id", "")).startswith(EVAL_USER_PREFIXES)]
     total_convs = len(convs)
     if total_convs == 0:
         return {"status": "no_data", "clusters_count": 0}
