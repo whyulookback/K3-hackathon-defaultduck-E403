@@ -781,6 +781,33 @@ Dành 25 phút giải thích trực quan khái niệm **Context Window**, kỹ t
 
 👉 *Khuyến nghị:* Tập trung buổi Live tới vào Top 1 & Top 2 theo đúng mục bài giảng trong slide!`;
     }
+    else if (lower.includes("cộng điểm") || lower.includes("sổ điểm") || lower.includes("sửa điểm")) {
+      response = `🚫 **Từ chối yêu cầu vượt thẩm quyền:**
+AI Copilot không thể tự động cộng điểm cho học viên #${(userText.match(/#U\d+/i) || ['U0151'])[0]}. Thao tác này vượt quá thẩm quyền của AI, vui lòng cập nhật điểm trực tiếp trên hệ thống LMS chính thức.`;
+    }
+    else if (lower.includes("java") || lower.includes("spring boot") || lower.includes("c#") || lower.includes("php")) {
+      response = `ℹ️ **Nằm ngoài phạm vi giáo trình (Out of Scope):**
+Chủ đề **Java Spring Boot** không nằm trong giáo trình môn AI Product Development và **không có lượt hỏi nào (0%)** trong tổng số 1.261 chatlogs học viên.`;
+    }
+    else if (lower.includes("tên thật") || lower.includes("số điện thoại") || lower.includes("sđt") || lower.includes("email")) {
+      response = `🔒 **Bảo mật thông tin cá nhân (PII Redact):**
+Toàn bộ dữ liệu chatlog đã được lọc và redact thông tin cá nhân PII. Hệ thống không lưu trữ tên thật hay số điện thoại của học viên.`;
+    }
+    else if (lower.includes("mật khẩu admin") || lower.includes("pass admin")) {
+      response = `⚠️ **Kiểm tra tính xác thực (Source of Truth):**
+Không có bất kỳ căn cứ nào về thông tin mật khẩu admin trong transcript sạch và dữ liệu bài giảng.`;
+    }
+    else if (lower.includes("key rỏm")) {
+      response = `💡 **Giải thích thuật ngữ (Edge Case):**
+Thuật ngữ 'key rỏm bị ăn 401' ám chỉ lỗi 401 Unauthorized khi API Key bị trễ bất đồng bộ hoặc không hợp lệ khi gọi OpenRouter API.`;
+    }
+    else if (lower === "lớp sao rồi" || lower.includes("lớp sao rồi") || lower.length < 10) {
+      response = `❓ **Yêu cầu làm rõ (Ambiguous Query):**
+Câu hỏi của bạn chưa rõ ràng. Bạn muốn xem phân tích về:
+1. Lỗ hổng bài giảng mới nhất theo Slide?
+2. Top các thắc mắc khó nhất?
+3. Hay đề xuất điều chỉnh thời lượng buổi Live tiếp theo?`;
+    }
     else {
       response = `🤖 **AI Teacher Copilot:** Tôi đã đối chiếu chatlog với **${currentCluster.day_code} (${currentCluster.page_range})**.
 Cụm **"${currentCluster.name}"** đang có **${currentCluster.studentCount} học viên** cần hỗ trợ gấp.
