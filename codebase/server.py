@@ -26,7 +26,7 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=CODEBASE_DIR, **kwargs)
 
     def do_GET(self):
-        if self.path == '/api/config':
+        if self.path.startswith('/api/config'):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
