@@ -65,6 +65,44 @@ def ask_tutor(
 ) -> Dict[str, Any]:
     """Autonomous Agent Execution Loop via OpenRouter LLM Reasoning & Function Tools."""
 
+    # ─── GUARD 1: Hard out-of-scope check (runs BEFORE any LLM call) ───────────
+    OUT_OF_SCOPE_KEYWORDS = [
+        # Personal / social
+        "tán gái", "tán trai", "hẹn hò", "tình yêu", "yêu đương", "bạn gái", "bạn trai",
+        "kết hôn", "chia tay", "tán đổ", "cưa đổ",
+        # Food & lifestyle
+        "ăn gì", "ăn ở đâu", "quán ngon", "cà phê", "nhậu",
+        # Sports & entertainment
+        "bóng đá", "bóng rổ", "thể thao", "game", "chơi game", "fifa", "lol", "pubg",
+        # Animals (off-topic)
+        "gà", "vịt", "mèo", "chó", "thú cưng",
+        # Weather
+        "thời tiết", "trời hôm nay", "mưa",
+        # Grading authority
+        "cộng điểm", "trừ điểm", "sửa điểm", "sổ điểm",
+        # PII
+        "tên thật", "số điện thoại", "sđt", "cmnd", "email cá nhân",
+        # Out-of-curriculum tech
+        "java spring boot", "spring boot", "c#", "php", "laravel", "ruby on rails",
+        # Admin
+        "học phí", "đóng tiền", "lịch học", "lich hoc",
+    ]
+    q_lower = question.lower()
+    if any(kw in q_lower for kw in OUT_OF_SCOPE_KEYWORDS):
+        msg = (
+            "🚫 **Nằm ngoài phạm vi môn học (Out of Scope)**\n\n"
+            "AI Teacher Copilot được thiết kế để hỗ trợ phân tích dữ liệu lớp học "
+            "và giải đáp thắc mắc liên quan đến môn **AI Product Development**. "
+            "Câu hỏi của bạn không liên quan đến nội dung bài giảng hoặc dữ liệu học viên.\n\n"
+            "Nếu có câu hỏi về bài giảng, slide, hoặc vướng mắc học viên, tôi rất sẵn lòng hỗ trợ!"
+        )
+        cid = db.save_conversation(user_id, day_code, page, selected_text, question, msg, "out_of_scope", None)
+        return {"id": cid, "status": "out_of_scope", "response": msg, "citation_page": None}
+
+    tutor_status = "answered"
+    citation_page = page
+    final_response = ""
+
     sys_prompt = (
         "Bạn là VLearn AI Agent Copilot chuyên sâu hỗ trợ Học viên và Giảng viên.\n"
         "HỆ THỐNG CÓ SẴN 1.261 CHATLOG CỦA HỌC VIÊN TRONG SQLITE DATABASE VÀ CÁC TOOLS TRUY VẤN.\n"
@@ -84,10 +122,6 @@ def ask_tutor(
         {"role": "system", "content": sys_prompt},
         {"role": "user", "content": question}
     ]
-
-    tutor_status = "answered"
-    citation_page = page
-    final_response = ""
 
     # Live OpenRouter Agent Tool Call Loop
     if openrouter_key:
