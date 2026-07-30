@@ -19,15 +19,14 @@ def slide_ocr_search_tool(day_code: str, page_number: int = 1) -> dict[str, Any]
     return tool.search_slide_section(day_code, page_number)
 
 
-def log_scanner_tool(target_directory: str = "data/vlearn-pack/chatlog") -> dict[str, Any]:
-    """Scans and ingests student chatlog datasets from log directory."""
+def log_scanner_tool(target_directory: str = "data/vlearn-pack/chatlog", query: str = None) -> dict[str, Any]:
+    """Scans student chatlog datasets and searches student chat history for keywords."""
     if str(CODEBASE_DIR) not in sys.path:
         sys.path.insert(0, str(CODEBASE_DIR))
     from process_chatlog import LogScannerTool
     full_path = ROOT / target_directory
     tool = LogScannerTool(str(full_path))
-    files = tool.scan_for_logs()
-    return {"status": "success", "found_files_count": len(files), "files": files}
+    return tool.scan_for_logs(query=query)
 
 
 def metric_calculator_tool(cluster_id: str = "cluster-1") -> dict[str, Any]:
@@ -81,11 +80,12 @@ TOOL_DECLARATIONS = [
         "type": "function",
         "function": {
             "name": "log_scanner_tool",
-            "description": "Scans log directory and ingests student chatlog datasets.",
+            "description": "Scans log directory and searches student chatlog history for specific keywords or topics (e.g., 'transformer', 'API key', 'vector').",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "target_directory": {"type": "string", "description": "Path to chatlog directory"}
+                    "target_directory": {"type": "string", "description": "Path to chatlog directory"},
+                    "query": {"type": "string", "description": "Keyword or topic to search within student chatlog messages"}
                 }
             }
         }

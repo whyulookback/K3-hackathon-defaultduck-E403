@@ -128,6 +128,9 @@ class VLearnStarletteServerHandler(http.server.SimpleHTTPRequestHandler):
 
         if url_path in ['/api/tutor', '/api/agent', '/api/chat']:
             try:
+                import importlib
+                importlib.reload(tutor)
+
                 user_id = req_json.get("user_id", "anon_user")
                 day_code = req_json.get("day_code", "Day1")
                 page = int(req_json.get("page", 1))

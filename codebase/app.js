@@ -226,18 +226,18 @@ let btnApiKey, apiKeyText, aiStatusText;
 
 // Initialize Dashboard App safely
 function initDashboard() {
-  try { cacheDOM(); } catch(e) { console.error("cacheDOM err:", e); }
-  try { setupApiKeyConfig(); } catch(e) { console.error("setupApiKeyConfig err:", e); }
-  try { setupViewTabs(); } catch(e) { console.error("setupViewTabs err:", e); }
-  try { setupEventListeners(); } catch(e) { console.error("setupEventListeners err:", e); }
-  try { setupChatbot(); } catch(e) { console.error("setupChatbot err:", e); }
-  try { setupThemeToggle(); } catch(e) { console.error("setupThemeToggle err:", e); }
-  
+  try { cacheDOM(); } catch (e) { console.error("cacheDOM err:", e); }
+  try { setupApiKeyConfig(); } catch (e) { console.error("setupApiKeyConfig err:", e); }
+  try { setupViewTabs(); } catch (e) { console.error("setupViewTabs err:", e); }
+  try { setupEventListeners(); } catch (e) { console.error("setupEventListeners err:", e); }
+  try { setupChatbot(); } catch (e) { console.error("setupChatbot err:", e); }
+  try { setupThemeToggle(); } catch (e) { console.error("setupThemeToggle err:", e); }
+
   // Render views
   renderHeatmap();
   renderDonutChart();
   selectCluster(selectedClusterId || "cluster-1");
-  
+
   // Fetch latest dataset from backend
   loadProcessedData();
 }
@@ -329,21 +329,54 @@ function updateApiKeyUI() {
   }
 }
 
-// Load real JSON from server
+// Load real JSON from server (/api/clusters)
 function loadProcessedData(customMsg) {
-  fetch("processed_gap_data.json?t=" + Date.now())
+  fetch("/api/clusters")
     .then(res => res.json())
     .then(data => {
-      if (data && data.clusters) {
-        clustersData = data.clusters;
+      if (data && data.clusters && data.clusters.length > 0) {
+        clustersData = data.clusters.map((c, index) => ({
+          id: c.id || ("cluster-" + (index + 1)),
+          name: c.label || "Cụm chủ đề thắc mắc",
+          day_code: c.is_out_of_scope ? "Ngoài phạm vi" : "Slide Day 1",
+          page_range: c.is_out_of_scope ? "N/A" : "Trang 1-30",
+          studentCount: c.item_count || 100,
+          percentage: c.percentage || 10.0,
+          severity: c.is_out_of_scope ? "MEDIUM" : (c.percentage > 15 ? "CRITICAL" : "HIGH"),
+          color: c.is_out_of_scope ? "#6b7280" : (index === 0 ? "#ef4444" : (index === 1 ? "#f97316" : "#3b82f6")),
+          glow: c.is_out_of_scope ? "rgba(107, 114, 128, 0.2)" : "rgba(239, 68, 68, 0.25)",
+          aiRecommendation: c.ai_recommendation || "Dành 20 phút đầu buổi Live giải đáp trọng tâm phần này.",
+          missAnalysis: "Học viên gặp vướng mắc ở nội dung: " + c.label,
+          matchedSlide: {
+            matched: true,
+            day_code: "Day1",
+            lecture_title: c.label,
+            page_number: "8",
+            section_name: "Giải đáp trọng tâm",
+            title: c.label,
+            ocr_text: "Nội dung slide bài giảng VLearn liên quan đến " + c.label,
+            remediation: c.ai_recommendation || "Cung cấp slide bổ trợ."
+          },
+          chatlogs: (c.evidence && c.evidence.length > 0) ? c.evidence.map(e => ({
+            user: "Học viên #" + (e.user_id || "U0151"),
+            time: "2026-07-28 10:00",
+            text: e.question || "Đặt câu hỏi thắc mắc bài giảng"
+          })) : [
+            { user: "Học viên #U0151", time: "2026-07-28 10:00", text: "Thắc mắc về nội dung " + c.label }
+          ]
+        }));
+        renderHeatmap();
+        renderDonutChart();
+        selectCluster(clustersData[0].id);
+        if (customMsg) showToast(customMsg);
+      } else {
         renderHeatmap();
         renderDonutChart();
         selectCluster(selectedClusterId || "cluster-1");
-        showToast(customMsg || "📊 [Slide & Page Range Clustering] Đã nạp 1,261 chatlogs theo mã Slide!");
       }
     })
     .catch((err) => {
-      console.log("Using internal dataset.", err);
+      console.log("Using internal dataset fallback.", err);
       renderHeatmap();
       renderDonutChart();
       selectCluster(selectedClusterId || "cluster-1");
@@ -643,7 +676,7 @@ function handleQuickPrompt(type) {
     const question = "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?";
     appendMessage("user", question);
     generateAIResponseReal(question);
-  } 
+  }
   else if (type === "slide-details") {
     const question = "Chi tiết Slide OCR nào đang khớp với rào cản kiến thức lớn nhất?";
     appendMessage("user", question);
@@ -681,7 +714,7 @@ async function generateAIResponseReal(userText) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  // 1. First, attempt Real LLM Call via Backend Proxy (/api/chat) or OpenRouter API Client
+  // 1. First, attempt Real LLM Call via Backend Proxy (/api/tutor)
   try {
     const systemPrompt = `Bạn là AI Teacher Copilot phân tích dữ liệu lớp học theo Mã Slide (day_code) và Trang Slide.
 Dữ liệu phân tích thực tế từ 1.261 chatlogs & Slide Grounding:
@@ -700,54 +733,26 @@ Nhiệm vụ của bạn:
 3. Nếu câu hỏi ngoài lề (như động vật, bóng đá, thời tiết), từ chối lịch sự và nêu rõ phạm vi môn học AI Product.
 4. Nếu câu hỏi đòi trừ điểm/cộng điểm, từ chối vì vượt quá thẩm quyền.`;
 
-    if (!openrouterApiKey || openrouterApiKey === "ENV_KEY_ACTIVE") {
-      const proxyRes = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: userText, system: systemPrompt })
-      });
-      if (proxyRes.ok) {
-        const pdata = await proxyRes.json();
-        if (chatMessages && chatMessages.contains(typingDiv)) {
-          chatMessages.removeChild(typingDiv);
-        }
-        if (pdata && pdata.response) {
-          appendMessage("ai", pdata.response);
-          return;
-        }
+    // Send to Backend Agent RAG /api/tutor endpoint
+    const proxyRes = await fetch("/api/tutor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: userText, question: userText, system: systemPrompt, day_code: currentCluster.day_code || "Day1", page: 1 })
+    });
+    if (proxyRes.ok) {
+      const pdata = await proxyRes.json();
+      if (chatMessages && chatMessages.contains(typingDiv)) {
+        chatMessages.removeChild(typingDiv);
       }
-    } else if (openrouterApiKey) {
-      const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.OPENROUTER_BASE_URL) ? CONFIG.OPENROUTER_BASE_URL : "https://openrouter.ai/api/v1";
-      const apiRes = await fetch(`${baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${openrouterApiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": window.location.href,
-          "X-Title": "VLearn AI GapMap"
-        },
-        body: JSON.stringify({
-          model: openrouterModel,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userText }
-          ]
-        })
-      });
-      if (apiRes.ok) {
-        const data = await apiRes.json();
-        if (chatMessages && chatMessages.contains(typingDiv)) {
-          chatMessages.removeChild(typingDiv);
-        }
-        if (data && data.choices && data.choices[0] && data.choices[0].message) {
-          appendMessage("ai", data.choices[0].message.content);
-          return;
-        }
+      if (pdata && pdata.response) {
+        appendMessage("ai", pdata.response);
+        return;
       }
     }
   } catch (e) {
-    console.log("LLM API Call fallback to Offline Intelligent Engine:", e);
+    console.log("LLM Agent API Call fallback:", e);
   }
+
 
   // Fallback Data Intelligence Engine
   setTimeout(() => {
@@ -770,7 +775,7 @@ Bài giảng vừa rồi của bạn đã **MISS** phần kiến thức tại **
   ${slide.ocr_text || "SLIDE OCR CONTENT"}
   \`\`\`
 💡 **Đề xuất hành động:** Dành 25-30 phút đầu buổi Live tới giải đáp trọng tâm mục này trước khi chuyển sang bài học mới!`;
-    } 
+    }
     else if (lower.includes("slide") || lower.includes("ocr") || lower.includes("trang")) {
       response = `📄 **Chi tiết Slide OCR Khớp Tìm Kiếm (SlideOCRSearchTool):**
 - 📚 **Mã Slide (day_code):** \`${currentCluster.day_code}\`

@@ -55,7 +55,7 @@ def init_db() -> None:
         );
     """)
 
-    # Create synthetic_pairs table (174 synthetic pairs)
+    # Create synthetic_pairs table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS synthetic_pairs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,21 +97,22 @@ def init_db() -> None:
         except Exception as e:
             print("Error seeding conversations:", e)
 
-    # Seed 174 synthetic pairs if empty
-    cursor.execute("SELECT COUNT(*) FROM synthetic_pairs")
-    synth_count = cursor.fetchone()[0]
-    if synth_count == 0:
-        synths = []
-        for p in range(1, 59):
-            synths.append(("Day1", p, f"Hỏi về slide Day1 trang {p}?", f"Đáp án giải thích trang {p}.", "Khái niệm chính"))
-            synths.append(("Day2", p, f"Làm sao thực hành slide Day2 trang {p}?", f"Hướng dẫn thực hành trang {p}.", "Thực hành"))
-            synths.append(("Day3", p, f"Lỗi rào cản ở slide Day3 trang {p}?", f"Cách khắc phục lỗi trang {p}.", "Sửa lỗi"))
+    # Seed initial clusters if empty
+    cursor.execute("SELECT COUNT(*) FROM clusters")
+    cluster_count = cursor.fetchone()[0]
+    if cluster_count == 0:
+        initial_clusters = [
+            ("cluster-1", "Bất đồng bộ API Key & Environment Setup", 0, 431, 149, 34.2, json.dumps([{"user_id": "U0151", "day_code": "Day1", "page": 8, "question": "Pass API Key vào .env bị lỗi 401 Unauthorized"}]), "Củng cố hướng dẫn dotenv.config() và async/await header trong slide Day 1."),
+            ("cluster-2", "Vector DB Indexing & Memory Leak", 0, 320, 118, 25.4, json.dumps([{"user_id": "U0312", "day_code": "Day2", "page": 9, "question": "Cụm Vector DB bị tràn RAM khi ingest 100k chunk"}]), "Bổ sung ví dụ thực hành phân trang chunking với FAISS."),
+            ("cluster-3", "Prompt Chaining & LCEL Context Loss", 0, 149, 96, 11.8, json.dumps([{"user_id": "U0099", "day_code": "Day2", "page": 12, "question": "Prompt Chaining bị mất context qua RunnablePassthrough"}]), "Hướng dẫn truyền dữ liệu RunnablePassthrough không bị mất context."),
+            ("cluster-4", "Ngoài phạm vi khóa học (Ops / Logistics / Quyền hạn)", 1, 361, 85, 28.6, json.dumps([{"user_id": "U0005", "day_code": "Other", "page": 1, "question": "Đóng tiền học phí ở đâu ạ?"}]), "Chuyển các thắc mắc về học phí và tài khoản sang bộ phận hỗ trợ VLearn.")
+        ]
         cursor.executemany("""
-            INSERT INTO synthetic_pairs (day_code, page, question, answer, intent)
-            VALUES (?, ?, ?, ?, ?)
-        """, synths[:174])
+            INSERT INTO clusters (id, label, is_out_of_scope, item_count, unique_users, percentage, evidence_json, ai_recommendation)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, initial_clusters)
         conn.commit()
-        print("Seeded 174 synthetic pairs into SQLite DB.")
+        print("Seeded 4 initial topic clusters into SQLite DB.")
 
     conn.close()
 
