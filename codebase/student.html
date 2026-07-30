@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VLearn Student Hub — Bài giảng & AI Tutor Hỗ trợ Học viên</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Remixicon icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="student-page">
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="logo-badge student-logo">
+          <i class="ri-book-open-line"></i>
+        </div>
+        <div>
+          <h1 class="app-title">VLearn Student Hub <span class="badge-tag student-tag">HỌC VIÊN VIEW</span></h1>
+          <p class="app-subtitle">Khóa học: AI Product Development (K3) · Bài 4: Xử lý API Key & Environment</p>
+        </div>
+      </div>
+
+      <div class="view-switch-banner">
+        <a href="index.html" class="btn-switch-view">
+          <i class="ri-dashboard-line"></i> 👉 Chuyển sang View Giảng viên (Class GapMap)
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Layout: Side-by-Side Slide Viewer & AI Student Tutor -->
+    <main class="student-main-layout">
+      
+      <!-- Left Container: Slide Presentation Viewer -->
+      <section class="slide-viewer-card card-glass">
+        <div class="slide-header">
+          <div class="slide-title-info">
+            <span class="slide-index-tag" id="slide-index-badge">SLIDE 1 / 4</span>
+            <h2 class="current-slide-title" id="slide-title">Bài 4: Bất đồng bộ khi gọi API Key & File .env</h2>
+          </div>
+          <div class="slide-nav-controls">
+            <button class="slide-btn" id="btn-prev-slide" disabled><i class="ri-arrow-left-s-line"></i> Trước</button>
+            <button class="slide-btn" id="btn-next-slide">Tiếp <i class="ri-arrow-right-s-line"></i></button>
+          </div>
+        </div>
+
+        <!-- Slide Canvas / Content Box -->
+        <div class="slide-canvas" id="slide-canvas">
+          <!-- Slide Content Rendered dynamically via JS -->
+        </div>
+
+        <!-- Action Bar Below Slide -->
+        <div class="slide-action-bar">
+          <button class="btn-copy-doc" id="btn-copy-slide-doc">
+            <i class="ri-file-copy-line"></i> 📋 Copy đoạn tài liệu trong slide này vào Chatbot AI
+          </button>
+          <span class="slide-tip"><i class="ri-information-line"></i> Bấm nút trên hoặc bôi đen văn bản để AI Tutor giải thích chi tiết</span>
+        </div>
+      </section>
+
+      <!-- Right Container: Side-by-Side VLearn AI Student Tutor -->
+      <aside class="student-tutor-card card-glass">
+        <div class="tutor-header">
+          <div class="tutor-brand">
+            <div class="tutor-avatar"><i class="ri-robot-2-line"></i></div>
+            <div>
+              <h3>VLearn AI Student Tutor</h3>
+              <span class="tutor-status"><span class="pulse-dot"></span> Đang kết nối bài giảng Slide</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Document Context Attachment Box -->
+        <div class="doc-context-box" id="doc-context-box">
+          <div class="context-label">
+            <i class="ri-file-text-line"></i> Đoạn tài liệu Slide đã trích dẫn:
+            <button class="btn-clear-context" id="btn-clear-context" title="Xóa trích dẫn"><i class="ri-close-line"></i></button>
+          </div>
+          <p class="context-preview-text" id="context-preview-text">
+            Chưa dán tài liệu. Hãy chọn Slide và bấm "Copy đoạn tài liệu" để gửi cho AI Tutor.
+          </p>
+        </div>
+
+        <!-- Student Quick Question Chips -->
+        <div class="student-prompt-chips">
+          <span class="chip-label">Câu hỏi gợi ý nhanh:</span>
+          <div class="chips-wrapper">
+            <button class="student-chip" data-q="explain">❓ AI hãy giải thích đoạn tài liệu này</button>
+            <button class="student-chip" data-q="401">🔴 Sao em bị lỗi 401 Unauthorized?</button>
+            <button class="student-chip" data-q="env">⚠️ `.env` bị undefined sửa thế nào?</button>
+          </div>
+        </div>
+
+        <!-- Chat History Stream -->
+        <div class="tutor-chat-messages" id="tutor-chat-messages">
+          <div class="tutor-msg ai-tutor-msg">
+            <div class="msg-avatar"><i class="ri-robot-line"></i></div>
+            <div class="msg-content">
+              Xin chào Học viên! Bạn đang xem Slide <strong>Bài 4</strong>. 
+              Hãy dán đoạn tài liệu hoặc bôi đen văn bản trong Slide rồi hỏi, tôi sẽ giải thích ngay!
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input & Send -->
+        <div class="tutor-input-bar">
+          <input type="text" id="student-chat-input" placeholder="Dán đoạn tài liệu hoặc gõ thắc mắc tại đây..." />
+          <button class="btn-student-send" id="btn-student-send"><i class="ri-send-plane-fill"></i> Gửi</button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>VLearn Student Hub — Cổng Học viên Hỏi-đáp & Xem Slide Bài Giảng | K3 AI Product Development</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-notification" id="student-toast">
+    <i class="ri-checkbox-circle-fill"></i> <span id="student-toast-msg">Đã copy tài liệu vào Chatbot AI!</span>
+  </div>
+
+  <script src="student-app.js"></script>
+</body>
+</html>
