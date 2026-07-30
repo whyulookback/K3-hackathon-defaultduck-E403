@@ -73,21 +73,53 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
                 req_json = json.loads(body) if body else {}
 
                 user_prompt = req_json.get("prompt") or req_json.get("query") or ""
-                active_cluster = req_json.get("cluster_id") or req_json.get("cluster") or ""
+                
+                # Check for live provider API Key
+                api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
 
-                if CODEBASE_DIR not in sys.path:
-                    sys.path.insert(0, CODEBASE_DIR)
-                import agent
-                copilot_agent = agent.VLearnCopilotAgent(WORKSPACE_DIR)
-                agent_res = copilot_agent.run(user_prompt, active_cluster)
+                if api_key:
+                    from providers import make_provider
+                    from tools import to_openai_tools
+                    from chat import run_model_tool_loop
+
+                    provider_name = "openrouter" if os.getenv("OPENROUTER_API_KEY") else "openai"
+                    provider = make_provider(provider_name)
+                    tools = to_openai_tools()
+
+                    sys_msg = {
+                        "role": "system",
+                        "content": (
+                            "Bạn là AI Teacher Copilot Agent sử dụng các Agent Tools để phân tích dữ liệu 1.261 chatlogs "
+                            "và slide bài giảng VLearn. Bạn có thể sử dụng các công cụ slide_ocr_search_tool, metric_calculator_tool, "
+                            "log_scanner_tool để tra cứu thông tin và trả lời trực tiếp cho người dùng. "
+                            "Nếu câu hỏi đòi vượt thẩm quyền (như cộng/trừ điểm), hãy từ chối. "
+                            "Nếu câu hỏi ngoài lề (động vật, bóng đá), từ chối lịch sự."
+                        )
+                    }
+                    user_msg = {"role": "user", "content": user_prompt}
+                    loop_result = run_model_tool_loop(
+                        provider=provider,
+                        messages=[sys_msg, user_msg],
+                        tools=tools,
+                        model=os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
+                        max_tool_rounds=3
+                    )
+                    ai_text = loop_result.get("assistant_text", "Đã xử lý xong truy vấn.")
+                    res_payload = {"status": "success", "response": ai_text, "details": loop_result}
+                else:
+                    # Fallback to Agent Class using local Tools execution
+                    import agent
+                    copilot_agent = agent.VLearnCopilotAgent(WORKSPACE_DIR)
+                    res_payload = copilot_agent.run(user_prompt)
 
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                self.wfile.write(json.dumps(agent_res, ensure_ascii=False).encode('utf-8'))
+                self.wfile.write(json.dumps(res_payload, ensure_ascii=False).encode('utf-8'))
+
             except Exception as e:
-                print("Error executing VLearnCopilotAgent:", e)
+                print("Error executing Agent Pipeline:", e)
                 self.send_response(500)
                 self.send_header('Content-Type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
