@@ -117,34 +117,34 @@
       }
     },
     "New learning material": {
-      "lecture_title": "New learning material: Bài giảng Bổ trợ Thiết lập Eval Golden Set & Quality Bar",
+      "lecture_title": "New learning material: Kiến trúc Mô hình Ngôn ngữ (LLM), Context Window & MoE Architecture",
       "sections": {
         "1-5": {
-          "section_name": "Mục 1: Xây dựng Golden Set 20-30 Cases theo 4 Lớp chỗ khó",
+          "section_name": "Mục 1: Tổng quan Mô hình LLM, Pre-training, SFT & RLHF/DPO",
           "pages": "Trang 1 - 5",
-          "title": "Xây dựng Golden Set Baseline (Happy path, Source of truth, Mơ hồ, Out of scope)",
-          "summary": "Phân bổ 25 case thử nghiệm: Happy path, Source of truth, Mơ hồ, Out of scope và Edge cases.",
-          "key_concept": "Golden Set Construction",
-          "ocr_text": "SLIDE 1: GOLDEN SET CREATION\nTạo tập 25 test cases đại diện cho 4 lớp chỗ khó:\n- Lớp 1: Happy Path\n- Lớp 2: Source of Truth\n- Lớp 3: Ambiguous\n- Lớp 4: Out of Scope / Edge Cases",
-          "remediation": "Chia sẻ file template golden_set.json mẫu."
+          "title": "Quy trình huấn luyện LLM: Pre-training → SFT → RLHF/DPO",
+          "summary": "3 giai đoạn huấn luyện LLM: Tiền huấn luyện trên hàng nghìn tỷ token, SFT theo ví dụ mẫu, và RLHF/DPO tinh chỉnh theo phản hồi con người.",
+          "key_concept": "Quy trình huấn luyện LLM (Pre-training, SFT, RLHF)",
+          "ocr_text": "SLIDE 2: LLM TRAINING PIPELINE\n1. Pre-training: Đọc hàng nghìn tỷ token học ngôn ngữ.\n2. SFT (Supervised Fine-Tuning): Học trả lời theo ví dụ mẫu.\n3. RLHF / DPO: Tinh chỉnh theo phản hồi con người.",
+          "remediation": "Cung cấp sơ đồ tổng quan 3 bước huấn luyện mô hình ngôn ngữ lớn."
         },
-        "6-15": {
-          "section_name": "Mục 2: Đánh giá Semantic Match & Benchmark Case khó",
-          "pages": "Trang 6 - 15",
-          "title": "Đo đạc Semantic Match & Exact Keyword Accuracy",
-          "summary": "Sử dụng Cosine Distance Embedding để chấm điểm câu trả lời mơ hồ của học viên.",
-          "key_concept": "Semantic Similarity Scoring",
-          "ocr_text": "SLIDE 7: SEMANTIC MATCHING BENCHMARK\nTính Cosine Similarity giữa Output và Expected Answer trong Golden Set.",
-          "remediation": "Cung cấp script đo đạc tự động bằng Python."
+        "6-25": {
+          "section_name": "Mục 2: Phân loại dòng LLM (GPT, Claude, Kimi) & Kiến trúc Transformer",
+          "pages": "Trang 6 - 25",
+          "title": "Các dòng LLM phổ biến & Nguyên lý Transformer",
+          "summary": "So sánh các dòng LLM chính (GPT, Claude, Kimi) và nguyên lý bộ não nền Transformer.",
+          "key_concept": "Các dòng LLM & Bộ não Transformer",
+          "ocr_text": "SLIDE 12: DÒNG MÔ HÌNH NGÔN NGỮ LỚN\nGPT-4, Claude 3.5, Kimi K3 - Mỗi mô hình có tập dữ liệu và bộ não nền Transformer riêng.",
+          "remediation": "So sánh điểm mạnh và weak-spot của từng dòng mô hình."
         },
-        "16+": {
-          "section_name": "Mục 3: Thiết lập Quality Bar & Run Eval Automation",
-          "pages": "Trang 16+",
-          "title": "Thiết lập Quality Bar Target (>=80%) & Test Runner",
-          "summary": "Chốt con số Quality Bar % trước khi build. Chạy eval tự động bằng script run_eval.py.",
-          "key_concept": "Quality Bar & Benchmark Automation",
-          "ocr_text": "SLIDE 16: QUALITY BAR BENCHMARKING\nPass Rate Target >= 80%. Viết script run_eval.py tự động kiểm tra 25 test cases.",
-          "remediation": "Hướng dẫn xuất báo cáo eval_report.md."
+        "26+": {
+          "section_name": "Mục 3: Context Window (Bàn làm việc), Autoregressive & MoE 2.800B Params",
+          "pages": "Trang 26+",
+          "title": "Giới hạn Context Window (Bàn làm việc 128K/1M token), Sinh từ Autoregressive & MoE",
+          "summary": "Cơ chế đoán từ nối câu của Transformer, ẩn dụ Bàn làm việc về giới hạn Context (128K/1M token), hiện tượng Lost-in-the-middle bỏ sót thông tin ở giữa prompt dài, và MoE 2.800B params.",
+          "key_concept": "Context Window (Bàn làm việc), Lost in the Middle & MoE Architecture",
+          "ocr_text": "SLIDE 31: CONTEXT WINDOW & TRANSFORMER GENERATION\n- Sinh văn bản = đoán → nối vào câu → đoán tiếp.\n- Context Window (Bàn làm việc): 128K token ≈ 300 trang sách, 1M token ≈ 4-5 cuốn sách.\n- Bàn đầy quá thì thông tin ở giữa bàn dễ bị bỏ sót (Lost in the middle).\n- SLIDE 37: MoE Architecture - 2.800 tỷ tham số (Bệnh viện đa khoa kích hoạt chuyên gia).",
+          "remediation": "Hướng dẫn kỹ thuật cấu trúc Prompt (đặt thông tin quan trọng ở đầu/cuối prompt) tránh lỗi Lost in the Middle."
         }
       }
     }
