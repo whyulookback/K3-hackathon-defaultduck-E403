@@ -1,99 +1,54 @@
 /**
- * VLearn Class Knowledge Gap Map - Interactive Prototype Application (CP2)
- * Handles Heatmap rendering, Topic Donut Chart, Cluster Inspector, Evidence Chatlog Stream,
- * Time filtering, AI Re-clustering Simulation, AI Teacher Copilot Chatbot, and Theme Switcher (Dark/Light mode).
+ * VLearn Topic Interest Map — working admin dashboard.
+ * Reads continuous clustering results from the local backend.
  */
 
-// Mock Clusters Data (Matching Spec & Data Evidence)
-const clustersData = [
-  {
-    id: "cluster-1",
-    name: "Bất đồng bộ API Key & Environment Setup",
-    studentCount: 342,
-    percentage: 34.2,
-    severity: "CRITICAL",
-    color: "#ef4444",
-    glow: "rgba(239, 68, 68, 0.35)",
-    aiRecommendation: "⚠️ **CẢNH BÁO LẬP BÀI GIẢNG:** Dành 30 phút đầu buổi Live tới demo Live Fix lỗi dotenv & async API Key handling trước khi chuyển sang Prompt Chaining. Có 342/1,000 học viên đang kẹt rào cản này!",
-    chatlogs: [
-      { user: "Học viên #842", time: "10 phút trước", text: "Thầy ơi em pass API Key vào `.env` rồi mà lúc gọi <span class='highlight-key'>async await</span> toàn báo <span class='highlight-key'>401 Unauthorized</span> là sao ạ?" },
-      { user: "Học viên #119", time: "25 phút trước", text: "Sao em chạy local thì được mà up lên VLearn server thì <span class='highlight-key'>API Key bị undefined</span> ạ?" },
-      { user: "Học viên #531", time: "42 phút trước", text: "Cho em hỏi <span class='highlight-key'>async function</span> trong JS xử lý API Key header khác gì sync function ạ?" },
-      { user: "Học viên #904", time: "1 giờ trước", text: "Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?" },
-      { user: "Học viên #208", time: "2 giờ trước", text: "TA hỗ trợ em với, em sửa API Key theo slide mà vẫn lỗi connection closed?" }
-    ]
-  },
-  {
-    id: "cluster-2",
-    name: "Vector DB Indexing & Memory Leak",
-    studentCount: 254,
-    percentage: 25.4,
-    severity: "HIGH",
-    color: "#f97316",
-    glow: "rgba(249, 115, 22, 0.3)",
-    aiRecommendation: "💡 **Đề xuất Giáo án:** Hướng dẫn kỹ thuật Batching Chunk Size (512 tokens) & giải phóng Memory khi Ingest dataset > 10.000 dòng trên ChromaDB/FAISS.",
-    chatlogs: [
-      { user: "Học viên #312", time: "30 phút trước", text: "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn ạ?" },
-      { user: "Học viên #671", time: "1 giờ trước", text: "Code python chunking văn bản lớn chạy được 50% là bị memory leak out of RAM ạ?" },
-      { user: "Học viên #445", time: "2 giờ trước", text: "Em lưu embedding vector vào FAISS index mà search similarity trả về kết quả rất chậm?" }
-    ]
-  },
-  {
-    id: "cluster-3",
-    name: "Prompt Chaining & LCEL Context Loss",
-    studentCount: 120,
-    percentage: 12.0,
-    severity: "MEDIUM",
-    color: "#eab308",
-    glow: "rgba(234, 179, 8, 0.25)",
-    aiRecommendation: "📘 **Nội dung bổ trợ:** Nhắc lại cú pháp RunnablePassthrough() trong LangChain Expression Language (LCEL) ở 10 phút cuối buổi.",
-    chatlogs: [
-      { user: "Học viên #099", time: "15 phút trước", text: "Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?" },
-      { user: "Học viên #721", time: "3 giờ trước", text: "Cho em hỏi làm sao debug được variables truyền qua các node trong RunnableMap ạ?" }
-    ]
-  },
-  {
-    id: "cluster-4",
-    name: "Eval Golden Set & Quality Bar Setup",
-    studentCount: 85,
-    percentage: 8.5,
-    severity: "LOW",
-    color: "#10b981",
-    glow: "rgba(16, 185, 129, 0.2)",
-    aiRecommendation: "✅ **Trạng thái ổn:** Cụm bài tập này học viên nắm khá tốt. Chỉ cần gửi bài đọc tham khảo trong tài liệu khoá học.",
-    chatlogs: [
-      { user: "Học viên #150", time: "45 phút trước", text: "Tạo golden set 20 case thì nên chia tỷ lệ case khó và case thường như thế nào ạ?" },
-      { user: "Học viên #811", time: "4 giờ trước", text: "Quality bar tính bằng phần trăm % exact match hay semantic match ạ?" }
-    ]
-  },
-  {
-    id: "cluster-5",
-    name: "Khác / Out of Scope Chatlogs",
-    studentCount: 99,
-    percentage: 9.9,
-    severity: "LOW",
-    color: "#4b5563",
-    glow: "rgba(75, 85, 99, 0.2)",
-    aiRecommendation: "ℹ️ **Lọc nhiễu:** Các câu hỏi không thuộc nội dung môn học (hỏi về tài khoản, lịch học, câu hỏi ngoài lề). TA có thể chuyển sang bộ phận Ops.",
-    chatlogs: [
-      { user: "Học viên #005", time: "10 phút trước", text: "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?" },
-      { user: "Học viên #012", time: "1 giờ trước", text: "Hôm nay lớp học online trên Zoom hay Discord vậy mọi người?" }
-    ]
-  }
-];
+function reportClientError(details) {
+  fetch("/api/client-logs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      level: "error",
+      page: window.location.href,
+      ...details,
+    }),
+    keepalive: true,
+  }).catch(() => {});
+}
 
-// State
-let selectedClusterId = "cluster-1";
-let currentViewMode = "grid"; // 'grid' or 'chart'
+window.addEventListener("error", (event) => {
+  reportClientError({
+    kind: "window_error",
+    message: event.message || "Unknown JavaScript error",
+    source: event.filename || "",
+    line: event.lineno || 0,
+    column: event.colno || 0,
+    stack: event.error?.stack || "",
+  });
+});
 
-// DOM Elements
+window.addEventListener("unhandledrejection", (event) => {
+  const reason = event.reason;
+  reportClientError({
+    kind: "unhandled_promise_rejection",
+    message: reason?.message || String(reason || "Unknown rejected promise"),
+    stack: reason?.stack || "",
+  });
+});
+
+let clustersData = [];
+let selectedClusterId = null;
+let currentViewMode = "grid";
+let currentWindow = "7d";
+const requestedScope = new URLSearchParams(window.location.search).get("scope");
+let currentScope = requestedScope === "slides" ? "slides" : "dataset";
+let pollTimer = null;
+
 const heatmapGrid = document.getElementById("heatmap-grid");
 const topicChartView = document.getElementById("topic-chart-view");
 const chartBarsList = document.getElementById("chart-bars-list");
 const btnModeGrid = document.getElementById("btn-mode-grid");
 const btnModeChart = document.getElementById("btn-mode-chart");
-
-const inspectorPanel = document.getElementById("inspector-panel");
 const clusterSeverity = document.getElementById("cluster-severity");
 const clusterTitle = document.getElementById("cluster-title");
 const clusterStats = document.getElementById("cluster-stats");
@@ -105,62 +60,248 @@ const btnAddSlide = document.getElementById("btn-add-slide");
 const btnEditTitle = document.getElementById("btn-edit-title");
 const toast = document.getElementById("toast");
 const toastMessage = document.getElementById("toast-message");
-
-// Chatbot Elements
 const btnOpenChat = document.getElementById("btn-open-chat");
 const btnCloseChat = document.getElementById("btn-close-chat");
 const chatDrawer = document.getElementById("chat-drawer");
 const chatMessages = document.getElementById("chat-messages");
 const chatInput = document.getElementById("chat-input");
 const btnSendChat = document.getElementById("btn-send-chat");
-
-// Theme Toggle Elements
 const btnThemeToggle = document.getElementById("btn-theme-toggle");
 const themeIcon = document.getElementById("theme-icon");
 const themeText = document.getElementById("theme-text");
+const uploadInput = document.getElementById("slide-upload-input");
+const btnUploadSlide = document.getElementById("btn-upload-slide");
 
-// Initialize Dashboard
-function initDashboard() {
-  initTheme();
-  renderHeatmap();
-  renderTopicDonutChart();
-  selectCluster(selectedClusterId);
-  setupEventListeners();
-  setupViewModeSwitcher();
-  setupChatbot();
-}
-
-// Theme Switcher Logic (Dark / Light Mode)
 function initTheme() {
-  const savedTheme = localStorage.getItem("vlearn-theme") || "dark";
-  applyTheme(savedTheme);
-
-  if (btnThemeToggle) {
-    btnThemeToggle.addEventListener("click", () => {
-      const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
-      applyTheme(newTheme);
-      localStorage.setItem("vlearn-theme", newTheme);
-      showToast(`Đã chuyển sang chế độ: ${newTheme === "light" ? "Sáng (Light Mode)" : "Tối (Dark Mode)"}`);
-    });
-  }
+  const saved = localStorage.getItem("vlearn-theme") || "dark";
+  applyTheme(saved);
+  btnThemeToggle?.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme") || "dark";
+    const next = current === "dark" ? "light" : "dark";
+    localStorage.setItem("vlearn-theme", next);
+    applyTheme(next);
+  });
 }
 
 function applyTheme(theme) {
   document.documentElement.setAttribute("data-theme", theme);
-  if (themeIcon && themeText) {
-    if (theme === "light") {
-      themeIcon.className = "ri-moon-line";
-      themeText.textContent = "Dark Mode";
-    } else {
-      themeIcon.className = "ri-sun-line";
-      themeText.textContent = "Light Mode";
+  if (!themeIcon || !themeText) return;
+  themeIcon.className = theme === "light" ? "ri-moon-line" : "ri-sun-line";
+  themeText.textContent = theme === "light" ? "Dark Mode" : "Light Mode";
+}
+
+async function loadClusters(showLoader = true) {
+  if (showLoader) renderProcessingState();
+  try {
+    const response = await fetch(
+      `/api/admin/clusters?window=${currentWindow}&scope=${currentScope}`
+    );
+    const result = await response.json();
+    if (response.status === 202 || result.status === "processing") {
+      schedulePoll();
+      return;
     }
+    if (!response.ok || result.status === "error") {
+      throw new Error(result.error || "Không tải được kết quả clustering");
+    }
+    if (result.refreshing) {
+      schedulePoll();
+    } else {
+      clearTimeout(pollTimer);
+    }
+    clustersData = result.clusters || [];
+    selectedClusterId = clustersData.some((item) => item.id === selectedClusterId)
+      ? selectedClusterId
+      : clustersData[0]?.id || null;
+    updateOverview(result);
+    renderHeatmap();
+    renderTopicDonutChart(result.total_pairs);
+    if (selectedClusterId) selectCluster(selectedClusterId);
+  } catch (error) {
+    heatmapGrid.innerHTML = `<div class="cluster-error"><i class="ri-error-warning-line"></i><strong>Chưa kết nối được backend</strong><span>${escapeHtml(error.message)}</span><code>./run-local.ps1</code></div>`;
   }
 }
 
-// View Mode Switcher (Grid vs Donut Chart)
-function setupViewModeSwitcher() {
+function schedulePoll() {
+  clearTimeout(pollTimer);
+  pollTimer = window.setTimeout(() => loadClusters(false), 1800);
+}
+
+function renderProcessingState() {
+  heatmapGrid.innerHTML = `
+    <div class="cluster-processing">
+      <i class="ri-loader-4-line ri-spin"></i>
+      <strong>Đang vector hóa hội thoại...</strong>
+      <span>Voyage xử lý QUESTION + TUTOR_ANSWER, sau đó OpenRouter đặt tên cụm.</span>
+    </div>
+  `;
+}
+
+function updateOverview(result) {
+  document.getElementById("class-meta").textContent =
+    `${result.unique_users.toLocaleString("vi-VN")} học viên · ${result.total_pairs.toLocaleString("vi-VN")} lượt hỏi–đáp`;
+  document.getElementById("kpi-total-pairs").textContent =
+    result.total_pairs.toLocaleString("vi-VN");
+  document.getElementById("kpi-unique-users").textContent =
+    result.unique_users.toLocaleString("vi-VN");
+  document.getElementById("chart-total").textContent =
+    `Tổng số: ${result.total_pairs.toLocaleString("vi-VN")} lượt hỏi–đáp`;
+  document.getElementById("analysis-desc").textContent =
+    currentScope === "slides"
+      ? `Dữ liệu synthetic từ 2 PDF · ${result.total_pairs.toLocaleString("vi-VN")} cặp question + tutor answer · có mapping trang`
+      : `Chatlog thật · ${result.total_pairs.toLocaleString("vi-VN")} cặp question + tutor answer · ${labelWindow(currentWindow)}`;
+  const top = result.clusters[0];
+  document.getElementById("kpi-top-topic").textContent = top?.name || "Chưa có dữ liệu";
+  document.getElementById("kpi-top-topic-sub").textContent = top
+    ? `${top.question_count} lượt hỏi · ${top.percentage}% hội thoại`
+    : "Chưa có hội thoại";
+  document.getElementById("kpi-provider").textContent =
+    result.embedding_provider?.startsWith("voyage") ? "Voyage + LLM" : "Local fallback";
+  document.getElementById("kpi-generated-at").textContent =
+    result.generated_at
+      ? `Cập nhật ${new Date(result.generated_at).toLocaleTimeString("vi-VN")}`
+      : "Đang chờ lần chạy đầu";
+}
+
+function renderHeatmap() {
+  heatmapGrid.replaceChildren();
+  clustersData.forEach((cluster) => {
+    const block = document.createElement("button");
+    block.type = "button";
+    block.className = `heatmap-block ${cluster.id === selectedClusterId ? "active-block" : ""}`;
+    block.style.setProperty("--block-color", cluster.color);
+    block.style.setProperty("--block-glow", cluster.glow);
+    const pageSignal = currentScope === "slides" && cluster.top_pages?.length
+      ? `<span class="slide-page-signal"><i class="ri-slideshow-line"></i> ${escapeHtml(cluster.top_pages[0].slide_filename)} · trang ${cluster.top_pages[0].page_number}</span>`
+      : "";
+    block.innerHTML = `
+      <div class="block-header">
+        <h3 class="block-name">${escapeHtml(cluster.name)}</h3>
+        <span class="block-count">${cluster.question_count} lượt</span>
+      </div>
+      ${pageSignal}
+      <p class="block-summary">${escapeHtml(cluster.summary || "")}</p>
+      <div class="block-metrics">
+        <div style="width:100%">
+          <div class="block-footer-txt"><span><strong>${cluster.unique_users}</strong> học viên duy nhất</span><span>${cluster.percentage}%</span></div>
+          <div class="pct-bar-bg"><div class="pct-bar-fill" style="width:${Math.min(100, cluster.percentage)}%"></div></div>
+        </div>
+      </div>
+    `;
+    block.addEventListener("click", () => selectCluster(cluster.id));
+    heatmapGrid.appendChild(block);
+  });
+}
+
+function renderTopicDonutChart(totalPairs = 0) {
+  chartBarsList.replaceChildren();
+  if (!clustersData.length) return;
+  let cumulative = 0;
+  const stops = clustersData
+    .map((cluster) => {
+      const start = cumulative;
+      cumulative += cluster.percentage;
+      return `${cluster.color} ${start}% ${cumulative}%`;
+    })
+    .join(", ");
+
+  const layout = document.createElement("div");
+  layout.className = "donut-chart-layout";
+  const visual = document.createElement("div");
+  visual.className = "donut-visual-box";
+  visual.innerHTML = `<div class="donut-circle" style="background:conic-gradient(${stops})"><div class="donut-hole"><span class="donut-center-val">${totalPairs.toLocaleString("vi-VN")}</span><span class="donut-center-lbl">Lượt hỏi–đáp</span></div></div>`;
+
+  const legend = document.createElement("div");
+  legend.className = "donut-legend-list";
+  clustersData.forEach((cluster) => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = `donut-legend-item ${cluster.id === selectedClusterId ? "active-legend" : ""}`;
+    item.innerHTML = `
+      <span class="legend-dot" style="background:${cluster.color}"></span>
+      <span class="legend-info"><span class="legend-title">${escapeHtml(cluster.name)}</span><span class="legend-sub">${cluster.question_count} lượt · <strong>${cluster.percentage}%</strong></span></span>
+    `;
+    item.addEventListener("click", () => selectCluster(cluster.id));
+    legend.appendChild(item);
+  });
+  layout.append(visual, legend);
+  chartBarsList.appendChild(layout);
+}
+
+function selectCluster(clusterId) {
+  selectedClusterId = clusterId;
+  const cluster = clustersData.find((item) => item.id === clusterId);
+  if (!cluster) return;
+  document.querySelectorAll(".heatmap-block").forEach((block, index) => {
+    block.classList.toggle("active-block", clustersData[index]?.id === clusterId);
+  });
+  document.querySelectorAll(".donut-legend-item").forEach((item, index) => {
+    item.classList.toggle("active-legend", clustersData[index]?.id === clusterId);
+  });
+  clusterSeverity.textContent = cluster.out_of_scope
+    ? "NGOÀI PHẠM VI"
+    : `QUAN TÂM ${cluster.interest_level || cluster.severity}`;
+  clusterSeverity.className = `severity-badge ${cluster.out_of_scope ? "LOW" : cluster.severity}`;
+  clusterTitle.textContent = cluster.name;
+  clusterStats.textContent =
+    `${cluster.question_count} lượt hỏi–đáp · ${cluster.unique_users} học viên duy nhất · ${cluster.percentage}%`
+    + (currentScope === "slides" && cluster.top_pages?.length
+      ? ` · Trang nổi bật: ${cluster.top_pages.slice(0, 3).map((item) => `${item.page_number}`).join(", ")}`
+      : "");
+  recBody.textContent = cluster.ai_recommendation;
+  renderEvidence(cluster.evidence || []);
+}
+
+function renderEvidence(evidence) {
+  chatlogCount.textContent = evidence.length;
+  chatlogList.replaceChildren();
+  evidence.forEach((log) => {
+    const item = document.createElement("article");
+    item.className = "chatlog-item evidence-pair";
+    const meta = document.createElement("div");
+    meta.className = "chat-meta";
+    const user = document.createElement("span");
+    user.className = "chat-user";
+    user.textContent = log.user;
+    const time = document.createElement("span");
+    time.className = "chat-time";
+    time.textContent = log.slide_filename && log.page_number
+      ? `${log.slide_filename} · trang ${log.page_number}`
+      : formatDate(log.time);
+    meta.append(user, time);
+
+    const questionLabel = document.createElement("span");
+    questionLabel.className = "evidence-label question";
+    questionLabel.textContent = "Học viên hỏi";
+    const question = document.createElement("p");
+    question.className = "chat-text";
+    question.textContent = log.question;
+    const answerLabel = document.createElement("span");
+    answerLabel.className = "evidence-label answer";
+    answerLabel.textContent = "Tutor trả lời";
+    const answer = document.createElement("p");
+    answer.className = "chat-text tutor-evidence-answer";
+    answer.textContent = log.answer;
+    item.append(meta, questionLabel, question, answerLabel, answer);
+    if (log.slide_id && log.page_number) {
+      const openSlide = document.createElement("button");
+      openSlide.type = "button";
+      openSlide.className = "btn-open-evidence-slide";
+      openSlide.innerHTML = `<i class="ri-external-link-line"></i> Mở PDF tại trang ${log.page_number}`;
+      openSlide.addEventListener("click", () => {
+        window.open(
+          `/api/slides/${encodeURIComponent(log.slide_id)}/file#page=${log.page_number}`,
+          "_blank",
+          "noopener"
+        );
+      });
+      item.appendChild(openSlide);
+    }
+    chatlogList.appendChild(item);
+  });
+}
+
+function setupViewSwitcher() {
   btnModeGrid.addEventListener("click", () => {
     currentViewMode = "grid";
     btnModeGrid.classList.add("active");
@@ -168,7 +309,6 @@ function setupViewModeSwitcher() {
     heatmapGrid.classList.remove("hidden");
     topicChartView.classList.add("hidden");
   });
-
   btnModeChart.addEventListener("click", () => {
     currentViewMode = "chart";
     btnModeChart.classList.add("active");
@@ -178,327 +318,187 @@ function setupViewModeSwitcher() {
   });
 }
 
-// Render Heatmap Grid
-function renderHeatmap() {
-  heatmapGrid.innerHTML = "";
-
-  clustersData.forEach(cluster => {
-    const block = document.createElement("div");
-    block.className = `heatmap-block ${cluster.id === selectedClusterId ? 'active-block' : ''}`;
-    block.style.setProperty('--block-color', cluster.color);
-    block.style.setProperty('--block-glow', cluster.glow);
-
-    block.innerHTML = `
-      <div class="block-header">
-        <h3 class="block-name">${cluster.name}</h3>
-        <span class="block-count">${cluster.studentCount} HV</span>
-      </div>
-      <div class="block-metrics">
-        <div style="width: 100%;">
-          <div class="block-footer-txt">
-            <span>Mức độ nghẽn: <strong>${cluster.percentage}%</strong></span>
-            <span>${cluster.severity}</span>
-          </div>
-          <div class="pct-bar-bg">
-            <div class="pct-bar-fill" style="width: ${cluster.percentage}%;"></div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    block.addEventListener("click", () => selectCluster(cluster.id));
-    heatmapGrid.appendChild(block);
-  });
-}
-
-// Render Circular / Donut Chart (Biểu Đồ Tròn Phân Bổ Chủ Đề)
-function renderTopicDonutChart() {
-  chartBarsList.innerHTML = "";
-
-  // Build Conic Gradient string for Donut Chart
-  let cumulativePct = 0;
-  const gradientStops = clustersData.map(c => {
-    const start = cumulativePct;
-    cumulativePct += c.percentage;
-    return `${c.color} ${start}% ${cumulativePct}%`;
-  }).join(", ");
-
-  const donutContainer = document.createElement("div");
-  donutContainer.className = "donut-chart-layout";
-
-  donutContainer.innerHTML = `
-    <!-- Donut Circle Visual -->
-    <div class="donut-visual-box">
-      <div class="donut-circle" style="background: conic-gradient(${gradientStops});">
-        <div class="donut-hole">
-          <span class="donut-center-val">1,542</span>
-          <span class="donut-center-lbl">Chatlog Tín Hiệu</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Donut Legend Side List -->
-    <div class="donut-legend-list">
-      ${clustersData.map(cluster => `
-        <div class="donut-legend-item ${cluster.id === selectedClusterId ? 'active-legend' : ''}" data-id="${cluster.id}">
-          <div class="legend-dot" style="background-color: ${cluster.color}; shadow: 0 0 8px ${cluster.glow};"></div>
-          <div class="legend-info">
-            <span class="legend-title">${cluster.name}</span>
-            <span class="legend-sub">${cluster.studentCount} câu hỏi · <strong>${cluster.percentage}%</strong></span>
-          </div>
-        </div>
-      `).join("")}
-    </div>
-  `;
-
-  chartBarsList.appendChild(donutContainer);
-
-  // Bind click events on Legend items
-  const legendItems = donutContainer.querySelectorAll(".donut-legend-item");
-  legendItems.forEach(item => {
-    item.addEventListener("click", () => {
-      const id = item.getAttribute("data-id");
-      selectCluster(id);
-    });
-  });
-}
-
-// Select & Inspect Cluster
-function selectCluster(clusterId) {
-  selectedClusterId = clusterId;
-  const cluster = clustersData.find(c => c.id === clusterId);
-  if (!cluster) return;
-
-  // Highlight active block in Grid
-  const blocks = document.querySelectorAll(".heatmap-block");
-  blocks.forEach((block, idx) => {
-    if (clustersData[idx].id === clusterId) {
-      block.classList.add("active-block");
-    } else {
-      block.classList.remove("active-block");
-    }
-  });
-
-  // Highlight active item in Donut Legend
-  const legendItems = document.querySelectorAll(".donut-legend-item");
-  legendItems.forEach(item => {
-    if (item.getAttribute("data-id") === clusterId) {
-      item.classList.add("active-legend");
-    } else {
-      item.classList.remove("active-legend");
-    }
-  });
-
-  // Update Inspector Details
-  clusterSeverity.textContent = cluster.severity;
-  clusterSeverity.className = `severity-badge ${cluster.severity}`;
-  clusterTitle.textContent = cluster.name;
-  clusterStats.textContent = `${cluster.studentCount} Học viên kẹt · ${cluster.percentage}% Tổng câu hỏi`;
-
-  // Update AI Recommendation
-  recBody.innerHTML = cluster.aiRecommendation;
-
-  // Update Chatlogs
-  chatlogCount.textContent = cluster.chatlogs.length;
-  chatlogList.innerHTML = "";
-
-  cluster.chatlogs.forEach(log => {
-    const chatItem = document.createElement("div");
-    chatItem.className = "chatlog-item";
-    chatItem.innerHTML = `
-      <div class="chat-meta">
-        <span class="chat-user">${log.user}</span>
-        <span class="chat-time">${log.time}</span>
-      </div>
-      <p class="chat-text">${log.text}</p>
-    `;
-    chatlogList.appendChild(chatItem);
-  });
-}
-
-// Event Listeners Setup
-function setupEventListeners() {
-  // Time Filters
-  const filterBtns = document.querySelectorAll(".filter-btn");
-  filterBtns.forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      filterBtns.forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
-      showToast(`Đã tải lại bản đồ tín hiệu cho thời gian: ${e.target.textContent}`);
+function setupFiltersAndActions() {
+  document.querySelectorAll(".time-filter .filter-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".filter-btn").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      currentWindow = button.dataset.time;
+      selectedClusterId = null;
+      loadClusters();
     });
   });
 
-  // AI Re-cluster Simulation
-  btnRecluster.addEventListener("click", () => {
+  document.querySelectorAll("[data-scope]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-scope]").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      currentScope = button.dataset.scope;
+      selectedClusterId = null;
+      loadClusters();
+    });
+  });
+
+  btnRecluster.addEventListener("click", async () => {
     btnRecluster.disabled = true;
-    btnRecluster.innerHTML = `<i class="ri-loader-4-line ri-spin"></i> AI Vectorizing...`;
-
-    setTimeout(() => {
-      btnRecluster.disabled = false;
-      btnRecluster.innerHTML = `<i class="ri-refresh-line"></i> AI Re-Cluster`;
-      showToast("✨ AI Re-clustering thành công! Đã quét 1,542 chatlogs.");
-    }, 1200);
+    btnRecluster.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Đang chạy...';
+    try {
+      await fetch("/api/admin/clusters/recompute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ window: currentWindow, scope: currentScope }),
+      });
+      renderProcessingState();
+      showToast("Đã yêu cầu chạy lại clustering trên dữ liệu mới nhất.");
+      window.setTimeout(() => loadClusters(false), 2200);
+    } finally {
+      window.setTimeout(() => {
+        btnRecluster.disabled = false;
+        btnRecluster.innerHTML = '<i class="ri-refresh-line"></i> AI Re-Cluster';
+      }, 1500);
+    }
   });
 
-  // Add to Slide Action
   btnAddSlide.addEventListener("click", () => {
-    const cluster = clustersData.find(c => c.id === selectedClusterId);
-    showToast(`📌 Đã thêm cụm "${cluster.name}" vào chương trình Live Stream!`);
+    const cluster = clustersData.find((item) => item.id === selectedClusterId);
+    if (cluster) showToast(`Đã đưa “${cluster.name}” vào agenda buổi sau.`);
   });
 
-  // Edit Cluster Title Action (Human-in-the-loop PAIR principle)
-  btnEditTitle.addEventListener("click", () => {
-    const cluster = clustersData.find(c => c.id === selectedClusterId);
-    const newTitle = prompt("Sửa tên cụm rào cản kiến thức (Human Override):", cluster.name);
-    if (newTitle && newTitle.trim() !== "") {
-      cluster.name = newTitle.trim();
-      renderHeatmap();
-      renderTopicDonutChart();
-      selectCluster(cluster.id);
-      showToast("✏️ Đã cập nhật tên cụm kiến thức mới!");
+  btnEditTitle.addEventListener("click", async () => {
+    const cluster = clustersData.find((item) => item.id === selectedClusterId);
+    if (!cluster) return;
+    const nextName = window.prompt("Sửa tên cụm chủ đề:", cluster.name);
+    if (!nextName?.trim()) return;
+    const response = await fetch(`/api/admin/clusters/${cluster.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: nextName.trim(), window: currentWindow, scope: currentScope }),
+    });
+    if (!response.ok) return showToast("Không lưu được tên cụm.");
+    cluster.name = nextName.trim();
+    renderHeatmap();
+    renderTopicDonutChart(
+      clustersData.reduce((sum, item) => sum + item.question_count, 0)
+    );
+    selectCluster(cluster.id);
+    showToast("Đã lưu tên cụm do giảng viên chỉnh sửa.");
+  });
+}
+
+function setupUpload() {
+  btnUploadSlide.addEventListener("click", () => uploadInput.click());
+  uploadInput.addEventListener("change", async () => {
+    const file = uploadInput.files?.[0];
+    if (!file) return;
+    btnUploadSlide.disabled = true;
+    btnUploadSlide.querySelector("span").textContent = "Đang đọc PDF...";
+    try {
+      const response = await fetch(
+        `/api/admin/slides?filename=${encodeURIComponent(file.name)}&title=${encodeURIComponent(file.name.replace(/\.pdf$/i, ""))}`,
+        { method: "POST", headers: { "Content-Type": "application/pdf" }, body: file }
+      );
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Upload thất bại");
+      showToast(`Đã upload ${result.title} (${result.page_count} trang).`);
+    } catch (error) {
+      showToast(error.message);
+    } finally {
+      uploadInput.value = "";
+      btnUploadSlide.disabled = false;
+      btnUploadSlide.querySelector("span").textContent = "Upload slide";
     }
   });
 }
 
-// ==========================================================================
-// AI Teacher Assistant Chatbot Logic
-// ==========================================================================
 function setupChatbot() {
-  btnOpenChat.addEventListener("click", () => {
-    chatDrawer.classList.toggle("active");
-  });
-
-  btnCloseChat.addEventListener("click", () => {
-    chatDrawer.classList.remove("active");
-  });
-
-  // Quick Prompt Chips Handler
-  const promptChips = document.querySelectorAll(".prompt-chip");
-  promptChips.forEach(chip => {
+  btnOpenChat.addEventListener("click", () => chatDrawer.classList.toggle("active"));
+  btnCloseChat.addEventListener("click", () => chatDrawer.classList.remove("active"));
+  document.querySelectorAll(".prompt-chip").forEach((chip) => {
     chip.addEventListener("click", () => {
-      const type = chip.getAttribute("data-prompt");
-      handleQuickPrompt(type);
+      const cluster = clustersData.find((item) => item.id === selectedClusterId);
+      if (!cluster) return;
+      const type = chip.dataset.prompt;
+      const answers = {
+        miss: `Không có slide đối chứng nên hệ thống chưa kết luận bài giảng “miss”. Tín hiệu chắc chắn hiện có: chủ đề “${cluster.name}” chiếm ${cluster.percentage}% hội thoại và liên quan ${cluster.unique_users} học viên duy nhất.`,
+        "top-questions": `Các hội thoại đại diện của “${cluster.name}” đang hiển thị ở Inspector. Cụm có ${cluster.question_count} lượt hỏi–đáp. ${cluster.summary}`,
+        quiz: `Đề xuất: dùng các câu hỏi đại diện trong cụm “${cluster.name}” để soạn 3 câu kiểm tra đầu buổi; giảng viên cần duyệt lại vì hiện chưa có slide chuẩn để đối chứng.`,
+        summary: clustersData.slice(0, 3).map((item, index) => `${index + 1}. ${item.name}: ${item.percentage}%`).join("\n"),
+      };
+      appendAdminMessage("user", chip.textContent.trim());
+      appendAdminMessage("ai", answers[type] || cluster.summary);
     });
   });
-
-  // Send Message
-  btnSendChat.addEventListener("click", sendUserMessage);
-  chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendUserMessage();
+  btnSendChat.addEventListener("click", sendAdminMessage);
+  chatInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") sendAdminMessage();
   });
 }
 
-function sendUserMessage() {
+function sendAdminMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
-
-  appendMessage("user", text);
+  const cluster = clustersData.find((item) => item.id === selectedClusterId);
+  appendAdminMessage("user", text);
   chatInput.value = "";
-
-  setTimeout(() => {
-    generateAIResponse(text);
-  }, 600);
+  appendAdminMessage(
+    "ai",
+    cluster
+      ? `Dựa trên cụm đang chọn: ${cluster.ai_recommendation}`
+      : "Hãy chọn một cụm chủ đề để xem phân tích có căn cứ."
+  );
 }
 
-function handleQuickPrompt(type) {
-  const currentCluster = clustersData.find(c => c.id === selectedClusterId);
-
-  if (type === "miss") {
-    const question = "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?";
-    appendMessage("user", question);
-    setTimeout(() => {
-      const response = `🎯 **Phân tích lệch pha bài giảng:**
-Buổi vừa rồi bạn đã giảng **Prompt Chaining** (chỉ có **8.5%** học viên thắc mắc), nhưng bài giảng đã hoàn toàn **MISS** phần **"${currentCluster.name}"** — nơi đang có **${currentCluster.studentCount} học viên (${currentCluster.percentage}%)** bị kẹt!
-
-⚠️ **Khái niệm cụ thể bị trôi:**
-1. Kỹ thuật đưa API Key vào file \`.env\` và xử lý Async Call trong Node.js/Python.
-2. Sửa lỗi \`401 Unauthorized\` khi header chưa kịp load Key trước khi fetch API.`;
-      appendMessage("ai", response);
-    }, 600);
-  } 
-  else if (type === "top-questions") {
-    const question = `Ở cụm "${currentCluster.name}", câu hỏi nào được hỏi nhiều nhất?`;
-    appendMessage("user", question);
-    setTimeout(() => {
-      const response = `💬 **Top 3 dạng câu hỏi xuất hiện nhiều nhất (${currentCluster.studentCount} lượt hỏi):**
-1. *"Pass API Key vào .env rồi nhưng async await toàn báo 401 Unauthorized?"* (**142 lượt**)
-2. *"Sao chạy local thì pass key được mà deploy server lại bị undefined?"* (**98 lượt**)
-3. *"Khác biệt giữa async header injection vs sync header injection?"* (**64 lượt**)`;
-      appendMessage("ai", response);
-    }, 600);
-  }
-  else if (type === "quiz") {
-    const question = "Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?";
-    appendMessage("user", question);
-    setTimeout(() => {
-      const response = `📝 **3 Câu hỏi Quiz Live-checking (Dành 5' đầu buổi):**
-1. **Câu 1:** Vì sao biến môi trường chứa API Key bị \`undefined\` khi gọi trong hàm \`async\` chưa được \`await dotenv.config()\`?
-2. **Câu 2:** Lỗi HTTP Code nào trả về khi API Key truyền đúng cú pháp nhưng bị trễ bất đồng bộ? *(A. 404, B. 401, C. 500)*
-3. **Câu 3:** Viết 3 dòng code mẫu để inject API Key an toàn vào Header của Fetch API.`;
-      appendMessage("ai", response);
-    }, 600);
-  }
-  else if (type === "summary") {
-    const question = "Tóm tắt điểm nghẽn lớn nhất của toàn lớp tuần này?";
-    appendMessage("user", question);
-    setTimeout(() => {
-      const response = `📊 **Tóm tắt 3 Điểm nghẽn lớn nhất khóa K3 (1,542 chatlogs):**
-🔴 **Top 1 (34.2%):** Bất đồng bộ API Key & Environment (342 học viên)
-🟠 **Top 2 (25.4%):** Vector DB Indexing & Memory Leak khi chunking (254 học viên)
-🟡 **Top 3 (12.0%):** Context loss trong Prompt Chaining LCEL (120 học viên)
-
-👉 *Khuyến nghị:* Dành 45 phút buổi Live tới cho Top 1 & Top 2 để tránh tỷ lệ rớt bài tập lớn!`;
-      appendMessage("ai", response);
-    }, 600);
-  }
-}
-
-function generateAIResponse(userText) {
-  const currentCluster = clustersData.find(c => c.id === selectedClusterId);
-  let response = "";
-
-  const lower = userText.toLowerCase();
-  if (lower.includes("miss") || lower.includes("thiếu") || lower.includes("bỏ qua")) {
-    response = `🎯 **Phân tích độ hổng bài giảng:**
-Bài giảng vừa qua của bạn chưa bao phủ rào cản **${currentCluster.name}**. 
-AI ghi nhận **${currentCluster.studentCount} câu hỏi** kẹt ở thực hành triển khai. Bạn nên dành 15-20 phút đầu buổi Live tới để live-coding chủ đề này!`;
-  } else if (lower.includes("câu hỏi") || lower.includes("hỏi nhiều")) {
-    response = `💬 **Dạng câu hỏi nổi bật tại cụm "${currentCluster.name}":**
-Đa số học viên hỏi về cách debug lỗi thực hành:
-- *"Lỗi 401 Unauthorized khi gọi async function"*
-- *"Sửa API key trong .env nhưng server không nhận"*`;
-  } else {
-    response = `🤖 **AI Copilot:** Tôi đã ghi nhận thắc mắc của bạn về cụm **"${currentCluster.name}"** (${currentCluster.studentCount} học viên kẹt). 
-Tôi khuyến nghị bạn bấm nút **"Đưa vào Slide Live"** để AI tự động chèn 1 Slide củng cố kiến thức này vào giáo án buổi tới!`;
-  }
-
-  appendMessage("ai", response);
-}
-
-function appendMessage(sender, text) {
-  const msgDiv = document.createElement("div");
-  msgDiv.className = `chat-msg ${sender}-msg`;
-
-  const icon = sender === "ai" ? "ri-robot-line" : "ri-user-line";
-  const formattedText = text.replace(/\n/g, "<br>");
-
-  msgDiv.innerHTML = `
-    <div class="msg-avatar"><i class="${icon}"></i></div>
-    <div class="msg-content">${formattedText}</div>
-  `;
-
-  chatMessages.appendChild(msgDiv);
+function appendAdminMessage(sender, text) {
+  const item = document.createElement("div");
+  item.className = `chat-msg ${sender}-msg`;
+  const avatar = document.createElement("div");
+  avatar.className = "msg-avatar";
+  avatar.innerHTML = `<i class="${sender === "ai" ? "ri-robot-line" : "ri-user-line"}"></i>`;
+  const content = document.createElement("div");
+  content.className = "msg-content";
+  content.textContent = text;
+  item.append(avatar, content);
+  chatMessages.appendChild(item);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Toast Helper
+function formatDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+function labelWindow(value) {
+  if (value === "24h") return "24 giờ gần nhất";
+  if (value === "all") return "toàn bộ dữ liệu";
+  return "7 ngày gần nhất";
+}
+
 function showToast(message) {
   toastMessage.textContent = message;
   toast.classList.add("show");
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 3000);
+  window.setTimeout(() => toast.classList.remove("show"), 3000);
 }
 
-// Run app
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+async function initDashboard() {
+  initTheme();
+  document.querySelectorAll("[data-scope]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.scope === currentScope);
+  });
+  setupViewSwitcher();
+  setupFiltersAndActions();
+  setupUpload();
+  setupChatbot();
+  await loadClusters();
+}
+
 document.addEventListener("DOMContentLoaded", initDashboard);
