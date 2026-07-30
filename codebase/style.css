@@ -1,20 +1,21 @@
 /* ==========================================================================
-   VLearn Class Knowledge Gap Map - Design System & CSS Styles
-   Aesthetics: Dark Glassmorphism, Premium Gradient Accents, Modern Typography
+   VLearn Class Knowledge Gap Map & Official Student Portal - CSS Stylesheet
+   Complete Design System for Teacher Dashboard (index.html) & Student Portal (student.html)
+   Aesthetics: Glassmorphism, Dark & Light Mode, Rich Risk Heatmap Colors
    ========================================================================== */
 
 :root {
-  --bg-dark: #0b0f19;
-  --bg-card: rgba(22, 28, 45, 0.75);
-  --bg-card-border: rgba(255, 255, 255, 0.08);
-  --bg-card-hover: rgba(30, 40, 65, 0.85);
+  --bg-dark: #080d1a;
+  --bg-card: rgba(15, 23, 42, 0.85);
+  --bg-card-border: rgba(255, 255, 255, 0.1);
+  --bg-card-hover: rgba(30, 41, 59, 0.9);
 
-  --color-primary: #6366f1;
-  --color-primary-glow: rgba(99, 102, 241, 0.3);
+  --color-primary: #3b82f6;
+  --color-primary-glow: rgba(59, 130, 246, 0.3);
   --color-accent: #8b5cf6;
-  --text-main: #f3f4f6;
-  --text-muted: #9ca3af;
-  --text-sub: #6b7280;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-sub: #64748b;
 
   /* Risk Heatmap Palette */
   --risk-critical: #ef4444;
@@ -31,6 +32,54 @@
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
+
+  /* Official VLearn Theme Vars (Dark Mode Default) */
+  --vlearn-bg: #080d1a;
+  --vlearn-card-bg: #0d1527;
+  --vlearn-border: rgba(255, 255, 255, 0.12);
+  --vlearn-text: #f8fafc;
+  --vlearn-subtext: #94a3b8;
+  --vlearn-blue: #3b82f6;
+  --vlearn-green: #10b981;
+  --vlearn-red: #ef4444;
+  --vlearn-msg-bg: #162032;
+  --vlearn-toolbar-bg: #0f172a;
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] {
+  --bg-dark: #f0f4f8;
+  --bg-card: #ffffff;
+  --bg-card-border: #e2e8f0;
+  --bg-card-hover: #f8fafc;
+
+  --color-primary: #2563eb;
+  --color-primary-glow: rgba(37, 99, 235, 0.15);
+  --color-accent: #7c3aed;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-sub: #64748b;
+
+  --risk-critical: #dc2626;
+  --risk-critical-glow: rgba(220, 38, 38, 0.2);
+  --risk-high: #ea580c;
+  --risk-high-glow: rgba(234, 88, 12, 0.2);
+  --risk-medium: #ca8a04;
+  --risk-medium-glow: rgba(202, 138, 4, 0.2);
+  --risk-low: #059669;
+  --risk-low-glow: rgba(5, 150, 105, 0.2);
+  --risk-noise: #64748b;
+
+  --vlearn-bg: #f0f4f8;
+  --vlearn-card-bg: #ffffff;
+  --vlearn-border: #e2e8f0;
+  --vlearn-text: #1e293b;
+  --vlearn-subtext: #64748b;
+  --vlearn-blue: #2563eb;
+  --vlearn-green: #10b981;
+  --vlearn-red: #ef4444;
+  --vlearn-msg-bg: #f1f5f9;
+  --vlearn-toolbar-bg: #ffffff;
 }
 
 * {
@@ -45,10 +94,21 @@ body {
   font-family: var(--font-family);
   min-height: 100vh;
   line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
   background-image: 
     radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
     radial-gradient(circle at 85% 75%, rgba(239, 68, 68, 0.1) 0%, transparent 45%);
 }
+
+[data-theme="light"] body {
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+}
+
+/* ==========================================================================
+   TEACHER DASHBOARD (index.html) STYLES
+   ========================================================================== */
 
 .app-container {
   max-width: 1440px;
@@ -67,7 +127,8 @@ body {
   border: 1px solid var(--bg-card-border);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* App Header */
@@ -104,6 +165,7 @@ body {
 .app-title {
   font-size: 20px;
   font-weight: 700;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -128,7 +190,7 @@ body {
 .class-selector {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .class-info {
@@ -141,6 +203,10 @@ body {
   border: 1px solid var(--bg-card-border);
 }
 
+[data-theme="light"] .class-info {
+  background: rgba(0, 0, 0, 0.03);
+}
+
 .class-info i {
   font-size: 20px;
   color: var(--color-primary);
@@ -149,12 +215,27 @@ body {
 .class-name {
   font-size: 13px;
   font-weight: 600;
+  color: var(--text-main);
   display: block;
 }
 
 .class-meta {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--bg-card-border);
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ai-status {
@@ -249,6 +330,7 @@ body {
 .panel-title {
   font-size: 18px;
   font-weight: 700;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -271,6 +353,10 @@ body {
   border: 1px solid var(--bg-card-border);
 }
 
+[data-theme="light"] .time-filter {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .filter-btn {
   background: transparent;
   border: none;
@@ -280,7 +366,6 @@ body {
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .filter-btn.active {
@@ -300,10 +385,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: opacity 0.2s ease;
 }
-
-.btn-primary-sm:hover { opacity: 0.9; }
 
 /* Visual Heatmap Grid Blocks */
 .heatmap-grid {
@@ -319,12 +401,16 @@ body {
   border-radius: var(--radius-md);
   padding: 18px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s ease;
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+[data-theme="light"] .heatmap-block {
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .heatmap-block::before {
@@ -340,13 +426,12 @@ body {
 .heatmap-block:hover {
   transform: translateY(-4px);
   background: var(--bg-card-hover);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
   border-color: var(--block-color);
 }
 
 .heatmap-block.active-block {
   border-color: var(--block-color);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 0 20px var(--block-glow);
 }
 
@@ -385,7 +470,7 @@ body {
 .pct-bar-bg {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
   overflow: hidden;
   margin-top: 8px;
@@ -395,7 +480,6 @@ body {
   height: 100%;
   background: var(--block-color);
   border-radius: 3px;
-  transition: width 0.6s ease;
 }
 
 .block-footer-txt {
@@ -494,8 +578,6 @@ body {
   color: var(--color-accent);
 }
 
-.icon-sparkle { font-size: 16px; color: var(--color-accent); }
-
 .rec-body {
   font-size: 13px;
   color: var(--text-main);
@@ -522,8 +604,6 @@ body {
   gap: 6px;
 }
 
-.btn-action:hover { opacity: 0.9; }
-
 .btn-action-outline {
   background: transparent;
   color: var(--text-main);
@@ -537,8 +617,6 @@ body {
   align-items: center;
   gap: 6px;
 }
-
-.btn-action-outline:hover { background: rgba(255, 255, 255, 0.05); }
 
 /* Chatlog Evidence List */
 .chatlog-section {
@@ -557,6 +635,7 @@ body {
 .chatlog-header h3 {
   font-size: 14px;
   font-weight: 700;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -576,16 +655,16 @@ body {
   padding-right: 4px;
 }
 
-.chatlog-list::-webkit-scrollbar { width: 6px; }
-.chatlog-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
-.chatlog-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
-
 .chatlog-item {
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--bg-card-border);
   border-radius: var(--radius-sm);
   padding: 12px;
   font-size: 13px;
+}
+
+[data-theme="light"] .chatlog-item {
+  background: rgba(241, 245, 249, 0.8);
 }
 
 .chat-meta {
@@ -601,11 +680,7 @@ body {
 .chat-text { color: var(--text-main); line-height: 1.4; }
 .highlight-key { color: var(--risk-critical); font-weight: 600; background: rgba(239, 68, 68, 0.15); padding: 1px 4px; border-radius: 3px; }
 
-/* ==========================================================================
-   AI Teacher Assistant Chatbot Component
-   ========================================================================== */
-
-/* Floating Chat Trigger Button */
+/* AI Teacher Assistant Chatbot Component */
 .chat-trigger-btn {
   position: fixed;
   bottom: 28px;
@@ -622,13 +697,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
   z-index: 999;
-}
-
-.chat-trigger-btn:hover {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 14px 36px rgba(99, 102, 241, 0.5);
 }
 
 .chat-badge {
@@ -641,10 +710,8 @@ body {
   font-weight: 800;
   padding: 2px 7px;
   border-radius: 10px;
-  border: 2px solid var(--bg-dark);
 }
 
-/* Chat Drawer Window */
 .chat-drawer {
   position: fixed;
   bottom: 100px;
@@ -657,7 +724,7 @@ body {
   transform: translateY(30px) scale(0.95);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  transition: transform 0.35s ease, opacity 0.35s ease;
   border: 1px solid rgba(139, 92, 246, 0.4);
 }
 
@@ -696,6 +763,7 @@ body {
 .chat-drawer-header h4 {
   font-size: 15px;
   font-weight: 700;
+  color: var(--text-main);
 }
 
 .chat-status-txt {
@@ -711,9 +779,6 @@ body {
   cursor: pointer;
 }
 
-.chat-close-btn:hover { color: #fff; }
-
-/* Quick Prompt Chips */
 .quick-prompts-container {
   padding: 10px 0;
   border-bottom: 1px solid var(--bg-card-border);
@@ -733,9 +798,6 @@ body {
   padding-bottom: 4px;
 }
 
-.quick-prompts-scroll::-webkit-scrollbar { height: 4px; }
-.quick-prompts-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
 .prompt-chip {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--bg-card-border);
@@ -745,16 +807,8 @@ body {
   border-radius: 16px;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.prompt-chip:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: var(--color-primary);
-  color: #fff;
-}
-
-/* Chat Messages */
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -763,9 +817,6 @@ body {
   flex-direction: column;
   gap: 14px;
 }
-
-.chat-messages::-webkit-scrollbar { width: 5px; }
-.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
 .chat-msg {
   display: flex;
@@ -793,11 +844,16 @@ body {
 .user-msg .msg-avatar { background: rgba(239, 68, 68, 0.2); color: var(--risk-critical); }
 
 .msg-content {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.15);
   border: 1px solid var(--bg-card-border);
   padding: 10px 14px;
   border-radius: 12px;
   max-width: 82%;
+  color: var(--text-main);
+}
+
+[data-theme="light"] .msg-content {
+  background: #f1f5f9;
 }
 
 .user-msg .msg-content {
@@ -806,10 +862,6 @@ body {
   border: none;
 }
 
-.msg-content strong { color: var(--color-accent); }
-.user-msg .msg-content strong { color: #fff; }
-
-/* Chat Input Area */
 .chat-input-area {
   display: flex;
   gap: 8px;
@@ -819,19 +871,19 @@ body {
 
 #chat-input {
   flex: 1;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--bg-card-border);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
-  color: #fff;
+  color: var(--text-main);
   font-size: 13px;
   font-family: var(--font-family);
 }
 
-#chat-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 10px var(--color-primary-glow);
+[data-theme="light"] #chat-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
 .btn-send-chat {
@@ -842,10 +894,733 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 16px;
-  transition: opacity 0.2s ease;
 }
 
-.btn-send-chat:hover { opacity: 0.9; }
+/* ==========================================================================
+   OFFICIAL VLEARN STUDENT UI CLONE (student.html) STYLES
+   ========================================================================== */
+
+.vlearn-official-body {
+  background-color: var(--vlearn-bg);
+  color: var(--vlearn-text);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top Navbar Header */
+.vlearn-nav-bar {
+  height: 52px;
+  background: var(--vlearn-card-bg);
+  border-bottom: 1px solid var(--vlearn-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.vlearn-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vlearn-btn-icon {
+  background: transparent;
+  border: 1px solid var(--vlearn-border);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--vlearn-subtext);
+}
+
+.vlearn-brand-logo {
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.vlearn-logo-v { color: #ef4444; }
+.vlearn-logo-text { color: var(--vlearn-text); }
+
+.vlearn-doc-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--vlearn-border);
+}
+
+.doc-icon {
+  font-size: 18px;
+  color: var(--vlearn-blue);
+}
+
+.doc-meta-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-filename {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vlearn-text);
+}
+
+.doc-subcode {
+  font-size: 10px;
+  color: var(--vlearn-subtext);
+}
+
+.vlearn-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vlearn-lang-btn {
+  background: transparent;
+  border: 1px solid var(--vlearn-border);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--vlearn-text);
+  cursor: pointer;
+}
+
+.vlearn-user-badge {
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--vlearn-border);
+  padding: 5px 12px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vlearn-text);
+}
+
+.vlearn-switch-gapmap-btn {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* 3-Column Main Workspace Layout */
+.vlearn-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* LEFT COLUMN: Syllabus Navigation */
+.vlearn-sidebar-left {
+  width: 280px;
+  background: var(--vlearn-card-bg);
+  border-right: 1px solid var(--vlearn-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid var(--vlearn-border);
+}
+
+.sidebar-header i {
+  font-size: 20px;
+  color: var(--vlearn-blue);
+  margin-top: 2px;
+}
+
+.sidebar-header h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vlearn-text);
+}
+
+.sidebar-header p {
+  font-size: 11px;
+  color: var(--vlearn-subtext);
+}
+
+.sidebar-accordion {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accordion-item {
+  border: 1px solid var(--vlearn-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.accordion-header {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.acc-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vlearn-text);
+}
+
+.acc-meta-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.acc-badge.studying {
+  font-size: 9px;
+  font-weight: 800;
+  background: #3b82f6;
+  color: #fff;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.acc-count {
+  font-size: 10px;
+  color: var(--vlearn-subtext);
+}
+
+.accordion-content {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid var(--vlearn-border);
+  background: var(--vlearn-card-bg);
+}
+
+.doc-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.doc-item:hover {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.doc-item.active {
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.doc-play-icon {
+  font-size: 16px;
+  color: var(--vlearn-blue);
+}
+
+.doc-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vlearn-text);
+  word-break: break-all;
+}
+
+.doc-pages {
+  font-size: 10px;
+  color: var(--vlearn-subtext);
+}
+
+.doc-check-icon {
+  color: var(--vlearn-blue);
+  font-size: 14px;
+}
+
+/* CENTER COLUMN: PDF / Slide Reader Canvas */
+.vlearn-center-canvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #080e1b;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .vlearn-center-canvas {
+  background: #e2e8f0;
+}
+
+/* Top PDF Floating Toolbar */
+.pdf-top-toolbar {
+  height: 48px;
+  background: var(--vlearn-toolbar-bg);
+  border-bottom: 1px solid var(--vlearn-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+}
+
+.tool-btn {
+  background: transparent;
+  border: 1px solid var(--vlearn-border);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 16px;
+  color: var(--vlearn-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tool-btn.active {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-color: #3b82f6;
+}
+
+.tool-btn-icon {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: var(--vlearn-subtext);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tool-btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--vlearn-text);
+}
+
+.page-note-txt {
+  font-size: 12px;
+  color: var(--vlearn-subtext);
+  margin-right: 8px;
+}
+
+.zoom-btn {
+  background: transparent;
+  border: 1px solid var(--vlearn-border);
+  color: var(--vlearn-text);
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zoom-level {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vlearn-text);
+  padding: 0 4px;
+}
+
+/* Canvas Display */
+.pdf-canvas-container {
+  flex: 1;
+  overflow: auto;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.slide-page-paper {
+  width: 780px;
+  min-height: 520px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+.slide-page-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 10px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.slide-page-tag {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.slide-main-content {
+  margin: 20px 0;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.slide-main-content h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.instructor-card-mock {
+  display: flex;
+  gap: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  border-radius: 12px;
+  align-items: center;
+}
+
+.instructor-avatar-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  background: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: #fff;
+  overflow: hidden;
+}
+
+.instructor-info-txt h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.instructor-role {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.instructor-bullets {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.6;
+}
+
+/* Bottom Slide Nav Footer */
+.pdf-bottom-navbar {
+  height: 44px;
+  background: var(--vlearn-card-bg);
+  border-top: 1px solid var(--vlearn-border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-arrow-btn {
+  background: transparent;
+  border: 1px solid var(--vlearn-border);
+  color: var(--vlearn-text);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-page-indicator {
+  font-size: 12px;
+  color: var(--vlearn-text);
+}
+
+/* Right Edge Tutor Toggle Drawer Button */
+.tutor-drawer-toggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 64px;
+  background: var(--vlearn-card-bg);
+  border: 1px solid var(--vlearn-border);
+  border-right: none;
+  border-radius: 16px 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  color: var(--vlearn-blue);
+}
+
+/* RIGHT COLUMN: VLearn Tutor Sidebar */
+.vlearn-sidebar-right {
+  width: 380px;
+  background: var(--vlearn-card-bg);
+  border-left: 1px solid var(--vlearn-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: margin-right 0.3s ease;
+}
+
+.vlearn-sidebar-right.closed {
+  margin-right: -380px;
+}
+
+.tutor-sidebar-header {
+  padding: 14px;
+  border-bottom: 1px solid var(--vlearn-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tutor-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tutor-bot-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.tutor-brand h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--vlearn-text);
+}
+
+.tutor-status-text {
+  font-size: 11px;
+  color: var(--vlearn-green);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tutor-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--vlearn-subtext);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.slide-context-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Quota Box */
+.tutor-quota-box {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--vlearn-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quota-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--vlearn-subtext);
+}
+
+.quota-count { font-weight: 700; color: var(--vlearn-text); }
+
+.quota-progress-bg {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.quota-progress-fill {
+  height: 100%;
+  background: #3b82f6;
+}
+
+.byok-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-byok {
+  background: transparent;
+  border: none;
+  font-size: 10px;
+  font-weight: 800;
+  color: #f59e0b;
+  cursor: pointer;
+}
+
+/* Context Ribbon */
+.context-ribbon {
+  font-size: 11px;
+  color: var(--vlearn-subtext);
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--vlearn-border);
+}
+
+/* Chat Stream - Clear Contrast for AI Bot Messages */
+.tutor-chat-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tutor-msg-item {
+  display: flex;
+  font-size: 13px;
+}
+
+.tutor-msg-item.user {
+  justify-content: flex-end;
+}
+
+.tutor-msg-item .msg-box {
+  background: var(--vlearn-msg-bg);
+  border: 1px solid var(--vlearn-border);
+  padding: 12px;
+  border-radius: 12px;
+  max-width: 88%;
+  color: var(--vlearn-text);
+  line-height: 1.5;
+}
+
+.tutor-msg-item.user .msg-box {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+}
+
+/* Chat Input Box */
+.tutor-chat-input-box {
+  padding: 10px 14px;
+  border-top: 1px solid var(--vlearn-border);
+  display: flex;
+  gap: 8px;
+}
+
+#tutor-input-field {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--vlearn-border);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--vlearn-text);
+  font-family: var(--font-family);
+}
+
+[data-theme="light"] #tutor-input-field {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+#tutor-input-field:focus {
+  outline: none;
+  border-color: var(--vlearn-blue);
+}
+
+.btn-send-tutor {
+  background: var(--vlearn-blue);
+  color: #fff;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
 
 /* Toast Notification */
 .toast-notification {
@@ -878,7 +1653,7 @@ body {
   text-align: center;
   font-size: 12px;
   color: var(--text-sub);
-  padding-top: 10px;
+  padding: 10px 0;
 }
 
 @media (max-width: 1024px) {
