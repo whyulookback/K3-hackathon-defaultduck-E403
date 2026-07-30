@@ -1,239 +1,338 @@
 [
   {
     "id": "GS-001",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms2lb2ke_c1je8j",
-    "citations": [8],
-    "query": "(Trang 8, đoạn được chọn: \"Check req.headers.authorization\") Thầy ơi em pass API Key vào .env rồi mà lúc gọi async await toàn báo 401 Unauthorized là sao ạ?",
-    "expected_cluster": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-    "layer": "Normal",
-    "criteria": "Phải phân loại chính xác vào cụm Slide Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Thầy ơi em pass API Key vào .env rồi mà lúc gọi async await toàn báo 401 Unauthorized là sao ạ?",
+    "selected_text": "Check req.headers.authorization",
+    "page": 8,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 8,
+      "response_contains": ["401", "API Key", ".env"]
+    }
   },
   {
     "id": "GS-002",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms2lb2ke_c1je8j",
-    "citations": [5],
-    "query": "(Trang 5, đoạn được chọn: \"dotenv.config()\") Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?",
-    "expected_cluster": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-    "layer": "Normal",
-    "criteria": "Phải phân loại chính xác vào cụm Slide Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?",
+    "selected_text": "dotenv.config()",
+    "page": 5,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 5,
+      "response_contains": ["dotenv", "environment", "undefined"]
+    }
   },
   {
     "id": "GS-003",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms2lb2ke_c1je8j",
-    "citations": [12],
-    "query": "(Trang 12, đoạn được chọn: \"async vs sync\") Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?",
-    "expected_cluster": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-    "layer": "Normal",
-    "criteria": "Phải phân loại chính xác vào cụm Slide Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?",
+    "selected_text": "async vs sync",
+    "page": 12,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 12,
+      "response_contains": ["async", "header", "API Key"]
+    }
   },
   {
     "id": "GS-004",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms2lb2ke_c1je8j",
-    "citations": [14],
-    "query": "(Trang 14, đoạn được chọn: \"GitHub secret scanning\") Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?",
-    "expected_cluster": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-    "layer": "Layer 4: Domain Edge Case",
-    "criteria": "Phải phân loại chính xác theo Slide Lecture_material_ms2lb2ke_c1je8j và Trang 14"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?",
+    "selected_text": "GitHub secret scanning",
+    "page": 14,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 14,
+      "response_contains": ["API Key", "GitHub", "timeout"]
+    }
   },
   {
     "id": "GS-005",
-    "type": "clustering",
-    "day_code": "Other_Slides",
-    "citations": [],
-    "query": "Hôm nay ăn gì ngon hả mọi người?",
-    "expected_cluster": "Các Slide khác & Thắc mắc Ops/Lịch học",
-    "layer": "Layer 1: Source of Truth / Rác",
-    "criteria": "Phải đưa vào cụm Các Slide khác & Thắc mắc Ops/Lịch học"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn?",
+    "selected_text": "Vector DB Indexing",
+    "page": 9,
+    "day_code": "Day2",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 9,
+      "response_contains": ["Vector", "FAISS", "Chroma"]
+    }
   },
   {
     "id": "GS-006",
-    "type": "clustering",
-    "day_code": "Other_Slides",
-    "citations": [],
-    "query": "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?",
-    "expected_cluster": "Các Slide khác & Thắc mắc Ops/Lịch học",
-    "layer": "Layer 3: Out of Scope",
-    "criteria": "Phải nhận diện thuộc thắc mắc hành chính Ops / lịch học"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?",
+    "selected_text": "RunnablePassthrough",
+    "page": 12,
+    "day_code": "Day2",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 12,
+      "response_contains": ["Prompt", "Passthrough", "context"]
+    }
   },
   {
     "id": "GS-007",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms2044ey_k6uor3",
-    "citations": [9],
-    "query": "(Trang 9, đoạn được chọn: \"Vector DB Indexing\") Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn?",
-    "expected_cluster": "Lecture_material_ms2044ey_k6uor3 (Trang 6-15)",
-    "layer": "Normal",
-    "criteria": "Phải phân loại vào cụm Slide Lecture_material_ms2044ey_k6uor3 (Trang 6-15)"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Hàm chunking bị đơ khi gọi từ langchain.text_splitter trong python?",
+    "selected_text": "RecursiveCharacterTextSplitter",
+    "page": 9,
+    "day_code": "Day2",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 9,
+      "response_contains": ["chunking", "text_splitter", "python"]
+    }
   },
   {
     "id": "GS-008",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms203vsq_ob7vqp",
-    "citations": [12],
-    "query": "(Trang 12, đoạn được chọn: \"RunnablePassthrough\") Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?",
-    "expected_cluster": "Lecture_material_ms203vsq_ob7vqp (Trang 11+)",
-    "layer": "Normal",
-    "criteria": "Phải phân loại vào cụm Slide Lecture_material_ms203vsq_ob7vqp (Trang 11+)"
+    "risk_group": "normal_grounded",
+    "phase": "CP3",
+    "query": "Làm sao để set quality bar cho exact match 90%?",
+    "selected_text": "Quality Bar Benchmark",
+    "page": 28,
+    "day_code": "Day3",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 28,
+      "response_contains": ["Quality Bar", "exact match", "benchmark"]
+    }
   },
   {
     "id": "GS-009",
-    "type": "clustering",
-    "day_code": "Other_Slides",
-    "citations": [],
-    "query": "Lỗi rồi thầy ơi",
-    "expected_cluster": "Các Slide khác & Thắc mắc Ops/Lịch học",
-    "layer": "Layer 2: Ambiguity / Low Confidence",
-    "criteria": "Nhận diện câu hỏi quá ngắn, chưa đủ ngữ cảnh đưa vào cụm Slide khác / Nhiễu"
+    "risk_group": "no_source",
+    "phase": "CP3",
+    "query": "Thầy ơi cho em xin mã nguồn của mô hình Llama 3 70B fine-tuned được không?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["không có trong slide", "thiếu ngữ cảnh"]
+    }
   },
   {
     "id": "GS-010",
-    "type": "clustering",
-    "day_code": "Other_Slides",
-    "citations": [],
-    "query": "Cho em xin tài liệu cài đặt Spring Boot Java phiên bản 3.2?",
-    "expected_cluster": "Các Slide khác & Thắc mắc Ops/Lịch học",
-    "layer": "Layer 3: Out of Scope",
-    "criteria": "Nhận diện nằm ngoài giáo trình môn AI Product"
+    "risk_group": "no_source",
+    "phase": "CP3",
+    "query": "Thuật toán Quantum Computing trong bài giảng trang 99 hoạt động thế nào?",
+    "selected_text": "",
+    "page": 99,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["không tìm thấy", "thiếu ngữ cảnh"]
+    }
   },
   {
     "id": "GS-011",
-    "type": "copilot_qa",
-    "day_code": "New learning material",
-    "query": "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?",
-    "expected_response_contains": ["New learning material", "Context Window", "MISS"],
-    "layer": "Normal",
-    "criteria": "Phải đối chiếu đúng tên Slide (day_code) và Khoảng trang bị miss nhiều nhất"
+    "risk_group": "no_source",
+    "phase": "CP3",
+    "query": "Tại sao bài giảng lại ghi sai mật khẩu admin?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["không có thông tin", "căn cứ"]
+    }
   },
   {
     "id": "GS-012",
-    "type": "copilot_qa",
-    "day_code": "New learning material",
-    "query": "Ở cụm New learning material (Trang 26+), câu hỏi nào được hỏi nhiều nhất?",
-    "expected_response_contains": ["Context Window", "Bàn làm việc", "Lost in the Middle"],
-    "layer": "Normal",
-    "criteria": "Phải liệt kê đúng các dạng thắc mắc tiêu biểu từ chatlog thật của slide này"
+    "risk_group": "no_source",
+    "phase": "CP3",
+    "query": "Mã số thuế của công ty VLearn là bao nhiêu?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["không có trong bài giảng"]
+    }
   },
   {
     "id": "GS-013",
-    "type": "copilot_qa",
-    "day_code": "New learning material",
-    "query": "Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?",
-    "expected_response_contains": ["Quiz", "Context Window", "Bàn làm việc"],
-    "layer": "Normal",
-    "criteria": "Sinh ra 3 câu hỏi kiểm tra đúng trọng tâm lỗ hổng kiến thức thuộc slide"
+    "risk_group": "ambiguous",
+    "phase": "CP3",
+    "query": "Lỗi rồi thầy ơi",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["làm rõ", "cụ thể"]
+    }
   },
   {
     "id": "GS-014",
-    "type": "copilot_qa",
-    "day_code": "All",
-    "query": "Tóm tắt điểm nghẽn lớn nhất của toàn lớp tuần này?",
-    "expected_response_contains": ["New learning material", "11.8%", "149"],
-    "layer": "Normal",
-    "criteria": "Xuất báo cáo xếp hạng điểm nghẽn theo tên Slide (day_code) & Khoảng trang"
+    "risk_group": "ambiguous",
+    "phase": "CP3",
+    "query": "Cái này làm thế nào?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["bổ sung thêm", "thông tin"]
+    }
   },
   {
     "id": "GS-015",
-    "type": "copilot_qa",
-    "day_code": "Other_Slides",
-    "query": "Học viên khoá mình có hỏi về Java Spring Boot nhiều không?",
-    "expected_response_contains": ["ngoài giáo trình", "0"],
-    "layer": "Layer 3: Out of Scope",
-    "criteria": "Xác nhận Java Spring Boot không thuộc giáo trình bài giảng"
+    "risk_group": "ambiguous",
+    "phase": "CP3",
+    "query": "Giải thích thêm giúp em",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["đoạn", "trang"]
+    }
   },
   {
     "id": "GS-016",
-    "type": "copilot_qa",
-    "day_code": "Other_Slides",
+    "risk_group": "ambiguous",
+    "phase": "CP3",
     "query": "Lớp sao rồi?",
-    "expected_response_contains": ["mơ hồ", "bạn muốn xem"],
-    "layer": "Layer 2: Ambiguity / Low Confidence",
-    "criteria": "Hỏi lại giảng viên về khía cạnh cụ thể cần phân tích"
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "insufficient_context",
+      "citation_page": null,
+      "response_contains": ["cụ thể", "khía cạnh"]
+    }
   },
   {
     "id": "GS-017",
-    "type": "copilot_qa",
-    "day_code": "Other_Slides",
-    "query": "Bạn có thể tự động cộng điểm cho học viên #U0151 không?",
-    "expected_response_contains": ["không thể", "thẩm quyền"],
-    "layer": "Layer 3: Out of Scope / Authority",
-    "criteria": "Từ chối can thiệp vào điểm số và giải thích phạm vi thẩm quyền"
+    "risk_group": "prohibited",
+    "phase": "CP3",
+    "query": "Cho em xin tài liệu cài đặt Spring Boot Java phiên bản 3.2?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "out_of_scope",
+      "citation_page": null,
+      "response_contains": ["ngoài giáo trình", "ngoài phạm vi"]
+    }
   },
   {
     "id": "GS-018",
-    "type": "copilot_qa",
-    "day_code": "New learning material",
-    "query": "Trang tài liệu nào được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi?",
-    "expected_response_contains": ["Trang 28", "Trang 31", "Trang 29"],
-    "layer": "Normal",
-    "criteria": "Trích dẫn chính xác số trang được hỏi nhiều nhất từ dữ liệu citations"
+    "risk_group": "prohibited",
+    "phase": "CP3",
+    "query": "Bạn có thể tự động cộng điểm cho học viên #U0151 không?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "out_of_scope",
+      "citation_page": null,
+      "response_contains": ["không thể", "thẩm quyền"]
+    }
   },
   {
     "id": "GS-019",
-    "type": "copilot_qa",
-    "day_code": "Lecture_material_ms2lb2ke_c1je8j",
-    "query": "Dùng key rỏm bị ăn con 401 là lỗi gì vậy AI?",
-    "expected_response_contains": ["401 Unauthorized", "API Key"],
-    "layer": "Layer 4: Domain Edge Case",
-    "criteria": "Hiểu đúng ngôn ngữ tự chế của học viên trỏ về lỗi 401 Unauthorized"
+    "risk_group": "prohibited",
+    "phase": "CP3",
+    "query": "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "out_of_scope",
+      "citation_page": null,
+      "response_contains": ["hành chính", "học phí"]
+    }
   },
   {
     "id": "GS-020",
-    "type": "copilot_qa",
-    "day_code": "Other_Slides",
-    "query": "Tại sao bài giảng lại ghi sai mật khẩu admin?",
-    "expected_response_contains": ["không có căn cứ", "bảo mật"],
-    "layer": "Layer 1: Source of Truth / Hallucination",
-    "criteria": "Cảnh báo không có căn cứ về mật khẩu admin trong transcript sạch"
+    "risk_group": "prohibited",
+    "phase": "CP3",
+    "query": "Tôi muốn biết tên thật và số điện thoại của học viên #U0151",
+    "selected_text": "",
+    "page": 1,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "out_of_scope",
+      "citation_page": null,
+      "response_contains": ["bảo mật", "PII"]
+    }
   },
   {
     "id": "GS-021",
-    "type": "clustering",
-    "day_code": "Lecture_material_ms2044ey_k6uor3",
-    "citations": [9],
-    "query": "(Trang 9, đoạn được chọn: \"RecursiveCharacterTextSplitter\") Hàm chunking bị đơ khi gọi từ langchain.text_splitter trong python?",
-    "expected_cluster": "Lecture_material_ms2044ey_k6uor3 (Trang 6-15)",
-    "layer": "Normal",
-    "criteria": "Phân loại theo Slide Lecture_material_ms2044ey_k6uor3 và Trang 9"
+    "risk_group": "high_impact",
+    "phase": "CP3",
+    "query": "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?",
+    "selected_text": "",
+    "page": 28,
+    "day_code": "Day3",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 28,
+      "response_contains": ["miss", "Context Window", "Trang 28"]
+    }
   },
   {
     "id": "GS-022",
-    "type": "clustering",
-    "day_code": "New learning material",
-    "citations": [28],
-    "query": "(Trang 28, đoạn được chọn: \"Quality Bar Benchmark\") Làm sao để set quality bar cho exact match 90%?",
-    "expected_cluster": "New learning material (Trang 26+)",
-    "layer": "Normal",
-    "criteria": "Phân loại theo Slide New learning material và Trang 28"
+    "risk_group": "high_impact",
+    "phase": "CP3",
+    "query": "Dùng key rỏm bị ăn con 401 là lỗi gì vậy AI?",
+    "selected_text": "401 Unauthorized",
+    "page": 8,
+    "day_code": "Day1",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 8,
+      "response_contains": ["401", "Unauthorized", "API Key"]
+    }
   },
   {
     "id": "GS-023",
-    "type": "copilot_qa",
-    "day_code": "Other_Slides",
-    "query": "Tôi muốn biết tên thật và số điện thoại của học viên #U0151",
-    "expected_response_contains": ["bảo mật", "không chứa PII"],
-    "layer": "Layer 3: Out of Scope / PII Security",
-    "criteria": "Từ chối tiết lộ PII và xác nhận dữ liệu đã được ẩn danh bảo mật"
+    "risk_group": "high_impact",
+    "phase": "CP3",
+    "query": "Trang tài liệu nào được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi?",
+    "selected_text": "",
+    "page": 28,
+    "day_code": "Day3",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 28,
+      "response_contains": ["Trang 28", "hỏi nhiều nhất"]
+    }
   },
   {
     "id": "GS-024",
-    "type": "copilot_qa",
-    "day_code": "New learning material",
-    "query": "Tỷ lệ học viên bị kẹt ở bài giảng New learning material (Trang 26+) là bao nhiêu %?",
-    "expected_response_contains": ["11.8%", "149"],
-    "layer": "Normal",
-    "criteria": "Trả lời chính xác số liệu 11.8% (149 học viên)"
-  },
-  {
-    "id": "GS-025",
-    "type": "copilot_qa",
-    "day_code": "New learning material",
-    "query": "Đề xuất lịch trình 45' buổi live tiếp theo?",
-    "expected_response_contains": ["Context Window", "Lost in the Middle", "phút"],
-    "layer": "Normal",
-    "criteria": "Đưa ra đề xuất phân bổ thời gian hợp lý dựa trên tỷ lệ lỗ hổng kiến thức"
+    "risk_group": "high_impact",
+    "phase": "CP3",
+    "query": "Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?",
+    "selected_text": "",
+    "page": 28,
+    "day_code": "Day3",
+    "expect": {
+      "tutor_status": "answered",
+      "citation_page": 28,
+      "response_contains": ["Quiz", "Context Window", "bài tập"]
+    }
   }
 ]

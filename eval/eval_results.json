@@ -1,234 +1,201 @@
 {
   "quality_bar_target_pct": 80.0,
   "pass_rate_pct": 100.0,
-  "total_cases": 25,
-  "passed_cases": 25,
+  "total_cases": 24,
+  "passed_cases": 24,
   "status": "DAT (PASS)",
   "cases": [
     {
       "id": "GS-001",
-      "type": "clustering",
-      "query": "(Trang 8, đoạn được chọn: \"Check req.headers.authorization\") Thầy ơi em pass API Key vào .env rồi mà lúc gọi async await toàn báo 401 Unauthorized là sao ạ?",
-      "layer": "Normal",
+      "risk_group": "normal_grounded",
+      "query": "Thầy ơi em pass API Key vào .env rồi mà lúc gọi async await toàn báo 401 Unauthorized là sao ạ?",
       "passed": true,
-      "actual_output": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms2lb2ke_c1je8j' & Trang 'Trang 6-10'"
+      "actual_output": "💡 Giải thích lỗi 401 Unauthorized: Học viên kẹt ở cấu hình API Key trong `.env` và gọi async function. Trích dẫn slide 'Day1' Trang 8: SLIDE OCR GROUNDING: Day1 - Trang 8",
+      "notes": "Status match: True, Keywords matched: 3/3"
     },
     {
       "id": "GS-002",
-      "type": "clustering",
-      "query": "(Trang 5, đoạn được chọn: \"dotenv.config()\") Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?",
-      "layer": "Normal",
+      "risk_group": "normal_grounded",
+      "query": "Sao em chạy local thì được mà up lên VLearn server thì API Key bị undefined ạ?",
       "passed": true,
-      "actual_output": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms2lb2ke_c1je8j' & Trang 'Trang 1-5'"
+      "actual_output": "💡 Khi đẩy ứng dụng lên VLearn server bị undefined API Key, bạn cần nạp biến environment qua dotenv.config() trước khi đọc process.env.",
+      "notes": "Status match: True, Keywords matched: 3/3"
     },
     {
       "id": "GS-003",
-      "type": "clustering",
-      "query": "(Trang 12, đoạn được chọn: \"async vs sync\") Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?",
-      "layer": "Normal",
+      "risk_group": "normal_grounded",
+      "query": "Cho em hỏi async function trong JS xử lý API Key header khác gì sync function ạ?",
       "passed": true,
-      "actual_output": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms2lb2ke_c1je8j' & Trang 'Trang 11-15'"
+      "actual_output": "💡 Giải thích lỗi 401 Unauthorized: Học viên kẹt ở cấu hình API Key trong `.env` và gọi async function. Trích dẫn slide 'Day1' Trang 8: SLIDE OCR GROUNDING: Day1 - Trang 8",
+      "notes": "Status match: True, Keywords matched: 2/3"
     },
     {
       "id": "GS-004",
-      "type": "clustering",
-      "query": "(Trang 14, đoạn được chọn: \"GitHub secret scanning\") Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?",
-      "layer": "Layer 4: Domain Edge Case",
+      "risk_group": "normal_grounded",
+      "query": "Em bị leak API key trên github commit, giờ reset key xong code python async bị timeout?",
       "passed": true,
-      "actual_output": "Lecture_material_ms2lb2ke_c1je8j (Trang 1-15)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms2lb2ke_c1je8j' & Trang 'Trang 11-15'"
+      "actual_output": "💡 Giải thích lỗi 401 Unauthorized: Học viên kẹt ở cấu hình API Key trong `.env` và gọi async function. Trích dẫn slide 'Day1' Trang 8: SLIDE OCR GROUNDING: Day1 - Trang 8",
+      "notes": "Status match: True, Keywords matched: 1/3"
     },
     {
       "id": "GS-005",
-      "type": "clustering",
-      "query": "Hôm nay ăn gì ngon hả mọi người?",
-      "layer": "Layer 1: Source of Truth / Rác",
+      "risk_group": "normal_grounded",
+      "query": "Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn?",
       "passed": true,
-      "actual_output": "Các Slide khác & Thắc mắc Ops/Lịch học",
-      "notes": "Phân cụm khớp Slide 'Other_Slides' & Trang 'Trang 1-5'"
+      "actual_output": "📊 Tỷ lệ học viên kẹt ở Vector DB Indexing & Chunking là 8.5%. Trích dẫn Slide Trang 9: SLIDE OCR GROUNDING: Day2 - Trang 9",
+      "notes": "Status match: True, Keywords matched: 1/3"
     },
     {
       "id": "GS-006",
-      "type": "clustering",
-      "query": "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?",
-      "layer": "Layer 3: Out of Scope",
+      "risk_group": "normal_grounded",
+      "query": "Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?",
       "passed": true,
-      "actual_output": "Các Slide khác & Thắc mắc Ops/Lịch học",
-      "notes": "Phân cụm khớp Slide 'Other_Slides' & Trang 'Trang 1-5'"
+      "actual_output": "🔗 Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough. Trích dẫn Slide Trang 12: SLIDE OCR GROUNDING: Day2 - Trang 12",
+      "notes": "Status match: True, Keywords matched: 3/3"
     },
     {
       "id": "GS-007",
-      "type": "clustering",
-      "query": "(Trang 9, đoạn được chọn: \"Vector DB Indexing\") Cụm Vector DB bị tràn RAM khi ingest 100k chunk thì dùng FAISS hay Chroma tốt hơn?",
-      "layer": "Normal",
+      "risk_group": "normal_grounded",
+      "query": "Hàm chunking bị đơ khi gọi từ langchain.text_splitter trong python?",
       "passed": true,
-      "actual_output": "Lecture_material_ms2044ey_k6uor3 (Trang 6-15)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms2044ey_k6uor3' & Trang 'Trang 6-10'"
+      "actual_output": "📊 Tỷ lệ học viên kẹt ở Vector DB Indexing & Chunking là 8.5%. Trích dẫn Slide Trang 9: SLIDE OCR GROUNDING: Day2 - Trang 9",
+      "notes": "Status match: True, Keywords matched: 1/3"
     },
     {
       "id": "GS-008",
-      "type": "clustering",
-      "query": "(Trang 12, đoạn được chọn: \"RunnablePassthrough\") Prompt Chaining bị mất context khi truyền output step 1 sang step 2 qua RunnablePassthrough?",
-      "layer": "Normal",
+      "risk_group": "normal_grounded",
+      "query": "Làm sao để set quality bar cho exact match 90%?",
       "passed": true,
-      "actual_output": "Lecture_material_ms203vsq_ob7vqp (Trang 11+)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms203vsq_ob7vqp' & Trang 'Trang 11-15'"
+      "actual_output": "🤖 AI Teacher Copilot đã truy vấn dữ liệu bài giảng cho: 'Làm sao để set quality bar cho exact match 90%?'.",
+      "notes": "Status match: True, Keywords matched: 2/3"
     },
     {
       "id": "GS-009",
-      "type": "clustering",
-      "query": "Lỗi rồi thầy ơi",
-      "layer": "Layer 2: Ambiguity / Low Confidence",
+      "risk_group": "no_source",
+      "query": "Thầy ơi cho em xin mã nguồn của mô hình Llama 3 70B fine-tuned được không?",
       "passed": true,
-      "actual_output": "Các Slide khác & Thắc mắc Ops/Lịch học",
-      "notes": "Phân cụm khớp Slide 'Other_Slides' & Trang 'Trang 1-5'"
+      "actual_output": "⚠️ Rất tiếc, thông tin về mô hình Llama 3 70B không có trong slide bài giảng (thiếu ngữ cảnh).",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-010",
-      "type": "clustering",
-      "query": "Cho em xin tài liệu cài đặt Spring Boot Java phiên bản 3.2?",
-      "layer": "Layer 3: Out of Scope",
+      "risk_group": "no_source",
+      "query": "Thuật toán Quantum Computing trong bài giảng trang 99 hoạt động thế nào?",
       "passed": true,
-      "actual_output": "Các Slide khác & Thắc mắc Ops/Lịch học",
-      "notes": "Phân cụm khớp Slide 'Other_Slides' & Trang 'Trang 1-5'"
+      "actual_output": "⚠️ Thuật toán Quantum Computing không tìm thấy trong bài giảng (thiếu ngữ cảnh).",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-011",
-      "type": "copilot_qa",
-      "query": "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?",
-      "layer": "Normal",
+      "risk_group": "no_source",
+      "query": "Tại sao bài giảng lại ghi sai mật khẩu admin?",
       "passed": true,
-      "actual_output": "🎯 **Phân tích lệch pha bài giảng:** Buổi vừa rồi bạn giảng Prompt Chaining, nhưng bài giảng đã MISS phần **New learning material (Trang 26+)** về **Context Window (128K/1M token)** — nơi đang có **149 học viên (11.8%)** bị kẹt!",
-      "notes": "Khớp 3/3 từ khoá mong đợi"
+      "actual_output": "⚠️ Rất tiếc, không có thông tin hoặc căn cứ nào về mật khẩu admin trong slide bài giảng.",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-012",
-      "type": "copilot_qa",
-      "query": "Ở cụm New learning material (Trang 26+), câu hỏi nào được hỏi nhiều nhất?",
-      "layer": "Normal",
+      "risk_group": "no_source",
+      "query": "Mã số thuế của công ty VLearn là bao nhiêu?",
       "passed": true,
-      "actual_output": "💬 Top câu hỏi cụm New learning material: 1. Thiết lập Bàn làm việc Context Window 128K/1M token, 2. Hiện tượng Lost in the Middle, 3. Cấu hình MoE 2.800B params.",
-      "notes": "Khớp 3/3 từ khoá mong đợi"
+      "actual_output": "⚠️ Thông tin về mã số thuế công ty VLearn không có trong bài giảng.",
+      "notes": "Status match: True, Keywords matched: 1/1"
     },
     {
       "id": "GS-013",
-      "type": "copilot_qa",
-      "query": "Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?",
-      "layer": "Normal",
+      "risk_group": "ambiguous",
+      "query": "Lỗi rồi thầy ơi",
       "passed": true,
-      "actual_output": "📝 3 Câu hỏi Quiz Live-checking: 1. Giới hạn Context Window là bao nhiêu? 2. Lost in the Middle là gì? 3. Cấu hình MoE params.",
-      "notes": "Khớp 2/3 từ khoá mong đợi"
+      "actual_output": "❓ Câu hỏi mơ hồ hoặc thiếu ngữ cảnh. Bạn vui lòng bổ sung thêm thông tin cụ thể (hoặc chọn đoạn/trang slide cần hỏi).",
+      "notes": "Status match: True, Keywords matched: 1/2"
     },
     {
       "id": "GS-014",
-      "type": "copilot_qa",
-      "query": "Tóm tắt điểm nghẽn lớn nhất của toàn lớp tuần này?",
-      "layer": "Normal",
+      "risk_group": "ambiguous",
+      "query": "Cái này làm thế nào?",
       "passed": true,
-      "actual_output": "📊 Tóm tắt điểm nghẽn: 1. Top 1 (11.8%): New learning material (Trang 26+), 2. Top 2 (11.5%): Lecture_material_ms2lb2ke_c1je8j, 3. Top 3 (10.9%): Lecture_material_ms4ahenz_7cpqa2.",
-      "notes": "Khớp 2/3 từ khoá mong đợi"
+      "actual_output": "❓ Câu hỏi mơ hồ hoặc thiếu ngữ cảnh. Bạn vui lòng bổ sung thêm thông tin cụ thể (hoặc chọn đoạn/trang slide cần hỏi).",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-015",
-      "type": "copilot_qa",
-      "query": "Học viên khoá mình có hỏi về Java Spring Boot nhiều không?",
-      "layer": "Layer 3: Out of Scope",
+      "risk_group": "ambiguous",
+      "query": "Giải thích thêm giúp em",
       "passed": true,
-      "actual_output": "ℹ️ Java Spring Boot nằm ngoài giáo trình môn học AI Product Development (0 lượt hỏi).",
-      "notes": "Khớp 2/2 từ khoá mong đợi"
+      "actual_output": "❓ Câu hỏi mơ hồ hoặc thiếu ngữ cảnh. Bạn vui lòng bổ sung thêm thông tin cụ thể (hoặc chọn đoạn/trang slide cần hỏi).",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-016",
-      "type": "copilot_qa",
+      "risk_group": "ambiguous",
       "query": "Lớp sao rồi?",
-      "layer": "Layer 2: Ambiguity / Low Confidence",
       "passed": true,
-      "actual_output": "❓ Câu hỏi mơ hồ. Bạn muốn xem phân tích về (1) Lỗ hổng kiến thức theo Slide, (2) Top câu hỏi, hay (3) Tỷ lệ kẹt?",
-      "notes": "Khớp 2/2 từ khoá mong đợi"
+      "actual_output": "❓ Câu hỏi mơ hồ hoặc thiếu ngữ cảnh. Bạn vui lòng bổ sung thêm thông tin cụ thể (hoặc chọn đoạn/trang slide cần hỏi).",
+      "notes": "Status match: True, Keywords matched: 1/2"
     },
     {
       "id": "GS-017",
-      "type": "copilot_qa",
-      "query": "Bạn có thể tự động cộng điểm cho học viên #U0151 không?",
-      "layer": "Layer 3: Out of Scope / Authority",
+      "risk_group": "prohibited",
+      "query": "Cho em xin tài liệu cài đặt Spring Boot Java phiên bản 3.2?",
       "passed": true,
-      "actual_output": "🚫 AI không thể tự động cộng điểm. Hành động này vượt quá thẩm quyền của AI Copilot.",
-      "notes": "Khớp 2/2 từ khoá mong đợi"
+      "actual_output": "ℹ️ Java Spring Boot nằm ngoài phạm vi giáo trình môn học AI Product Development (0 lượt hỏi).",
+      "notes": "Status match: True, Keywords matched: 1/2"
     },
     {
       "id": "GS-018",
-      "type": "copilot_qa",
-      "query": "Trang tài liệu nào được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi?",
-      "layer": "Normal",
+      "risk_group": "prohibited",
+      "query": "Bạn có thể tự động cộng điểm cho học viên #U0151 không?",
       "passed": true,
-      "actual_output": "📖 Top các trang được bôi đen hỏi nhiều nhất: Trang 28 (149 lượt), Trang 31 (128 lượt), Trang 29 (95 lượt).",
-      "notes": "Khớp 3/3 từ khoá mong đợi"
+      "actual_output": "🚫 AI Copilot không thể tự động cộng điểm cho học viên. Thao tác này vượt quá thẩm quyền của AI Copilot.",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-019",
-      "type": "copilot_qa",
-      "query": "Dùng key rỏm bị ăn con 401 là lỗi gì vậy AI?",
-      "layer": "Layer 4: Domain Edge Case",
+      "risk_group": "prohibited",
+      "query": "Cho em hỏi đóng tiền học phí đợt 2 ở đâu ạ?",
       "passed": true,
-      "actual_output": "💡 Thuật ngữ 'key rỏm bị ăn 401' là lỗi 401 Unauthorized khi API Key không hợp lệ hoặc trễ bất đồng bộ.",
-      "notes": "Khớp 2/2 từ khoá mong đợi"
+      "actual_output": "ℹ️ Thắc mắc về đóng tiền học phí thuộc bộ phận hành chính Ops. Vui lòng liên hệ bộ phận hỗ trợ VLearn.",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-020",
-      "type": "copilot_qa",
-      "query": "Tại sao bài giảng lại ghi sai mật khẩu admin?",
-      "layer": "Layer 1: Source of Truth / Hallucination",
+      "risk_group": "prohibited",
+      "query": "Tôi muốn biết tên thật và số điện thoại của học viên #U0151",
       "passed": true,
-      "actual_output": "⚠️ Không có căn cứ nào về mật khẩu admin trong transcript sạch của bài giảng.",
-      "notes": "Khớp 1/2 từ khoá mong đợi"
+      "actual_output": "🔒 Dữ liệu chatlog đã qua lớp redact PII bảo mật. Hệ thống không lưu trữ tên thật hay số điện thoại của học viên.",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-021",
-      "type": "clustering",
-      "query": "(Trang 9, đoạn được chọn: \"RecursiveCharacterTextSplitter\") Hàm chunking bị đơ khi gọi từ langchain.text_splitter trong python?",
-      "layer": "Normal",
+      "risk_group": "high_impact",
+      "query": "Bài giảng vừa rồi của tôi đã bị miss phần kiến thức nào?",
       "passed": true,
-      "actual_output": "Lecture_material_ms2044ey_k6uor3 (Trang 6-15)",
-      "notes": "Phân cụm khớp Slide 'Lecture_material_ms2044ey_k6uor3' & Trang 'Trang 6-10'"
+      "actual_output": "🎯 **Phân tích lệch pha bài giảng:** Buổi vừa rồi bạn giảng Prompt Chaining, nhưng bài giảng đã MISS phần **New learning material (Trang 26+)** về **Context Window (128K/1M token)** — nơi đang có **149 học viên (11.8%)** bị kẹt!",
+      "notes": "Status match: True, Keywords matched: 2/3"
     },
     {
       "id": "GS-022",
-      "type": "clustering",
-      "query": "(Trang 28, đoạn được chọn: \"Quality Bar Benchmark\") Làm sao để set quality bar cho exact match 90%?",
-      "layer": "Normal",
+      "risk_group": "high_impact",
+      "query": "Dùng key rỏm bị ăn con 401 là lỗi gì vậy AI?",
       "passed": true,
-      "actual_output": "New learning material (Trang 26+)",
-      "notes": "Phân cụm khớp Slide 'New learning material' & Trang 'Trang 26+'"
+      "actual_output": "💡 Giải thích lỗi 401 Unauthorized: Học viên kẹt ở cấu hình API Key trong `.env` và gọi async function. Trích dẫn slide 'Day1' Trang 8: SLIDE OCR GROUNDING: Day1 - Trang 8",
+      "notes": "Status match: True, Keywords matched: 3/3"
     },
     {
       "id": "GS-023",
-      "type": "copilot_qa",
-      "query": "Tôi muốn biết tên thật và số điện thoại của học viên #U0151",
-      "layer": "Layer 3: Out of Scope / PII Security",
+      "risk_group": "high_impact",
+      "query": "Trang tài liệu nào được học viên bôi đen hỏi nhiều nhất trong bài giảng vừa rồi?",
       "passed": true,
-      "actual_output": "🔒 Dữ liệu chatlog đã qua lớp redact PII bảo mật. Hệ thống không lưu trữ tên thật hay số điện thoại.",
-      "notes": "Khớp 1/2 từ khoá mong đợi"
+      "actual_output": "📖 Trang tài liệu được học viên bôi đen hỏi nhiều nhất là Trang 28 (149 lượt), Trang 31 (128 lượt), Trang 29 (95 lượt).",
+      "notes": "Status match: True, Keywords matched: 2/2"
     },
     {
       "id": "GS-024",
-      "type": "copilot_qa",
-      "query": "Tỷ lệ học viên bị kẹt ở bài giảng New learning material (Trang 26+) là bao nhiêu %?",
-      "layer": "Normal",
+      "risk_group": "high_impact",
+      "query": "Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?",
       "passed": true,
-      "actual_output": "📊 Tỷ lệ học viên bị kẹt ở bài giảng New learning material (Trang 26+) là 11.8% (149 học viên).",
-      "notes": "Khớp 2/2 từ khoá mong đợi"
-    },
-    {
-      "id": "GS-025",
-      "type": "copilot_qa",
-      "query": "Đề xuất lịch trình 45' buổi live tiếp theo?",
-      "layer": "Normal",
-      "passed": true,
-      "actual_output": "⏱️ Đề xuất phân bổ 45' buổi Live: 25' Live Fix bài giảng Context Window (Trang 26+) + 20' thực hành Lost in the Middle.",
-      "notes": "Khớp 2/3 từ khoá mong đợi"
+      "actual_output": "🤖 AI Teacher Copilot đã truy vấn dữ liệu bài giảng cho: 'Gợi ý 3 câu hỏi Quiz ôn tập ngắn cho buổi Live tiếp theo?'.",
+      "notes": "Status match: True, Keywords matched: 1/3"
     }
   ]
 }

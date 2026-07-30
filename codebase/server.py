@@ -3,6 +3,7 @@ import socketserver
 import os
 import json
 import sys
+from functools import partial
 
 PORT = 8000
 WORKSPACE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,26 +23,37 @@ def load_dotenv():
 load_dotenv()
 
 class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=CODEBASE_DIR, **kwargs)
-
     def do_GET(self):
-        if self.path.startswith('/api/config'):
+        url_path = self.path.split('?')[0]
+        if url_path == '/api/health':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "service": "VLearn Tutor & Topic Interest Map Server"}, ensure_ascii=False).encode('utf-8'))
+            return
+
+        if url_path in ['/admin', '/admin/']:
+            self.path = '/index.html'
+
+        if url_path == '/api/config':
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             cfg_data = {
-                "has_key": bool(os.getenv("OPENROUTER_API_KEY")),
+                "has_key": bool(os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")),
                 "model": os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini"),
                 "base_url": os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
             }
             self.wfile.write(json.dumps(cfg_data, ensure_ascii=False).encode('utf-8'))
-        else:
-            super().do_GET()
+            return
+
+        return super().do_GET()
 
     def do_POST(self):
-        if self.path in ['/api/recluster', '/api/scan']:
+        url_path = self.path.split('?')[0]
+        if url_path in ['/api/recluster', '/api/scan']:
             try:
                 if CODEBASE_DIR not in sys.path:
                     sys.path.insert(0, CODEBASE_DIR)
@@ -66,7 +78,7 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
                 res_data = {"status": "error", "message": str(e)}
                 self.wfile.write(json.dumps(res_data, ensure_ascii=False).encode('utf-8'))
 
-        elif self.path in ['/api/agent', '/api/chat']:
+        elif url_path in ['/api/agent', '/api/chat']:
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(content_length).decode('utf-8')
@@ -74,10 +86,11 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
 
                 user_prompt = req_json.get("prompt") or req_json.get("query") or ""
                 
-                # Check for live provider API Key
                 api_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY")
 
                 if api_key:
+                    if WORKSPACE_DIR not in sys.path:
+                        sys.path.insert(0, WORKSPACE_DIR)
                     from providers import make_provider
                     from tools import to_openai_tools
                     from chat import run_model_tool_loop
@@ -91,9 +104,7 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
                         "content": (
                             "Bạn là AI Teacher Copilot Agent sử dụng các Agent Tools để phân tích dữ liệu 1.261 chatlogs "
                             "và slide bài giảng VLearn. Bạn có thể sử dụng các công cụ slide_ocr_search_tool, metric_calculator_tool, "
-                            "log_scanner_tool để tra cứu thông tin và trả lời trực tiếp cho người dùng. "
-                            "Nếu câu hỏi đòi vượt thẩm quyền (như cộng/trừ điểm), hãy từ chối. "
-                            "Nếu câu hỏi ngoài lề (động vật, bóng đá), từ chối lịch sự."
+                            "log_scanner_tool để tra cứu thông tin và trả lời trực tiếp cho người dùng."
                         )
                     }
                     user_msg = {"role": "user", "content": user_prompt}
@@ -107,7 +118,8 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
                     ai_text = loop_result.get("assistant_text", "Đã xử lý xong truy vấn.")
                     res_payload = {"status": "success", "response": ai_text, "details": loop_result}
                 else:
-                    # Fallback to Agent Class using local Tools execution
+                    if WORKSPACE_DIR not in sys.path:
+                        sys.path.insert(0, WORKSPACE_DIR)
                     import agent
                     copilot_agent = agent.VLearnCopilotAgent(WORKSPACE_DIR)
                     res_payload = copilot_agent.run(user_prompt)
@@ -136,8 +148,9 @@ class RealAIGapMapHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
 
 if __name__ == "__main__":
-    os.chdir(WORKSPACE_DIR)
+    os.chdir(CODEBASE_DIR)
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), RealAIGapMapHandler) as httpd:
+    handler = partial(RealAIGapMapHandler, directory=CODEBASE_DIR)
+    with socketserver.TCPServer(("", PORT), handler) as httpd:
         print(f"Serving REAL AI GapMap Server with Live Re-Clustering Backend at http://localhost:{PORT}")
         httpd.serve_forever()
