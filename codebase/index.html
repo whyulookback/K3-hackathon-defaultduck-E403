@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VLearn AI — Class Knowledge Gap Map (Bản đồ Lỗ hổng Kiến thức)</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Remixicon icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="logo-badge">
+          <i class="ri-brain-line"></i>
+        </div>
+        <div>
+          <h1 class="app-title">VLearn AI GapMap <span class="badge-tag">PROTOTYPE CP2</span></h1>
+          <p class="app-subtitle">Bản đồ lỗ hổng kiến thức thời gian thực cho Giảng viên & TA Leader</p>
+        </div>
+      </div>
+
+      <div class="class-selector">
+        <div class="class-info">
+          <i class="ri-user-star-line"></i>
+          <div>
+            <span class="class-name">Khóa học: AI Product Development (K3)</span>
+            <span class="class-meta">1,000 Học viên · 1,542 Chatlog tuần này</span>
+          </div>
+        </div>
+        <div class="ai-status">
+          <span class="pulse-dot"></span>
+          <span>AI Clustering & Copilot: Active</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI Metric Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card danger">
+        <div class="kpi-icon"><i class="ri-error-warning-line"></i></div>
+        <div class="kpi-content">
+          <span class="kpi-label">Lỗ hổng nghiêm trọng nhất</span>
+          <h3 class="kpi-value">Bất đồng bộ API Key</h3>
+          <span class="kpi-sub">342 Học viên (34.2% Lớp kẹt)</span>
+        </div>
+      </div>
+
+      <div class="kpi-card warning">
+        <div class="kpi-icon"><i class="ri-time-line"></i></div>
+        <div class="kpi-content">
+          <span class="kpi-label">Tiết kiệm thời gian TA</span>
+          <h3 class="kpi-value">6.5 Giờ / Tuần</h3>
+          <span class="kpi-sub">Thay thế tổng hợp chatlog thủ công</span>
+        </div>
+      </div>
+
+      <div class="kpi-card alert">
+        <div class="kpi-icon"><i class="ri-compass-3-line"></i></div>
+        <div class="kpi-content">
+          <span class="kpi-label">Cảnh báo lệch bài giảng</span>
+          <h3 class="kpi-value">Rủi ro RẤT CAO</h3>
+          <span class="kpi-sub">Giáo án Live: Prompt Chaining (chỉ 8.5% hỏi)</span>
+        </div>
+      </div>
+
+      <div class="kpi-card success">
+        <div class="kpi-icon"><i class="ri-checkbox-circle-line"></i></div>
+        <div class="kpi-content">
+          <span class="kpi-label">Độ tin cậy Gom cụm</span>
+          <h3 class="kpi-value">92.4% Purified</h3>
+          <span class="kpi-sub">Dựa trên Semantic Vector Embedding</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area: Heatmap & Inspector -->
+    <main class="main-dashboard">
+      <!-- Left Panel: Heatmap & Cluster Controls -->
+      <section class="heatmap-panel card-glass">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title"><i class="ri-grid-fill"></i> Class Knowledge Gap Heatmap</h2>
+            <p class="panel-desc">Gom cụm ngữ nghĩa 1.542 câu hỏi chatlog — Bấm vào từng khối để soi chi tiết</p>
+          </div>
+          <div class="controls-group">
+            <div class="time-filter">
+              <button class="filter-btn active" data-time="7d">7 Ngày qua</button>
+              <button class="filter-btn" data-time="24h">24 Giờ qua</button>
+            </div>
+            <button class="btn-primary-sm" id="btn-recluster">
+              <i class="ri-refresh-line"></i> AI Re-Cluster
+            </button>
+          </div>
+        </div>
+
+        <!-- Visual Heatmap Grid -->
+        <div class="heatmap-grid" id="heatmap-grid">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Legend -->
+        <div class="heatmap-legend">
+          <span class="legend-item"><span class="color-box critical"></span> Rất nghẽn (>30%)</span>
+          <span class="legend-item"><span class="color-box high"></span> Nghẽn cao (20-30%)</span>
+          <span class="legend-item"><span class="color-box medium"></span> Trung bình (10-20%)</span>
+          <span class="legend-item"><span class="color-box low"></span> Thấp (<10%)</span>
+          <span class="legend-item"><span class="color-box noise"></span> Nhiễu / Out-of-scope</span>
+        </div>
+      </section>
+
+      <!-- Right Panel: Cluster Inspector & AI Action Plan -->
+      <aside class="inspector-panel card-glass" id="inspector-panel">
+        <div class="inspector-header">
+          <span class="severity-badge" id="cluster-severity">CRITICAL</span>
+          <h2 class="cluster-title" id="cluster-title">Chọn một cụm để xem phân tích</h2>
+          <p class="cluster-stats" id="cluster-stats">0 Học viên · 0% Tổng thể câu hỏi</p>
+        </div>
+
+        <!-- AI Lesson Recommendation Box -->
+        <div class="ai-recommendation-box" id="ai-rec-box">
+          <div class="rec-header">
+            <i class="ri-sparkles-fill icon-sparkle"></i>
+            <span>AI Đề Xuất Giáo Án Bổ Trợ (Live Session)</span>
+          </div>
+          <p class="rec-body" id="rec-body">
+            Vui lòng chọn cụm lỗ hổng trên bản đồ nhiệt để xem AI gợi ý lộ trình giảng dạy bổ trợ.
+          </p>
+          <div class="rec-actions">
+            <button class="btn-action" id="btn-add-slide"><i class="ri-slideshow-3-line"></i> Đưa vào Slide Live</button>
+            <button class="btn-action-outline" id="btn-edit-title"><i class="ri-edit-line"></i> Sửa Tên Cụm (Human-in-loop)</button>
+          </div>
+        </div>
+
+        <!-- Evidence Chatlog Stream -->
+        <div class="chatlog-section">
+          <div class="chatlog-header">
+            <h3><i class="ri-chat-history-line"></i> Bằng chứng Chatlog Thực Tế (<span id="chatlog-count">0</span>)</h3>
+            <span class="filter-tag">Semantic Match > 88%</span>
+          </div>
+          <div class="chatlog-list" id="chatlog-list">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Footer Information -->
+    <footer class="app-footer">
+      <p>VLearn Class Knowledge Gap Map — Hackathon Project Batch 03 | Team Members: Hoàng Anh (Data), Quân (Prompt), Việt Anh (Tech), Thúy (UI), Khánh (Spec), Oanh (QA)</p>
+    </footer>
+  </div>
+
+  <!-- Floating Trigger Button for AI Teacher Copilot Chatbot -->
+  <button class="chat-trigger-btn" id="btn-open-chat" title="Hỏi Trợ lý AI Giảng dạy">
+    <i class="ri-robot-2-line"></i>
+    <span class="chat-badge">AI Copilot</span>
+  </button>
+
+  <!-- AI Teacher Assistant Chatbot Drawer -->
+  <div class="chat-drawer card-glass" id="chat-drawer">
+    <div class="chat-drawer-header">
+      <div class="chat-title-group">
+        <div class="chat-avatar">
+          <i class="ri-sparkles-line"></i>
+        </div>
+        <div>
+          <h4>AI Teacher Copilot</h4>
+          <span class="chat-status-txt">Trợ lý Phân tích Dữ liệu Lớp học & Giáo án</span>
+        </div>
+      </div>
+      <button class="chat-close-btn" id="btn-close-chat"><i class="ri-close-line"></i></button>
+    </div>
+
+    <!-- Quick Prompts Chips -->
+    <div class="quick-prompts-container">
+      <span class="prompts-label">Gợi ý truy vấn nhanh:</span>
+      <div class="quick-prompts-scroll">
+        <button class="prompt-chip" data-prompt="miss">🎯 Bài giảng của tôi bị miss phần nào?</button>
+        <button class="prompt-chip" data-prompt="top-questions">💬 Câu hỏi nào được hỏi nhiều nhất ở cụm này?</button>
+        <button class="prompt-chip" data-prompt="quiz">📝 Gợi ý 3 câu hỏi Quiz ôn tập cho buổi Live</button>
+        <button class="prompt-chip" data-prompt="summary">📊 Tóm tắt điểm nghẽn lớn nhất toàn lớp</button>
+      </div>
+    </div>
+
+    <!-- Chat Messages History -->
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-msg ai-msg">
+        <div class="msg-avatar"><i class="ri-robot-line"></i></div>
+        <div class="msg-content">
+          Xin chào Giảng viên! Tôi là **AI Teacher Copilot**. 
+          Tôi đã phân tích **1,542 chatlog** tuần qua. Bạn muốn tôi giúp gì về rào cản kiến thức hay sự lệch pha bài giảng hôm nay?
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Area -->
+    <div class="chat-input-area">
+      <input type="text" id="chat-input" placeholder="Hỏi AI về bài giảng, câu hỏi của học viên hay lỗ hổng..." />
+      <button class="btn-send-chat" id="btn-send-chat"><i class="ri-send-plane-fill"></i></button>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-notification" id="toast">
+    <i class="ri-checkbox-circle-fill"></i> <span id="toast-message">Đã cập nhật bài giảng vào Slide!</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
