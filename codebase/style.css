@@ -342,7 +342,40 @@ body {
 .controls-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+/* View Mode Switcher (Heatmap vs Topic Chart) */
+.view-mode-switch {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bg-card-border);
+}
+
+[data-theme="light"] .view-mode-switch {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: var(--color-primary);
+  color: #fff;
 }
 
 .time-filter {
@@ -393,6 +426,10 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 14px;
   min-height: 380px;
+}
+
+.heatmap-grid.hidden, .topic-chart-view.hidden {
+  display: none !important;
 }
 
 .heatmap-block {
@@ -488,6 +525,142 @@ body {
   margin-top: 6px;
   display: flex;
   justify-content: space-between;
+}
+
+/* Question Topic Donut Circular Chart Styles */
+.topic-chart-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 380px;
+}
+
+.chart-header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+}
+
+.chart-tag { font-weight: 700; color: var(--color-primary); }
+.chart-total { color: var(--text-muted); }
+
+/* Donut Chart Layout */
+.donut-chart-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.donut-visual-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.donut-circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.donut-circle:hover {
+  transform: scale(1.04);
+}
+
+.donut-hole {
+  width: 110px;
+  height: 110px;
+  background: var(--bg-card);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+.donut-center-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.donut-center-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Donut Legend List */
+.donut-legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .donut-legend-item {
+  background: rgba(241, 245, 249, 0.8);
+}
+
+.donut-legend-item:hover {
+  background: var(--bg-card-hover);
+  transform: translateX(4px);
+}
+
+.donut-legend-item.active-legend {
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.legend-sub {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* Legend */
@@ -1544,7 +1717,7 @@ body {
   border-bottom: 1px solid var(--vlearn-border);
 }
 
-/* Chat Stream - Clear Contrast for AI Bot Messages */
+/* Chat Stream */
 .tutor-chat-stream {
   flex: 1;
   overflow-y: auto;
@@ -1660,4 +1833,5 @@ body {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .main-dashboard { grid-template-columns: 1fr; }
   .chat-drawer { width: 90%; right: 5%; bottom: 90px; }
+  .donut-chart-layout { grid-template-columns: 1fr; }
 }

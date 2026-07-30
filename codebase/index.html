@@ -93,10 +93,16 @@
       <section class="heatmap-panel card-glass">
         <div class="panel-header">
           <div>
-            <h2 class="panel-title"><i class="ri-grid-fill"></i> Class Knowledge Gap Heatmap</h2>
-            <p class="panel-desc">Gom cụm ngữ nghĩa 1.542 câu hỏi chatlog — Bấm vào từng khối để soi chi tiết</p>
+            <h2 class="panel-title"><i class="ri-grid-fill"></i> Class Knowledge Gap Analysis</h2>
+            <p class="panel-desc">Gom cụm ngữ nghĩa 1.542 câu hỏi chatlog — Bấm vào để soi chi tiết</p>
           </div>
           <div class="controls-group">
+            <!-- View Mode Switcher: Heatmap Grid vs Topic Chart -->
+            <div class="view-mode-switch">
+              <button class="mode-btn active" id="btn-mode-grid" title="Chế độ Lưới Heatmap"><i class="ri-grid-line"></i> Heatmap</button>
+              <button class="mode-btn" id="btn-mode-chart" title="Chế độ Biểu đồ Chủ đề"><i class="ri-bar-chart-fill"></i> Biểu đồ Chủ đề</button>
+            </div>
+
             <div class="time-filter">
               <button class="filter-btn active" data-time="7d">7 Ngày qua</button>
               <button class="filter-btn" data-time="24h">24 Giờ qua</button>
@@ -107,9 +113,20 @@
           </div>
         </div>
 
-        <!-- Visual Heatmap Grid -->
+        <!-- Visual Heatmap Grid View -->
         <div class="heatmap-grid" id="heatmap-grid">
           <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Question Topic Distribution Chart View (Hidden by default) -->
+        <div class="topic-chart-view hidden" id="topic-chart-view">
+          <div class="chart-header-info">
+            <span class="chart-tag"><i class="ri-bar-chart-grouped-line"></i> Biểu đồ Tần suất Câu hỏi Theo Chủ đề</span>
+            <span class="chart-total">Tổng số: 1,542 Chatlog Tín hiệu</span>
+          </div>
+          <div class="chart-bars-list" id="chart-bars-list">
+            <!-- Populated by JavaScript -->
+          </div>
         </div>
 
         <!-- Legend -->
@@ -137,7 +154,7 @@
             <span>AI Đề Xuất Giáo Án Bổ Trợ (Live Session)</span>
           </div>
           <p class="rec-body" id="rec-body">
-            Vui lòng chọn cụm lỗ hổng trên bản đồ nhiệt để xem AI gợi ý lộ trình giảng dạy bổ trợ.
+            Vui lòng chọn cụm lỗ hổng trên bản đồ nhiệt hoặc biểu đồ để xem AI gợi ý lộ trình giảng dạy bổ trợ.
           </p>
           <div class="rec-actions">
             <button class="btn-action" id="btn-add-slide"><i class="ri-slideshow-3-line"></i> Đưa vào Slide Live</button>
