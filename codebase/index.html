@@ -269,6 +269,66 @@
     </form>
   </div>
 
+  <!-- Admin Chatbot Agent -->
+  <button class="chatbot-fab" id="chatbot-fab" type="button" title="Trợ lý AI cho Giảng viên">
+    <i class="ri-robot-2-line"></i>
+    <span class="chatbot-fab-pulse"></span>
+  </button>
+
+  <div class="chatbot-panel" id="chatbot-panel">
+    <div class="chatbot-header">
+      <div class="chatbot-header-info">
+        <div class="chatbot-avatar">
+          <i class="ri-robot-2-line"></i>
+        </div>
+        <div>
+          <h3 class="chatbot-title">VLearn Admin Assistant</h3>
+          <span class="chatbot-status"><span class="chatbot-status-dot"></span> Sẵn sàng hỗ trợ</span>
+        </div>
+      </div>
+      <button class="chatbot-close" id="chatbot-close" type="button" title="Đóng">
+        <i class="ri-close-line"></i>
+      </button>
+    </div>
+
+    <div class="chatbot-messages" id="chatbot-messages">
+      <div class="chatbot-welcome">
+        <div class="chatbot-welcome-icon">
+          <i class="ri-sparkles-fill"></i>
+        </div>
+        <p>Xin chào! Tôi là trợ lý AI phân tích dữ liệu học tập. Bạn có thể hỏi tôi về:</p>
+        <ul>
+          <li><i class="ri-bar-chart-line"></i> Thống kê & phân bố chủ đề</li>
+          <li><i class="ri-search-eye-line"></i> Vướng mắc của học sinh</li>
+          <li><i class="ri-file-text-line"></i> Nội dung kiến thức trong slide</li>
+          <li><i class="ri-questionnaire-line"></i> Tạo quiz từ nội dung bài giảng</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="chatbot-suggestions" id="chatbot-suggestions">
+      <button class="chatbot-chip" type="button" data-prompt="Học sinh đang quan tâm chủ đề nào nhiều nhất?">
+        <i class="ri-bar-chart-grouped-line"></i> Chủ đề hot nhất
+      </button>
+      <button class="chatbot-chip" type="button" data-prompt="Câu hỏi nào được hỏi nhiều nhất?">
+        <i class="ri-question-line"></i> Câu hỏi phổ biến
+      </button>
+      <button class="chatbot-chip" type="button" data-prompt="Tạo 3 câu quiz trắc nghiệm về AI">
+        <i class="ri-questionnaire-line"></i> Tạo quiz AI
+      </button>
+      <button class="chatbot-chip" type="button" data-prompt="Kiến thức nào học sinh thắc mắc nhiều nhất?">
+        <i class="ri-error-warning-line"></i> Vướng mắc lớn nhất
+      </button>
+    </div>
+
+    <div class="chatbot-input-area">
+      <textarea class="chatbot-input" id="chatbot-input" placeholder="Hỏi về dữ liệu học tập..." rows="1"></textarea>
+      <button class="chatbot-send" id="chatbot-send" type="button" title="Gửi">
+        <i class="ri-send-plane-2-fill"></i>
+      </button>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

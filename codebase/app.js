@@ -43,10 +43,11 @@ let currentWindow = "7d";
 const requestedScope = new URLSearchParams(window.location.search).get("scope");
 let currentScope = requestedScope === "slides" ? "slides" : "dataset";
 let pollTimer = null;
+let lastGeneratedAt = null;
 
 const heatmapGrid = document.getElementById("heatmap-grid");
-const topicChartView = document.getElementById("topic-chart-view");
-const chartBarsList = document.getElementById("chart-bars-list");
+const topicChartView = document.getElementById("chart-view-container");
+const chartBarsList = document.getElementById("chart-legend-list");
 const btnModeGrid = document.getElementById("btn-mode-grid");
 const btnModeChart = document.getElementById("btn-mode-chart");
 const clusterSeverity = document.getElementById("cluster-severity");
@@ -98,7 +99,7 @@ async function handleAdminLogin(event) {
   adminLoginError?.classList.add("hidden");
   adminLoginError?.classList.remove("role-switch-notice");
   const name = document.getElementById("admin-display-name").value.trim();
-  const accessCode = document.getElementById("admin-access-code").value;
+  const accessCode = document.getElementById("admin-access-code").value.trim();
   try {
     const response = await fetch("/api/auth/login", {
       method: "POST",
@@ -170,10 +171,17 @@ async function loadClusters(showLoader = true) {
       throw new Error(result.error || "Không tải được kết quả clustering");
     }
     if (result.refreshing) {
-      schedulePoll();
+      schedulePoll(1800);
     } else {
-      clearTimeout(pollTimer);
+      schedulePoll(15000); // Poll every 15s to get continuous updates
     }
+    
+    // Check if data actually changed to avoid flickering
+    if (result.generated_at === lastGeneratedAt && !result.refreshing && clustersData.length > 0) {
+      return; 
+    }
+    lastGeneratedAt = result.generated_at;
+
     clustersData = result.clusters || [];
     selectedClusterId = clustersData.some((item) => item.id === selectedClusterId)
       ? selectedClusterId
@@ -187,9 +195,9 @@ async function loadClusters(showLoader = true) {
   }
 }
 
-function schedulePoll() {
+function schedulePoll(delay = 1800) {
   clearTimeout(pollTimer);
-  pollTimer = window.setTimeout(() => loadClusters(false), 1800);
+  pollTimer = window.setTimeout(() => loadClusters(false), delay);
 }
 
 function renderProcessingState() {
@@ -392,7 +400,7 @@ function setupFiltersAndActions() {
       selectedClusterId = null;
       loadClusters();
     });
-  }
+  });
 
   document.querySelectorAll("[data-scope]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -518,7 +526,219 @@ async function initDashboard() {
   setupViewSwitcher();
   setupFiltersAndActions();
   setupUpload();
+  initChatbot();
   await loadClusters();
 }
 
 document.addEventListener("DOMContentLoaded", initDashboard);
+
+// ── Admin Chatbot Agent ──────────────────────────────────────────────────────
+
+function escapeHtml(text) {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+const chatbotFab = document.getElementById("chatbot-fab");
+const chatbotPanel = document.getElementById("chatbot-panel");
+const chatbotClose = document.getElementById("chatbot-close");
+const chatbotMessages = document.getElementById("chatbot-messages");
+const chatbotInput = document.getElementById("chatbot-input");
+const chatbotSend = document.getElementById("chatbot-send");
+const chatbotSuggestions = document.getElementById("chatbot-suggestions");
+
+let chatbotHistory = [];
+let chatbotBusy = false;
+
+const TOOL_LABELS = {
+  query_student_stats: { icon: "ri-bar-chart-line", label: "Thống kê học viên" },
+  query_topic_distribution: { icon: "ri-pie-chart-line", label: "Phân bố chủ đề" },
+  query_most_asked_questions: { icon: "ri-question-line", label: "Câu hỏi phổ biến" },
+  search_knowledge_base: { icon: "ri-search-eye-line", label: "Tìm kiến thức" },
+  query_student_struggles: { icon: "ri-error-warning-line", label: "Vướng mắc học sinh" },
+  generate_quiz: { icon: "ri-questionnaire-line", label: "Tạo quiz" },
+  scan_runtime_logs: { icon: "ri-terminal-box-line", label: "Quét log hệ thống" },
+};
+
+function initChatbot() {
+  if (!chatbotFab || !chatbotPanel) return;
+  chatbotFab.addEventListener("click", toggleChatbotPanel);
+  chatbotClose?.addEventListener("click", () => setChatbotOpen(false));
+  chatbotSend?.addEventListener("click", sendChatbotMessage);
+  chatbotInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendChatbotMessage();
+    }
+  });
+  chatbotInput?.addEventListener("input", autoResizeInput);
+  chatbotSuggestions?.querySelectorAll(".chatbot-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const prompt = chip.dataset.prompt;
+      if (prompt && chatbotInput) {
+        chatbotInput.value = prompt;
+        sendChatbotMessage();
+      }
+    });
+  });
+}
+
+function toggleChatbotPanel() {
+  const isOpen = chatbotPanel.classList.contains("chatbot-panel-open");
+  setChatbotOpen(!isOpen);
+}
+
+function setChatbotOpen(open) {
+  chatbotPanel.classList.toggle("chatbot-panel-open", open);
+  chatbotFab.classList.toggle("chatbot-fab-hidden", open);
+  if (open) {
+    chatbotInput?.focus();
+    scrollChatToBottom();
+  }
+}
+
+function autoResizeInput() {
+  if (!chatbotInput) return;
+  chatbotInput.style.height = "auto";
+  chatbotInput.style.height = Math.min(chatbotInput.scrollHeight, 120) + "px";
+}
+
+function scrollChatToBottom() {
+  if (chatbotMessages) {
+    requestAnimationFrame(() => {
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    });
+  }
+}
+
+function appendChatMessage(role, content, toolCalls) {
+  // Hide welcome on first message
+  const welcome = chatbotMessages?.querySelector(".chatbot-welcome");
+  if (welcome) welcome.style.display = "none";
+
+  const msgEl = document.createElement("div");
+  msgEl.className = `chatbot-msg chatbot-msg-${role}`;
+
+  if (role === "user") {
+    msgEl.innerHTML = `
+      <div class="chatbot-msg-bubble chatbot-msg-user-bubble">
+        <p>${escapeHtml(content)}</p>
+      </div>
+    `;
+  } else {
+    // Tool badges
+    let toolBadgesHtml = "";
+    if (toolCalls && toolCalls.length > 0) {
+      const badges = toolCalls.map((tc) => {
+        const info = TOOL_LABELS[tc.tool] || { icon: "ri-tools-line", label: tc.tool };
+        return `<span class="chatbot-tool-badge"><i class="${info.icon}"></i> ${escapeHtml(info.label)}</span>`;
+      }).join("");
+      toolBadgesHtml = `<div class="chatbot-tool-badges">${badges}</div>`;
+    }
+
+    msgEl.innerHTML = `
+      <div class="chatbot-msg-avatar"><i class="ri-robot-2-line"></i></div>
+      <div class="chatbot-msg-content">
+        ${toolBadgesHtml}
+        <div class="chatbot-msg-bubble chatbot-msg-assistant-bubble">
+          ${formatChatbotContent(content)}
+        </div>
+      </div>
+    `;
+  }
+
+  chatbotMessages?.appendChild(msgEl);
+  scrollChatToBottom();
+  return msgEl;
+}
+
+function appendThinkingIndicator() {
+  const el = document.createElement("div");
+  el.className = "chatbot-msg chatbot-msg-assistant chatbot-thinking";
+  el.id = "chatbot-thinking";
+  el.innerHTML = `
+    <div class="chatbot-msg-avatar"><i class="ri-robot-2-line"></i></div>
+    <div class="chatbot-msg-content">
+      <div class="chatbot-thinking-indicator">
+        <div class="chatbot-thinking-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="chatbot-thinking-text">Đang phân tích dữ liệu...</span>
+      </div>
+    </div>
+  `;
+  chatbotMessages?.appendChild(el);
+  scrollChatToBottom();
+  return el;
+}
+
+function removeThinkingIndicator() {
+  document.getElementById("chatbot-thinking")?.remove();
+}
+
+function formatChatbotContent(text) {
+  if (!text) return "<p>—</p>";
+  let html = escapeHtml(text);
+  // Bold: **text**
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  // Inline code: `text`
+  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+  // Numbered lists
+  html = html.replace(/^(\d+)\.\s+(.+)$/gm, "<li>$2</li>");
+  // Bullet lists
+  html = html.replace(/^[-•]\s+(.+)$/gm, "<li>$1</li>");
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/((?:<li>.*?<\/li>\s*)+)/g, "<ul>$1</ul>");
+  // Line breaks to paragraphs
+  html = html.split(/\n{2,}/).map((p) => p.trim() ? `<p>${p.trim()}</p>` : "").join("");
+  // Single newlines to <br>
+  html = html.replace(/\n/g, "<br>");
+  return html || "<p>—</p>";
+}
+
+async function sendChatbotMessage() {
+  if (chatbotBusy || !chatbotInput) return;
+  const text = chatbotInput.value.trim();
+  if (!text) return;
+
+  chatbotInput.value = "";
+  chatbotInput.style.height = "auto";
+  chatbotBusy = true;
+  chatbotSend?.classList.add("chatbot-send-disabled");
+
+  // Hide suggestions after first message
+  if (chatbotSuggestions) chatbotSuggestions.style.display = "none";
+
+  // Add user message
+  chatbotHistory.push({ role: "user", content: text });
+  appendChatMessage("user", text);
+
+  // Show thinking
+  appendThinkingIndicator();
+
+  try {
+    const response = await fetch("/api/admin/chatbot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: chatbotHistory }),
+    });
+    if (!(await ensureAdminAccess(response))) return;
+    const data = await response.json();
+
+    removeThinkingIndicator();
+
+    const assistantContent = data.content || data.error || "Không có phản hồi.";
+    chatbotHistory.push({ role: "assistant", content: assistantContent });
+    appendChatMessage("assistant", assistantContent, data.tool_calls_log || []);
+  } catch (err) {
+    removeThinkingIndicator();
+    appendChatMessage("assistant", `Lỗi kết nối: ${err.message}`, []);
+  } finally {
+    chatbotBusy = false;
+    chatbotSend?.classList.remove("chatbot-send-disabled");
+    chatbotInput?.focus();
+  }
+}
