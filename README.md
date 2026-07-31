@@ -2,6 +2,32 @@
 
 **SPEC → Prototype → Demo.** Đây không phải cuộc thi code — đây là cuộc thi **tư duy sản phẩm AI**.
 
+## Chạy prototype VLearn local
+
+Prototype hiện có hai trang:
+
+- Student Tutor: `http://127.0.0.1:8000/`
+- Admin Topic Interest Map: `http://127.0.0.1:8000/admin`
+
+Yêu cầu Python 3.11+ và các biến môi trường `OPENROUTER_API_KEY`,
+`VOYAGE_API_KEY`. Có thể đặt thêm `OPENROUTER_MODEL`, `VOYAGE_MODEL` và
+`VOYAGE_OUTPUT_DIMENSION`.
+
+```powershell
+pip install -r requirements.txt
+.\run-local.ps1
+```
+
+Backend sử dụng SQLite tại `data/runtime/`, đọc PDF bằng `pypdf`, dùng Voyage
+cho embedding và OpenRouter cho Tutor/đặt tên cluster. Nếu API tạm lỗi, hệ
+thống tự fallback về embedding/label local để demo không bị dừng.
+
+Admin có hai nguồn dữ liệu tách biệt:
+
+- **Chatlog thật · Topic:** clustering trên cả câu hỏi và câu trả lời Tutor.
+- **Slide demo · Theo trang:** 174 cặp hỏi–đáp synthetic từ 58 trang của hai
+  PDF; có mapping file/trang và không được xem là evidence của học viên thật.
+
 - Thời lượng: **1,5 ngày** (một ngày build + một buổi demo)
 - Nhóm: **4-5 người** · zone tối đa 5 nhóm · thi theo lớp
 

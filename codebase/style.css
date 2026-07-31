@@ -323,8 +323,10 @@ body {
 
 .panel-header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 14px;
 }
 
 .panel-title {
@@ -341,7 +343,9 @@ body {
 
 .controls-group {
   display: flex;
+  width: 100%;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -2112,3 +2116,264 @@ body {
   .chart-layout { grid-template-columns: 1fr; }
 }
 
+/* Working demo additions */
+.demo-login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at 50% 20%, rgba(79, 70, 229, .28), transparent 38%), rgba(5, 10, 25, .92);
+  backdrop-filter: blur(16px);
+}
+
+.demo-login-overlay.hidden { display: none; }
+
+.demo-login-card {
+  width: min(420px, 100%);
+  padding: 34px;
+  border: 1px solid rgba(148, 163, 184, .22);
+  border-radius: 22px;
+  color: #f8fafc;
+  background: #111a2e;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .45);
+}
+
+.demo-login-card .login-logo {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 20px;
+  place-items: center;
+  border-radius: 16px;
+  color: white;
+  font-size: 27px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+.demo-login-card h2 { margin: 0 0 8px; font-size: 24px; }
+.demo-login-card p { margin: 0 0 22px; color: #94a3b8; line-height: 1.55; }
+.demo-login-card label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 13px; font-weight: 700; }
+
+.demo-login-card input {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: #f8fafc;
+  outline: none;
+  background: #0b1220;
+}
+
+.demo-login-card input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, .16); }
+
+.demo-login-card button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+.demo-login-card > span { display: block; margin-top: 14px; color: #64748b; font-size: 11px; text-align: center; }
+
+.slide-main-content { width: 100%; height: 100%; min-height: 650px; padding: 0 !important; }
+.pdf-slide-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 650px;
+  border: 0;
+  border-radius: 4px;
+  background: #fff;
+  pointer-events: none;
+}
+
+.page-jump-input {
+  width: 54px;
+  padding: 4px 6px;
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 6px;
+  background: var(--surface-color, #fff);
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+}
+
+.slide-main-content {
+  overscroll-behavior: contain;
+  cursor: ns-resize;
+}
+
+.slide-loading,
+.slide-empty {
+  display: grid;
+  min-height: 600px;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  color: #64748b;
+}
+
+.slide-loading i { color: #4f46e5; font-size: 32px; }
+.sidebar-accordion .doc-item { width: 100%; border: 0; color: inherit; text-align: left; }
+
+.api-error {
+  margin: 12px;
+  padding: 14px;
+  border: 1px solid rgba(239, 68, 68, .3);
+  border-radius: 10px;
+  color: #fca5a5;
+  font-size: 12px;
+  line-height: 1.6;
+  background: rgba(127, 29, 29, .16);
+}
+
+.tutor-answer-text { white-space: pre-wrap; }
+
+.tutor-citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, .16);
+}
+
+.tutor-citations button {
+  padding: 5px 8px;
+  border: 1px solid rgba(59, 130, 246, .4);
+  border-radius: 7px;
+  color: #60a5fa;
+  font-size: 10px;
+  cursor: pointer;
+  background: rgba(37, 99, 235, .1);
+}
+
+.answer-status {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #fbbf24;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  background: rgba(245, 158, 11, .12);
+}
+
+.cluster-processing,
+.cluster-error {
+  display: grid;
+  grid-column: 1 / -1;
+  min-height: 330px;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 32px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.cluster-processing i,
+.cluster-error i { color: #8b5cf6; font-size: 38px; }
+.cluster-processing strong,
+.cluster-error strong { color: var(--text-main); font-size: 17px; }
+.cluster-error code { padding: 7px 10px; border-radius: 6px; color: #fca5a5; background: rgba(239, 68, 68, .1); }
+
+button.heatmap-block,
+button.donut-legend-item { width: 100%; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+
+.block-summary {
+  display: -webkit-box;
+  min-height: 38px;
+  margin: 8px 0 14px;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.dataset-filter {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--bg-card-border);
+  border-radius: 9px;
+  background: rgba(15, 23, 42, .32);
+}
+
+.dataset-filter .filter-btn {
+  white-space: nowrap;
+}
+
+.slide-page-signal {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border: 1px solid rgba(59, 130, 246, .25);
+  border-radius: 7px;
+  color: #60a5fa;
+  font-size: 9px;
+  font-weight: 700;
+  background: rgba(37, 99, 235, .08);
+}
+
+.evidence-pair { display: block; }
+
+.evidence-label {
+  display: inline-block;
+  margin: 8px 0 4px;
+  color: #60a5fa;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.evidence-label.answer { color: #a78bfa; }
+
+.tutor-evidence-answer {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-muted) !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.btn-open-evidence-slide {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 6px 9px;
+  border: 1px solid rgba(59, 130, 246, .32);
+  border-radius: 7px;
+  color: #60a5fa;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(37, 99, 235, .08);
+}
+
+#btn-upload-slide:disabled,
+#btn-recluster:disabled,
+#btn-send-tutor:disabled { cursor: wait; opacity: .62; }
+
+.admin-student-link {
+  text-decoration: none;
+}

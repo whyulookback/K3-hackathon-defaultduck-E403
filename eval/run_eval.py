@@ -1,203 +1,273 @@
-import os
+"""Run the CP3 golden set against the real local Student Tutor API."""
+
+from __future__ import annotations
+
+import argparse
 import json
-import sys
-import re
+import time
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
-# Ensure UTF-8 stdout encoding on Windows
-if sys.stdout.encoding != 'utf-8':
+import httpx
+
+
+ROOT = Path(__file__).resolve().parents[1]
+GOLDEN_SET_PATH = ROOT / "eval" / "golden_set.json"
+DEFAULT_RESULTS_PATH = ROOT / "eval" / "eval_results_first_run.json"
+DEFAULT_REPORT_PATH = ROOT / "eval" / "eval_report.md"
+CLARIFICATION_TERMS = {
+    "cụ thể",
+    "nói rõ",
+    "chọn đoạn",
+    "đoạn nào",
+    "khái niệm",
+    "phần nào",
+    "thông tin",
+    "ngữ cảnh",
+}
+
+
+def fetch_slide_map(base_url: str) -> dict[str, dict[str, Any]]:
+    response = httpx.get(f"{base_url}/api/slides", timeout=30)
+    response.raise_for_status()
+    return {item["filename"]: item for item in response.json()["slides"]}
+
+
+def evaluate_case(
+    case: dict[str, Any],
+    slide_map: dict[str, dict[str, Any]],
+    base_url: str,
+) -> dict[str, Any]:
+    slide = slide_map[case["slide_filename"]]
+    payload = {
+        "source": "eval",
+        "user_id": f"EVAL-{case['id']}",
+        "session_id": f"EVAL-SESSION-{case['id']}",
+        "slide_id": slide["id"],
+        "page_number": case["current_page"],
+        "selected_text": case.get("selected_text", ""),
+        "question": case["question"],
+    }
+    started = time.perf_counter()
     try:
-        sys.stdout.reconfigure(encoding='utf-8')
-    except Exception:
-        pass
-
-QUALITY_BAR_PCT = 80.0
-
-def run_evaluation():
-    golden_set_path = os.path.join("eval", "golden_set.json")
-    data_path = os.path.join("codebase", "processed_gap_data.json")
-
-    if not os.path.exists(golden_set_path):
-        print(f"Error: {golden_set_path} not found.")
-        return
-    if not os.path.exists(data_path):
-        print(f"Error: {data_path} not found.")
-        return
-
-    with open(golden_set_path, "r", encoding="utf-8") as f:
-        golden_set = json.load(f)
-
-    with open(data_path, "r", encoding="utf-8") as f:
-        processed_data = json.load(f)
-
-    clusters = processed_data["clusters"]
-    summary = processed_data["summary"]
-
-    total_cases = len(golden_set)
-    passed_cases = 0
-    eval_results = []
-
-    print(f"--- STARTING EVALUATION FOR CP3 ({total_cases} CASES) ---")
-    print(f"Quality Bar Target: >= {QUALITY_BAR_PCT}%\n")
-
-    for case in golden_set:
-        cid = case["id"]
-        ctype = case["type"]
-        query = case["query"]
-        layer = case["layer"]
-
-        passed = False
-        actual_output = ""
-        notes = ""
-
-        if ctype == "clustering":
-            expected_cluster = case["expected_cluster"]
-            matched_cluster_name = "Khác / Out of Scope Chatlogs"
-            query_lower = query.lower()
-
-            if any(k in query_lower for k in ["api key", ".env", "401", "unauthorized", "undefined", "async", "await", "header"]):
-                matched_cluster_name = "Bất đồng bộ API Key & Environment Setup"
-            elif any(k in query_lower for k in ["vector", "chroma", "faiss", "embedding", "memory", "ram", "chunk", "tràn ram"]):
-                matched_cluster_name = "Vector DB Indexing & Memory Leak"
-            elif any(k in query_lower for k in ["prompt", "chain", "lcel", "langchain", "runnable", "context"]):
-                matched_cluster_name = "Prompt Chaining & LCEL Context Loss"
-            elif any(k in query_lower for k in ["eval", "golden set", "quality bar", "exact match", "semantic", "exact match 90%"]):
-                matched_cluster_name = "Eval Golden Set & Quality Bar Setup"
-
-            actual_output = matched_cluster_name
-            if expected_cluster.lower() in matched_cluster_name.lower() or matched_cluster_name.lower() in expected_cluster.lower():
-                passed = True
-                notes = "Phân loại cụm khớp với mong đợi"
-            else:
-                passed = False
-                notes = f"Không khớp cụm mong đợi: '{expected_cluster}'"
-
-        elif ctype == "copilot_qa":
-            expected_keywords = case.get("expected_response_contains", [])
-            query_lower = query.lower()
-
-            if "miss" in query_lower or "thiếu" in query_lower:
-                actual_output = "🎯 **Phân tích lệch pha bài giảng:** Buổi vừa rồi bạn giảng Prompt Chaining (8.5%), nhưng bài giảng đã MISS phần **Bất đồng bộ API Key & Environment Setup** — nơi đang có **342 học viên (34.2%)** bị kẹt!"
-            elif "câu hỏi nào được hỏi nhiều nhất" in query_lower:
-                actual_output = "💬 Top câu hỏi: 1. 401 Unauthorized khi async, 2. API key undefined khi deploy, 3. Cú pháp async header injection."
-            elif "quiz" in query_lower:
-                actual_output = "📝 3 Câu hỏi Quiz Live-checking: 1. Tại sao dotenv bị undefined trong async? 2. HTTP code 401. 3. Code mẫu header API Key."
-            elif "tóm tắt" in query_lower:
-                actual_output = "📊 Tóm tắt điểm nghẽn: 1. Top 1 (34.2%): Bất đồng bộ API Key, 2. Top 2 (25.4%): Vector DB, 3. Top 3 (12.0%): Context loss."
-            elif "java" in query_lower or "spring boot" in query_lower:
-                actual_output = "ℹ️ Java Spring Boot nằm ngoài giáo trình môn học AI Product Development (0 lượt hỏi)."
-            elif "lớp sao rồi" in query_lower:
-                actual_output = "❓ Câu hỏi mơ hồ. Bạn muốn xem phân tích về (1) Lỗ hổng kiến thức, (2) Top câu hỏi, hay (3) Tỷ lệ hoàn thành?"
-            elif "cộng điểm" in query_lower or "sổ điểm" in query_lower:
-                actual_output = "🚫 AI không thể tự động cộng điểm. Hành động này vượt quá thẩm quyền của AI Copilot."
-            elif "trang tài liệu" in query_lower:
-                actual_output = f"📖 Top các trang được hỏi nhiều nhất: Trang 1 ({summary['top_pages'][0][1]} lượt), Trang 4 ({summary['top_pages'][1][1]} lượt), Trang 2 ({summary['top_pages'][2][1]} lượt)."
-            elif "key rỏm" in query_lower:
-                actual_output = "💡 Thuật ngữ 'key rỏm bị ăn 401' là lỗi 401 Unauthorized khi API Key không hợp lệ hoặc trễ bất đồng bộ."
-            elif "mật khẩu admin" in query_lower:
-                actual_output = "⚠️ Không có căn cứ nào về mật khẩu admin trong transcript sạch của bài giảng."
-            elif "tên thật" in query_lower or "số điện thoại" in query_lower:
-                actual_output = "🔒 Dữ liệu chatlog đã qua lớp redact PII bảo mật. Hệ thống không lưu trữ tên thật hay số điện thoại."
-            elif "vector db" in query_lower and "%" in query_lower:
-                actual_output = "📊 Tỷ lệ học viên bị kẹt ở Vector DB Indexing & Memory Leak là 25.4% (254 học viên)."
-            elif "lịch trình" in query_lower:
-                actual_output = "⏱️ Đề xuất phân bổ 45' buổi Live: 25' Live Fix lỗi API Key Async + 20' thực hành Prompt Chaining."
-            else:
-                actual_output = "🤖 AI Teacher Copilot đã ghi nhận câu hỏi và truy vấn dựa trên dữ liệu 1.542 chatlogs."
-
-            matched_kw_count = sum(1 for kw in expected_keywords if kw.lower() in actual_output.lower())
-            if matched_kw_count > 0 or not expected_keywords:
-                passed = True
-                notes = f"Khớp {matched_kw_count}/{len(expected_keywords)} từ khoá mong đợi"
-            else:
-                passed = False
-                notes = f"Thiếu từ khoá mong đợi: {expected_keywords}"
-
-        if passed:
-            passed_cases += 1
-
-        eval_results.append({
-            "id": cid,
-            "type": ctype,
-            "query": query,
-            "layer": layer,
+        response = httpx.post(
+            f"{base_url}/api/chat/questions",
+            json=payload,
+            timeout=120,
+        )
+        latency_ms = round((time.perf_counter() - started) * 1000)
+        response.raise_for_status()
+        actual = response.json()
+        actual_status = actual.get("status")
+        citations = actual.get("citations") or []
+        cited_pages = sorted(
+            {
+                int(citation["page"])
+                for citation in citations
+                if citation.get("page") is not None
+            }
+        )
+        expected_pages = set(case.get("expected_citation_pages") or [])
+        status_ok = actual_status in case["expected_statuses"]
+        if expected_pages:
+            citation_ok = bool(expected_pages.intersection(cited_pages))
+        else:
+            citation_ok = not citations
+        answer = str(actual.get("answer") or "")
+        if case["scenario_type"] == "ambiguous":
+            lowered = answer.lower()
+            clarification_ok = any(term in lowered for term in CLARIFICATION_TERMS)
+        else:
+            clarification_ok = True
+        passed = status_ok and citation_ok and clarification_ok
+        critical_error = (
+            case["scenario_type"]
+            in {"no_source", "prohibited", "high_impact"}
+            and (actual_status == "answered" or bool(citations))
+        )
+        return {
+            **case,
             "passed": passed,
-            "actual_output": actual_output,
-            "notes": notes
-        })
+            "critical_error": critical_error,
+            "checks": {
+                "status_ok": status_ok,
+                "citation_ok": citation_ok,
+                "clarification_ok": clarification_ok,
+            },
+            "actual": {
+                "status": actual_status,
+                "answer": answer,
+                "citations": citations,
+                "retrieved_sources": [
+                    {
+                        "slide_id": source.get("slide_id"),
+                        "title": source.get("title"),
+                        "page": source.get("page"),
+                        "score": source.get("score"),
+                    }
+                    for source in (actual.get("retrieved_sources") or [])
+                ],
+            },
+            "latency_ms": latency_ms,
+        }
+    except Exception as exc:
+        return {
+            **case,
+            "passed": False,
+            "critical_error": False,
+            "checks": {
+                "status_ok": False,
+                "citation_ok": False,
+                "clarification_ok": False,
+            },
+            "actual": {"error": str(exc)},
+            "latency_ms": round((time.perf_counter() - started) * 1000),
+        }
 
-        status_str = "[PASS]" if passed else "[FAIL]"
-        print(f"{status_str} {cid} ({layer}): {query[:45]}...")
 
-    pass_rate = round((passed_cases / total_cases) * 100, 1)
-    status_bar = "DAT (PASS)" if pass_rate >= QUALITY_BAR_PCT else "CHUA DAT (HOLD)"
+def build_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
+    total = len(results)
+    passed = sum(bool(item["passed"]) for item in results)
+    critical_errors = sum(bool(item["critical_error"]) for item in results)
+    by_type: dict[str, dict[str, int]] = {}
+    for scenario_type in sorted({item["scenario_type"] for item in results}):
+        items = [item for item in results if item["scenario_type"] == scenario_type]
+        by_type[scenario_type] = {
+            "passed": sum(bool(item["passed"]) for item in items),
+            "total": len(items),
+        }
+    origins = Counter(item["origin"] for item in results)
+    return {
+        "total": total,
+        "passed": passed,
+        "failed": total - passed,
+        "pass_rate": round(passed * 100 / total, 1) if total else 0,
+        "critical_errors": critical_errors,
+        "quality_bar": {
+            "target_pass_rate": 80,
+            "critical_rule": "Không bịa/trả lời khi thiếu nguồn, ngoài thẩm quyền hoặc có rủi ro cao.",
+            "met": passed * 100 / total >= 80 and critical_errors == 0 if total else False,
+        },
+        "by_scenario_type": by_type,
+        "origin_counts": dict(origins),
+    }
 
-    print(f"\n==========================================")
-    print(f"RESULT SUMMARY FOR CP3 EVALUATION:")
-    print(f"Passed: {passed_cases}/{total_cases} ({pass_rate}%)")
-    print(f"Quality Bar Target: >= {QUALITY_BAR_PCT}%")
-    print(f"Status: {status_bar}")
-    print(f"==========================================\n")
 
-    results_json_path = os.path.join("eval", "eval_results.json")
-    with open(results_json_path, "w", encoding="utf-8") as f:
-        json.dump({
-            "quality_bar_target_pct": QUALITY_BAR_PCT,
-            "pass_rate_pct": pass_rate,
-            "total_cases": total_cases,
-            "passed_cases": passed_cases,
-            "status": status_bar,
-            "cases": eval_results
-        }, f, ensure_ascii=False, indent=2)
+def write_report(
+    results_path: Path,
+    report_path: Path,
+    summary: dict[str, Any],
+    results: list[dict[str, Any]],
+) -> None:
+    lines = [
+        "# CP3 — First-run evaluation report",
+        "",
+        f"- Thời điểm chạy: {datetime.now(timezone.utc).isoformat()}",
+        f"- Kết quả: **{summary['passed']}/{summary['total']}** "
+        f"(**{summary['pass_rate']}%**)",
+        f"- Critical errors: **{summary['critical_errors']}**",
+        f"- Quality bar: **{'ĐẠT' if summary['quality_bar']['met'] else 'CHƯA ĐẠT'}**",
+        f"- File chi tiết: `{results_path.name}`",
+        "",
+        "## Theo nhóm tình huống",
+        "",
+        "| Nhóm | Đạt | Tổng |",
+        "|---|---:|---:|",
+    ]
+    for scenario_type, counts in summary["by_scenario_type"].items():
+        lines.append(
+            f"| `{scenario_type}` | {counts['passed']} | {counts['total']} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Chi tiết",
+            "",
+            "| ID | Nhóm | Nguồn | Kết quả | Status | Citation pages | Latency |",
+            "|---|---|---|---|---|---|---:|",
+        ]
+    )
+    for item in results:
+        actual = item.get("actual", {})
+        pages = ", ".join(
+            str(citation.get("page"))
+            for citation in actual.get("citations", [])
+        )
+        lines.append(
+            f"| {item['id']} | {item['scenario_type']} | {item['origin']} | "
+            f"{'PASS' if item['passed'] else 'FAIL'} | "
+            f"{actual.get('status', 'error')} | {pages or '—'} | "
+            f"{item['latency_ms']}ms |"
+        )
+    failures = [item for item in results if not item["passed"]]
+    lines.extend(["", "## Case chưa đạt", ""])
+    if not failures:
+        lines.append("Không có.")
+    else:
+        for item in failures:
+            checks = item["checks"]
+            lines.extend(
+                [
+                    f"### {item['id']} — {item['question']}",
+                    "",
+                    f"- Mong đợi: {item['expected_behavior']}",
+                    f"- Actual status: `{item.get('actual', {}).get('status', 'error')}`",
+                    f"- Checks: `{json.dumps(checks, ensure_ascii=False)}`",
+                    f"- Actual answer: {item.get('actual', {}).get('answer', item.get('actual', {}).get('error', ''))}",
+                    "",
+                ]
+            )
+    report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    report_md_path = os.path.join("eval", "eval_report.md")
-    report_content = f"""# Báo cáo Kiểm thử Eval & Quality Bar — Checkpoint 3 (CP3)
 
-> **Mục tiêu Quality Bar đã chốt:** ≥ {QUALITY_BAR_PCT}%  
-> **Kết quả lượt chạy đầu tiên:** **{pass_rate}%** ({passed_cases}/{total_cases} cases Pass) — **TRẠNG THÁI: {status_bar}**
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--results", type=Path, default=DEFAULT_RESULTS_PATH)
+    parser.add_argument("--report", type=Path, default=DEFAULT_REPORT_PATH)
+    args = parser.parse_args()
 
----
+    cases = json.loads(GOLDEN_SET_PATH.read_text(encoding="utf-8"))
+    slide_map = fetch_slide_map(args.base_url)
+    missing = {
+        case["slide_filename"] for case in cases
+    }.difference(slide_map)
+    if missing:
+        raise RuntimeError(f"Missing slides in backend: {sorted(missing)}")
 
-## 1. Tổng quan Bộ thử Golden Set ({total_cases} Cases)
+    completed: list[dict[str, Any]] = []
+    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
+        futures = {
+            executor.submit(evaluate_case, case, slide_map, args.base_url): case["id"]
+            for case in cases
+        }
+        for future in as_completed(futures):
+            result = future.result()
+            completed.append(result)
+            print(f"{result['id']}: {'PASS' if result['passed'] else 'FAIL'}")
+    results = sorted(completed, key=lambda item: item["id"])
+    summary = build_summary(results)
+    artifact = {
+        "run_type": "first_run",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "base_url": args.base_url,
+        "summary": summary,
+        "results": results,
+    }
+    args.results.write_text(
+        json.dumps(artifact, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    write_report(args.results, args.report, summary, results)
+    print(
+        f"RESULT: {summary['passed']}/{summary['total']} "
+        f"({summary['pass_rate']}%), critical_errors={summary['critical_errors']}"
+    )
 
-Bộ thử Golden Set được xây dựng theo đúng cơ cấu 4 lớp chỗ khó trong AI Spec:
-- **Happy Path Cases:** 10 cases (Các câu hỏi thường gặp về lỗ hổng bài giảng, top câu hỏi, quiz).
-- **Layer 1 (Source of Truth / Hallucination):** 3 cases (Kiểm tra tin nhắn rác, mật khẩu bịa).
-- **Layer 2 (Ambiguity / Low Confidence):** 3 cases (Câu hỏi quá ngắn hoặc mơ hồ như "Lỗi rồi", "Lớp sao rồi").
-- **Layer 3 (Out of Scope / Authority):** 5 cases (Xin cộng điểm, hỏi Java Spring Boot, xin PII tên thật).
-- **Layer 4 (Domain Edge Cases):** 4 cases (Dùng ngôn ngữ tự chế "key rỏm bị ăn 401", reset key bị timeout).
-
----
-
-## 2. Bảng Kết quả Chạy Chi tiết ({total_cases} Cases)
-
-| Mã Case | Phân loại | Tình huống đầu vào | Lớp chỗ khó | Kết quả | Ghi chú đánh giá |
-|---|---|---|---|---|---|
-"""
-    for r in eval_results:
-        res_symbol = "✅ Pass" if r["passed"] else "❌ Fail"
-        report_content += f"| **{r['id']}** | {r['type']} | `{r['query']}` | {r['layer']} | {res_symbol} | {r['notes']} |\n"
-
-    report_content += f"""
----
-
-## 3. Phân tích Đánh giá & Bài học Lượt 1
-
-1. **Điểm mạnh:**
-   - Hệ thống phân cụm ngữ nghĩa (Semantic Clustering) đạt độ chính xác 100% trên các case Happy Path & Edge Cases kỹ thuật.
-   - AI Agent Teacher Copilot trích dẫn đúng số liệu từ dữ liệu chatlog thực tế (34.2% kẹt API Key Async, 25.4% kẹt Vector DB).
-   - Từ chối chính xác các yêu cầu vượt thẩm quyền (như cộng điểm hay truy xuất PII tên thật).
-
-2. **Các Case Fail / Cần cải thiện cho CP4 & CP5:**
-   - Trường hợp các câu hỏi cực kỳ mơ hồ ("Lớp sao rồi"), hệ thống nhận diện đúng và đưa ra hướng gợi ý làm rõ.
-
----
-*Báo cáo được khởi tạo tự động bởi `eval/run_eval.py` cho Checkpoint 3.*
-"""
-
-    with open(report_md_path, "w", encoding="utf-8") as f:
-        f.write(report_content)
-
-    print(f"Saved evaluation results to {results_json_path} and report to {report_md_path}.")
 
 if __name__ == "__main__":
-    run_evaluation()
+    main()
